@@ -1,4 +1,4 @@
-# Arliss2019 Team Tadpole Rover Project
+# Arliss2019 Tadpole Rover Project
 
 Tadpole rover program is a C++ package for the creation, manipulation, and study of the rover for planetary exploration in Black Rock Desert.
 
