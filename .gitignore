@@ -1,0 +1,7 @@
+# build 
+/build/*
+!/build/*.sh
+!/build/initialize.txt
+!/build/log/
+# Log 
+/build/log/*.txt

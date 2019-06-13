@@ -1,0 +1,139 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <fstream>
+#include <functional>
+#include <stdarg.h>
+#include <wiringPi.h>
+
+#include "../rover_util/delayed_execution.h"
+#include "../rover_util/utils.h"
+#include "../rover_util/serial_command.h"
+#include "../pwm/motor.h"
+#include "../constants.h"
+#include "../rover_util/logging.h"
+#include "separating_sequence.h"
+#include "separating_sequence_constant.h"
+#include "../manager/accel_manager.h"
+#include "testing_sequence.h"
+#include "navigating_sequence.h"
+#include "../pwm/servo.h"
+#include "../sensor/gps.h"
+#include "../sensor/pressure.h"
+
+SeparatingState gSeparatingState;
+bool SeparatingState::onInit(const struct timespec& time)
+{
+	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
+	Debug::print(LOG_SUMMARY, "[Separating State] Start\r\n");
+	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
+	Time::showNowTime();
+
+	//必要なタスクを使用できるようにする
+	TaskManager::getInstance()->setRunMode(false);
+	setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	gServo.setRunMode(true);
+	gSerialCommand.setRunMode(true);
+	gMotorDrive.setRunMode(true);
+	gAccelManager.setRunMode(true);
+	gGPSSensor.setRunMode(true);
+	gPressureSensor.setRunMode(true);
+	gSensorLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
+
+	//初期化
+	gServo.holdPara();
+	gServo.centerDirect();
+
+	mLastUpdateTime = time;
+	mCurServoState = false;
+	mServoCount = 0;
+	mCurStep = STEP_STABI_OPEN;
+
+	return true;
+}
+void SeparatingState::onUpdate(const struct timespec& time)
+{
+	switch (mCurStep)
+	{
+	case STEP_STABI_OPEN:
+		gServo.holdPara();
+		gServo.centerDirect();
+
+		mCurStep = STEP_WAIT_STABI_OPEN;
+		mLastUpdateTime = time;
+		break;
+	case STEP_WAIT_STABI_OPEN:
+		if (Time::dt(time, mLastUpdateTime) > 0.5)//スタビ展開動作後待機する
+		{
+			//次状態に遷移
+			mLastUpdateTime = time;
+			mCurStep = STEP_SEPARATE;
+		}
+		break;
+	case STEP_SEPARATE:
+		//パラシュートを切り離す
+		if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL)return;
+		mLastUpdateTime = time;
+
+		mCurServoState = !mCurServoState;
+
+		if (mCurServoState)
+		{
+			gServo.releasePara();
+			gServo.centerDirect();
+		}
+		else
+		{
+			gServo.holdPara();
+			gServo.centerDirect();
+		}
+
+		++mServoCount;
+		Debug::print(LOG_SUMMARY, "Separating...(%d/%d)\r\n", mServoCount, SEPARATING_SERVO_COUNT);
+
+		if (mServoCount >= SEPARATING_SERVO_COUNT)//サーボを規定回数動かした
+		{
+			//次状態に遷移
+			gServo.releasePara();
+			gServo.centerDirect();
+			mLastUpdateTime = time;
+			//gWakingState.setRunMode(true);
+			nextState();
+		}
+		break;
+	};
+}
+void SeparatingState::nextState()
+{
+	//この状態を終了
+	setRunMode(false);
+
+	//次の状態を設定
+	//ナビゲーション中でなければtestingに戻る
+	if (!mNavigatingFlag)
+	{
+		gTestingState.setRunMode(true);
+	}
+	else
+	{
+		gNavigatingState.setRunMode(true);
+		gNavigatingState.SetNavigatingFlag(true);
+	}
+
+
+}
+void SeparatingState::SetNavigatingFlag(bool flag)
+{
+	mNavigatingFlag = flag;
+}
+SeparatingState::SeparatingState() : mCurServoState(false), mServoCount(0)
+{
+	setName("separating");
+	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
+	SetNavigatingFlag(false);
+}
+SeparatingState::~SeparatingState()
+{
+}
