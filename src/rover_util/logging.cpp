@@ -133,8 +133,8 @@ void MovementLogging::onUpdate(const struct timespec& time)
 
 	mPrevPowerR = gMotorDrive.getPowerR();
 	//mPrevPowerL = gMotorDrive.getPowerL();
-	mPrevParaServo = gServo.mParaServoPulseWidth;
-	mPrevDirectServo = gServo.mDirectServoPulseWidth;
+	//mPrevParaServo = gServo.mParaServoPulseWidth;
+	//mPrevDirectServo = gServo.mDirectServoPulseWidth;
 
 	if (gMotorDrive.isActive() && gServo.isActive())write(mFilenameActuator, "%s,%d,%d,%d\r\n", char_timestamp, mPrevPowerR, mPrevParaServo, mPrevDirectServo);
 	else write(mFilenameActuator, "unavailable\r\n");

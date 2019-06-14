@@ -49,9 +49,7 @@ bool TestingState::onInit(const struct timespec& time)
 	gLED.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 
-	//‰Šú‰»
-	gServo.stopPara();
-	gServo.stopDirect();
+	gServo.free();
 
 	std::function<void()> f = [&]()
 	{

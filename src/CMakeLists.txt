@@ -31,15 +31,15 @@ set(rover_src
 	noisy/led.cpp
 	manager/accel_manager.cpp
 	sequence/testing_sequence.cpp
-	sequence/separating_sequence.cpp
-	sequence/waiting_sequence.cpp
-	sequence/falling_sequence.cpp
-	sequence/navigating_sequence.cpp
-	sequence/arliss_sequence.cpp
-	sub_sequence/waking_turnside.cpp
-	sub_sequence/waking_turnback.cpp
-	sub_sequence/stucking.cpp
-	sub_sequence/near_navigating.cpp
+	#sequence/separating_sequence.cpp
+	#sequence/waiting_sequence.cpp
+	#sequence/falling_sequence.cpp
+	#sequence/navigating_sequence.cpp
+	#sequence/arliss_sequence.cpp
+	#sub_sequence/waking_turnside.cpp
+	#sub_sequence/waking_turnback.cpp
+	#sub_sequence/stucking.cpp
+	#sub_sequence/near_navigating.cpp
 	main.cpp	
 )
 

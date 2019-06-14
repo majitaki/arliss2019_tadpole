@@ -53,6 +53,7 @@ class String
 public:
 	//文字列を空白で分割
 	static void split(const std::string& input, std::vector<std::string>& outputs);
+	static bool check_int(const std::string& str);
 };
 
 class Filename

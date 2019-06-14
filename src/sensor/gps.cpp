@@ -27,6 +27,7 @@ GPSSensor gGPSSensor;
 
 bool GPSSensor::onInit(const struct timespec& time)
 {
+	return true;
 	mLastUpdateTime = time;
 	mLastGetNewDataTime = time;
 	mLastGetRemoveTime = time;
@@ -50,7 +51,7 @@ void GPSSensor::onClean()
 }
 void GPSSensor::onUpdate(const struct timespec& time)
 {
-
+	return;
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < GPS_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
@@ -135,14 +136,14 @@ bool GPSSensor::get(VECTOR3& pos, bool disableNewFlag)
 	VECTOR3 new_pos = mLastPos.front();
 	if (mSatelites >= 4 && !(new_pos.x == 0 && new_pos.y == 0 && new_pos.z == 0))//3D fix
 	{
-		if (!disableNewFlag)mIsNewData = false;//ƒf[ƒ^‚ğæ“¾‚µ‚½‚±‚Æ‚ğ‹L˜^
-		pos = new_pos;//ˆø”‚Ìpos‚É‘ã“ü
+		if (!disableNewFlag)mIsNewData = false;//ï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½Lï¿½^
+		pos = new_pos;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½posï¿½É‘ï¿½ï¿½
 		return true;
 	}
 	return false;//Invalid Position
 }
 
-//GPS‚Ì‚»‚ê‚¼‚ê‚ÌˆÊ’uÀ•W‚ğ•Ô‚·ŠÖ”
+//GPSï¿½Ì‚ï¿½ï¿½ê‚¼ï¿½ï¿½ÌˆÊ’uï¿½ï¿½ï¿½Wï¿½ï¿½Ô‚ï¿½ï¿½Öï¿½
 double GPSSensor::getPosx() const
 {
 	return mPos.x;
@@ -254,7 +255,7 @@ bool GPSSensor::getDirectionAngle(double & angle)
 
 	VECTOR3 currentPos = mLastPos.front();
 	VECTOR3 prePos = mLastPos.back();
-	angle = VECTOR3::calcAngleXY(prePos, currentPos);//ƒ[ƒo[‚Ì•ûŒü
+	angle = VECTOR3::calcAngleXY(prePos, currentPos);//ï¿½ï¿½ï¿½[ï¿½oï¿½[ï¿½Ì•ï¿½ï¿½ï¿½
 
 	return true;
 }

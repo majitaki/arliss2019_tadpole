@@ -17,6 +17,7 @@
 #include <wiringPiI2C.h>
 #include <wiringPi.h>
 #include <wiringSerial.h>
+#include <algorithm>
 #include "utils.h"
 #include "unistd.h"
 
@@ -228,6 +229,15 @@ void String::split(const std::string& input, std::vector<std::string>& outputs)
 	std::istringstream iss(input);
 	std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter(outputs));
 }
+bool String::check_int(const std::string& str){
+	if (std::all_of(str.cbegin(), str.cend(), isdigit))
+	{
+		return true;
+	}
+	return false;
+}
+
+
 void ConstantManager::add(unsigned int index, const char* name, double value)
 {
 	if (mData.count(index) != 0)
