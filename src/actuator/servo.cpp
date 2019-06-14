@@ -69,8 +69,8 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 			"\r\n\
 servo wrap (value [-1,1])               : \r\n\
 servo turn (value [-1,1])               : \r\n\
-servo move (id, raw_value[3500-11500])  : \r\n\
-servo move (name, raw_value[3500-11500]): \r\n\
+servo (id, raw_value[3500-11500])  		: \r\n\
+servo (name, raw_value[3500-11500])		: \r\n\
 servo free                  			: \r\n\
 servo free (id)                			: \r\n\
 servo free (name)              			: \r\n\
@@ -126,26 +126,24 @@ servo getid (name)             			: \r\n\
 			Debug::print(LOG_PRINT, "Servo Turn %f\r\n", value);
 			return true;
 		}
-		break;
-	case 4:
-		if (args[1].compare("move") == 0)
-			{
-				int id = -1;
-				int raw_value = -1;
-				std::string str_second_input = args[2]; 
+		else
+		{
+			int id = -1;
+			int raw_value = -1;
+			std::string str_second_input = args[1]; 
 
-				if(String::check_int(str_second_input)) {
-					id = atoi(str_second_input.c_str());
-					raw_value = atoi(args[3].c_str());
-					move(id, raw_value);
-					Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
-				}else{
-					raw_value = atoi(args[3].c_str());
-					move(str_second_input, raw_value);
-					Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
-				}
-				return true;
+			if(String::check_int(str_second_input)) {
+				id = atoi(str_second_input.c_str());
+				raw_value = atoi(args[2].c_str());
+				move(id, raw_value);
+				Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
+			}else{
+				raw_value = atoi(args[2].c_str());
+				move(str_second_input, raw_value);
+				Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
 			}
+			return true;
+		}
 		}
 	Debug::print(LOG_PRINT, "Failed Command\r\n");
 	return false;
@@ -181,7 +179,10 @@ void Servo::free(std::string servo_name){
 	free(servo_id);
 }
 void Servo::free(){
-
+	free(NECK_ID);
+	free(DIRECT_ID);
+	free(WAIST_ID);
+	free(STABI_ID);
 }
 int Servo::getServoID(std::string name){
 	if(name == "neck"){
