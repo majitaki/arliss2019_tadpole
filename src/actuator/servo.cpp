@@ -74,6 +74,7 @@ servo move (name, raw_value[3500-11500]): \r\n\
 servo free                  			: \r\n\
 servo free (id)                			: \r\n\
 servo free (name)              			: \r\n\
+servo getid (name)             			: \r\n\
 ");
 		return true;
 	case 2:
@@ -95,10 +96,16 @@ servo free (name)              			: \r\n\
 				free(id);
 				Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
 			}else{
-				raw_value = atoi(args[3].c_str());
 				free(str_second_input);
 				Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
 			}
+			return true;
+		}
+		else if (args[1].compare("getid") == 0)
+		{
+			std::string servo_name = args[2];
+			int servo_id = getServoID(servo_name); 
+			Debug::print(LOG_PRINT, "Servo ID is %d\r\n", servo_id);
 			return true;
 		}
 		else if (args[1].compare("wrap") == 0)
@@ -151,21 +158,44 @@ void Servo::turn(int value){
 
 }
 void Servo::move(int id, int raw_value){
-
+	digitalWrite(ENIN_ID, 0);
+	digitalWrite(ENIN_ID, 1);
+	serialPutchar(fd,0x80 | (id & 0x1f));
+	serialPutchar(fd,(raw_value >> 7) & 0x7f);
+	serialPutchar(fd, raw_value & 0x7f);
 }
 void Servo::move(std::string servo_name, int raw_value){
-
+	int servo_id = getServoID(servo_name);
+	move(servo_id, raw_value);	
 }
 void Servo::free(int id){
-
+	digitalWrite(ENIN_ID, 0);
+	digitalWrite(ENIN_ID, 1);
+    serialPutchar(fd, (0x80 | id));
+    serialPutchar(fd, 0x00);
+    serialPutchar(fd, 0x00);
+    serialPutchar(fd, 0x00);
 }
 void Servo::free(std::string servo_name){
-
+	int servo_id = getServoID(servo_name);
+	free(servo_id);
 }
 void Servo::free(){
 
 }
-
+int Servo::getServoID(std::string name){
+	if(name == "neck"){
+		return NECK_ID;
+	}else if(name == "direct"){
+		return DIRECT_ID;
+	}else if(name == "waist"){
+		return WAIST_ID;
+	}else if(name == "stabi"){
+		return STABI_ID;
+	}else{
+		return -1;
+	}
+}
 Servo::Servo()
 {
 	setName("servo");

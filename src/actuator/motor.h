@@ -108,7 +108,7 @@ public:
 	int getRatioR();
 	int getRatioB();
 
-	//指定された出力でモータを回転させる((100,100)の場合、実際のpwm出力はsetRatioに設定した値になる)
+	//指定された出力でモータを回転させる((100,100)の場合、実際のactuator出力はsetRatioに設定した値になる)
 	void drive(int powerL, int powerR, int powerB);
 	void drive(int power);//左右とも引数のレシオに設定する
 	void drive(int power, PID &pid);

@@ -21,8 +21,8 @@ set(rover_src
 	rover_util/alias.cpp 
 	rover_util/delayed_execution.cpp
 	rover_util/logging.cpp 
-	pwm/motor.cpp 
-	pwm/servo.cpp 
+	actuator/motor.cpp 
+	actuator/servo.cpp 
 	sensor/gps.cpp 
 	sensor/light.cpp 
 	sensor/nineaxis.cpp 

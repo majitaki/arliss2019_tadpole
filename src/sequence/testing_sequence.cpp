@@ -15,13 +15,13 @@
 #include "../sensor/light.h"
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
-#include "../pwm/motor.h"
+#include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
 #include "../manager/accel_manager.h"
 #include "../noisy/buzzer.h"
 #include "../noisy/led.h"
-#include "../pwm/servo.h"
+#include "../actuator/servo.h"
 //#include "../sub_sequence/demo.h"
 
 TestingState gTestingState;

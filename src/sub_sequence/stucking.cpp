@@ -3,15 +3,15 @@
 #include "../rover_util/delayed_execution.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
-#include "../pwm/motor.h"
-#include "../pwm/motor_constant.h"
+#include "../actuator/motor.h"
+#include "../actuator/motor_constant.h"
 #include "../constants.h"
 #include "../manager/accel_manager.h"
-#include "../pwm/servo.h"
+#include "../actuator/servo.h"
 #include "stucking.h"
 #include "stucking_constant.h"
 #include "../sensor/gps.h"
-#include "../pwm/servo_constant.h"
+#include "../actuator/servo_constant.h"
 
 Stucking gStucking;
 bool Stucking::onInit(const timespec & time)

@@ -26,6 +26,7 @@ public:
 	void free(int id);	
 	void free(std::string servo_name);	
 	void free();	
+	int getServoID(std::string name);
 	Servo();
 	~Servo();
 };

@@ -16,7 +16,7 @@
 #include "./testing_sequence.h"
 #include "./waiting_sequence.h"
 #include "./falling_sequence.h"
-#include "../pwm/servo.h"
+#include "../actuator/servo.h"
 #include "../noisy/led.h"
 #include "../noisy/buzzer.h"
 

@@ -14,9 +14,9 @@
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
 #include "../sensor/pressure.h"
-#include "../pwm/motor.h"
+#include "../actuator/motor.h"
 #include "../manager/accel_manager.h"
-#include "../pwm/servo.h"
+#include "../actuator/servo.h"
 
 SensorLogging gSensorLoggingState;
 MovementLogging gMovementLoggingState;

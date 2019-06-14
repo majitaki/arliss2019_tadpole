@@ -9,7 +9,7 @@
 #include "../rover_util/delayed_execution.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
-#include "../pwm/motor.h"
+#include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
 #include "separating_sequence.h"
@@ -17,7 +17,7 @@
 #include "../manager/accel_manager.h"
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
-#include "../pwm/servo.h"
+#include "../actuator/servo.h"
 #include "../sensor/gps.h"
 #include "../sensor/pressure.h"
 
