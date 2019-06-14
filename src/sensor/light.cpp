@@ -26,7 +26,7 @@
 LightSensor gLightSensor;
 bool LightSensor::onInit(const struct timespec& time)
 {
-	Debug::print(LOG_SUMMARY, "light sensor is Ready\n");
+	Debug::print(LOG_SUMMARY, "light sensor is Ready\r\n");
 	pinMode(mPin, INPUT);
 	return true;
 }

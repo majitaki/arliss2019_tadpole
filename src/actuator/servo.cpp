@@ -25,6 +25,7 @@ Servo gServo;
 bool Servo::onInit(const struct timespec& time)
 {
     if(wiringPiSetupGpio() == -1) {
+		Debug::print(LOG_SUMMARY, "cannot setup wiringpi\r\n");
         return false;
     }
     pinMode(ENIN_ID, OUTPUT);
@@ -32,7 +33,7 @@ bool Servo::onInit(const struct timespec& time)
 	/* シリアルポートオープン */
 	fd = serialOpen("/dev/ttyAMA0",115200);
 	if(fd < 0){
-		printf("can not open serialport");
+		Debug::print(LOG_SUMMARY, "serial device cannot open\r\n");
 	}
 	struct termios options ;
 
@@ -150,7 +151,14 @@ servo getid (name)             			: \r\n\
 }
 
 void Servo::wrap(int value){
+	if(value < -1 || value > 1){
+		Debug::print(LOG_PRINT, "Please value is from -1 to 1.\r\n");
+		return;
+	}
 
+	move(NECK_ID, NECK_INNER + ((NECK_INNER - NECK_OUTER) / (-1 - 1)) * (value + 1));
+	move(DIRECT_ID, DIRECT_CENTER);
+	move(STABI_ID, STABI_INNER + ((STABI_INNER - STABI_OUTER) / (-1 - 1)) * (value + 1));
 }
 void Servo::turn(int value){
 
@@ -166,6 +174,7 @@ void Servo::move(std::string servo_name, int raw_value){
 	int servo_id = getServoID(servo_name);
 	move(servo_id, raw_value);	
 }
+
 void Servo::free(int id){
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
