@@ -49,6 +49,7 @@ bool Servo::onInit(const struct timespec& time)
 void Servo::onClean()
 {
 	free();
+	serialClose(fd);
 }
 void Servo::onUpdate(const timespec & time)
 {
@@ -112,7 +113,7 @@ servo getid (name)             			: \r\n\
 		else if (args[1].compare("wrap") == 0)
 		{
 			double value = 0.0;
-			value = atoi(args[2].c_str());
+			value = atof(args[2].c_str());
 			if(value <-1 || value >1) break;
 			wrap(value);	
 			Debug::print(LOG_PRINT, "Servo Wrap %f\r\n", value);
@@ -121,7 +122,7 @@ servo getid (name)             			: \r\n\
 		else if (args[1].compare("turn") == 0)
 		{
 			double value = 0.0;
-			value = atoi(args[2].c_str());
+			value = atof(args[2].c_str());
 			if(value <-1 || value >1) break;
 			turn(value);	
 			Debug::print(LOG_PRINT, "Servo Turn %f\r\n", value);
@@ -150,18 +151,23 @@ servo getid (name)             			: \r\n\
 	return false;
 }
 
-void Servo::wrap(int value){
+void Servo::wrap(double value){
 	if(value < -1 || value > 1){
 		Debug::print(LOG_PRINT, "Please value is from -1 to 1.\r\n");
 		return;
 	}
 
-	move(NECK_ID, NECK_INNER + ((NECK_INNER - NECK_OUTER) / (-1 - 1)) * (value + 1));
+	move(NECK_ID, NECK_INNER + (int)(((NECK_INNER - NECK_OUTER) / (-1.0 - 1.0)) * (value + 1)));
 	move(DIRECT_ID, DIRECT_CENTER);
-	move(STABI_ID, STABI_INNER + ((STABI_INNER - STABI_OUTER) / (-1 - 1)) * (value + 1));
+	move(WAIST_ID, WAIST_INNER +(int)(((WAIST_INNER - WAIST_OUTER) / (-1.0 - 1.0)) * (value + 1)));
+	move(STABI_ID, STABI_INNER +(int)(((STABI_INNER - STABI_OUTER) / (-1.0 - 1.0)) * (value + 1)));
 }
-void Servo::turn(int value){
-
+void Servo::turn(double value){
+	if(value < -1 || value > 1){
+		Debug::print(LOG_PRINT, "Please value is from -1 to 1.\r\n");
+		return;
+	}
+	move(DIRECT_ID, DIRECT_RIGHT + (int)(((DIRECT_RIGHT - DIRECT_LEFT) / (-1.0 - 1.0)) * (value + 1)));
 }
 void Servo::move(int id, int raw_value){
 	digitalWrite(ENIN_ID, 0);
@@ -169,6 +175,8 @@ void Servo::move(int id, int raw_value){
 	serialPutchar(fd,0x80 | (id & 0x1f));
 	serialPutchar(fd,(raw_value >> 7) & 0x7f);
 	serialPutchar(fd, raw_value & 0x7f);
+	serialFlush(fd);
+	delay(100);
 }
 void Servo::move(std::string servo_name, int raw_value){
 	int servo_id = getServoID(servo_name);
@@ -182,6 +190,8 @@ void Servo::free(int id){
     serialPutchar(fd, 0x00);
     serialPutchar(fd, 0x00);
     serialPutchar(fd, 0x00);
+	serialFlush(fd);
+	delay(10);
 }
 void Servo::free(std::string servo_name){
 	int servo_id = getServoID(servo_name);

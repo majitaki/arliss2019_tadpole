@@ -19,8 +19,8 @@ protected:
 	virtual void onUpdate(const timespec& time) override;
 	virtual bool onCommand(const std::vector<std::string>& args);
 public:
-	void wrap(int value);	
-	void turn(int value);	
+	void wrap(double value);	
+	void turn(double value);	
 	void move(int id, int raw_value);	
 	void move(std::string servo_name, int raw_value);	
 	void free(int id);	
