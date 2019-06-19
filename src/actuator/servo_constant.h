@@ -13,12 +13,12 @@ const static int DIRECT_CENTER = 7500;
 const static int DIRECT_LEFT = 9000;
 //waist
 const static int WAIST_ID = 2;
-const static int WAIST_INNER = 9000;
+const static int WAIST_INNER = 6500;
 const static int WAIST_CENTER = 7500;
-const static int WAIST_OUTER = 5000;
+const static int WAIST_OUTER = 8500;
 //stabi
 const static int STABI_ID = 3;
-const static int STABI_INNER = 9000;
+const static int STABI_INNER = 6000;
 const static int STABI_CENTER = 7500;
-const static int STABI_OUTER = 5500;
+const static int STABI_OUTER = 9000;
 

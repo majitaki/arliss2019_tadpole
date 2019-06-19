@@ -2,15 +2,15 @@ start testing
 //start arliss
 detecting setmode ON
 cdetecting setmode ON
-//‰´‚Ì—×
+//ï¿½ï¿½ï¿½Ì—ï¿½
 //navigating 40.87884 -119.11606
 //true goal
 navigating 40.880068 -119.121620
-//ƒTƒŒƒWƒIŒö‰€ “S–_’[‚Á‚±
-//”\‘ãƒS[ƒ‹
+//ï¿½Tï¿½ï¿½ï¿½Wï¿½Iï¿½ï¿½ï¿½ï¿½ ï¿½Sï¿½_ï¿½[ï¿½ï¿½ï¿½ï¿½
+//ï¿½\ï¿½ï¿½Sï¿½[ï¿½ï¿½
 //navigating 40.14240 139.98732
 //navigating 40.21624 140.01434
-//•xmŒ©Œö‰€ ŠJ‚¯‚½‚Æ‚±
+//ï¿½xï¿½mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½
 //navigating 35.659329 139.541576
 
 motor r 100 100 100
@@ -22,11 +22,11 @@ alias hh motor h
 alias aa motor a
 alias dd motor d
 //servo
-alias hd servo hold
-alias rl servo release
-alias rr servo right
-alias ll servo left
-alias cc servo center
+alias hd servo wrap -1
+alias rl servo wrap 1
+alias rr servo turn -1
+alias ll servo turn 1
+alias cc servo turn 0
 //sensor
 alias nx nineaxis
 alias pr pressure
