@@ -29,7 +29,7 @@ set(rover_src
 	sensor/pressure.cpp 
 	noisy/buzzer.cpp
 	noisy/led.cpp
-	manager/accel_manager.cpp
+	#manager/accel_manager.cpp
 	sequence/testing_sequence.cpp
 	#sequence/separating_sequence.cpp
 	#sequence/waiting_sequence.cpp
@@ -57,4 +57,7 @@ set(LIBRARIES
 	${GPSD_LIBRARIES}
 	)
 
-target_link_libraries(${PROJ_NAME} ${LIBRARIES})
+target_link_libraries(${PROJ_NAME} 
+	${LIBRARIES}
+	RTIMULib
+)

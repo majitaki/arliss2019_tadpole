@@ -9,7 +9,7 @@
 #include "../rover_util/utils.h"
 #include "motor.h"
 #include "motor_constant.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 MotorDrive gMotorDrive;
 
 bool Motor::init(int powPin, int revPin)
@@ -107,7 +107,7 @@ Motor::~Motor()
 bool MotorDrive::onInit(const struct timespec& time)
 {
 	//ジャイロを使うように設定
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	//gNineAxisSensor.setRunMode(true);
 
 	//初期化
@@ -139,7 +139,8 @@ void MotorDrive::updatePIDState(const VECTOR3& pid, double dangle, double maxCon
 {
 
 	//ずれ情報を更新
-	double angle = gAccelManager.normalize(dangle);
+	//double angle = gAccelManager.normalize(dangle);
+	double angle = 0;
 	mDiff3 = mDiff2; mDiff2 = mDiff1; mDiff1 = angle;
 
 	//ずれ情報を元に新しいモーター出力を設定(PID)
@@ -177,7 +178,7 @@ void MotorDrive::updatePIDState(const VECTOR3& pid, double dangle, double maxCon
 
 void MotorDrive::updatePIDGyroMove()
 {
-	updatePIDState(mPIDGyro, gAccelManager.getSz() - mAngle, mMaxPIDControlRatioGyro);
+	//updatePIDState(mPIDGyro, gAccelManager.getSz() - mAngle, mMaxPIDControlRatioGyro);
 	updatePIDState(mPIDGyro, mAngle, mMaxPIDControlRatioGyro);
 }
 
@@ -304,8 +305,8 @@ void MotorDrive::setPIDPose(double p, double i, double d)
 }
 void MotorDrive::drivePIDGyro(double angle, int power, bool reset)
 {
-	if (reset) mAngle = gAccelManager.normalize(angle + gAccelManager.getSz());
-	else mAngle = gAccelManager.normalize(angle);
+	//if (reset) mAngle = gAccelManager.normalize(angle + gAccelManager.getSz());
+	//else mAngle = gAccelManager.normalize(angle);
 
 
 

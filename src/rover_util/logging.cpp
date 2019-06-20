@@ -15,7 +15,7 @@
 #include "../sensor/light.h"
 #include "../sensor/pressure.h"
 #include "../actuator/motor.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "../actuator/servo.h"
 
 SensorLogging gSensorLoggingState;
@@ -28,7 +28,7 @@ bool SensorLogging::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gMotorDrive.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	mLastUpdateTime = time;
 
 	write(mFilenameGPS, "time,latitude,longitude,height\r\n");
@@ -55,14 +55,14 @@ void SensorLogging::onUpdate(const struct timespec& time)
 		if (gPressureSensor.isActive())write(mFilenamePressure, "%s,%f,%f,%f,%f\r\n", char_timestamp, gPressureSensor.getPressure(), gPressureSensor.getTemperature(), gPressureSensor.getAltitude(), gPressureSensor.getHumidity());
 		else write(mFilenamePressure, "unavailable\r\n");
 
-		if (gAccelManager.isActive())write(mFilenameAccel, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getAx(), gAccelManager.getAy(), gAccelManager.getAz());
-		else write(mFilenameAccel, "unavailable\r\n");
+		//if (gAccelManager.isActive())write(mFilenameAccel, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getAx(), gAccelManager.getAy(), gAccelManager.getAz());
+		//else write(mFilenameAccel, "unavailable\r\n");
 
-		if (gAccelManager.isActive())write(mFilenameGyro, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getGx(), gAccelManager.getGy(), gAccelManager.getGz());
-		else write(mFilenameGyro, "unavailable\r\n");
+		//if (gAccelManager.isActive())write(mFilenameGyro, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getGx(), gAccelManager.getGy(), gAccelManager.getGz());
+		//else write(mFilenameGyro, "unavailable\r\n");
 
-		if (gAccelManager.isActive())write(mFilenameMagnet, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getMx(), gAccelManager.getMy(), gAccelManager.getMz());
-		else write(mFilenameMagnet, "unavailable\r\n");
+		//if (gAccelManager.isActive())write(mFilenameMagnet, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getMx(), gAccelManager.getMy(), gAccelManager.getMz());
+		//else write(mFilenameMagnet, "unavailable\r\n");
 	}
 }
 
@@ -115,7 +115,7 @@ bool MovementLogging::onInit(const struct timespec& time)
 
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
 

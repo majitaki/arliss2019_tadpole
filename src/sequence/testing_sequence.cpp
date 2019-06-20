@@ -18,7 +18,7 @@
 #include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "../noisy/buzzer.h"
 #include "../noisy/led.h"
 #include "../actuator/servo.h"
@@ -38,7 +38,7 @@ bool TestingState::onInit(const struct timespec& time)
 	gDelayedExecutor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gGPSSensor.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	gMotorDrive.setRunMode(true);
 	gLightSensor.setRunMode(true);
 	gServo.setRunMode(true);
@@ -107,7 +107,7 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 		{
 			gGPSSensor.isAlive();
 			gLightSensor.isAlive();
-			gNineAxisSensor.isAlive();
+			//gNineAxisSensor.isAlive();
 			gPressureSensor.isAlive();
 			//gDemo.setRunMode(true);
 			return true;
