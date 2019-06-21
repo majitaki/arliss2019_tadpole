@@ -13,6 +13,7 @@ pkg_check_modules(GPSD REQUIRED libgps)
 include_directories(${GPSD_INCLUDE_DIRS})
 
 link_directories(/usr/lib/)
+link_directories(/usr/local/lib/)
 
 set(rover_src
 	rover_util/utils.cpp 
