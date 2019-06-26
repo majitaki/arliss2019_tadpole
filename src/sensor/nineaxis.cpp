@@ -32,9 +32,9 @@ bool NineAxisSensor::onInit(const struct timespec& time)
 
     imu = RTIMU::createIMU(settings);
 
-    if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL)) {
+    if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_MPU9250)) {
 		Debug::print(LOG_SUMMARY, "Failed to Begin NineAxis Sensor\r\n");
-		setRunMode(false);
+		//setRunMode(false);
 		return false;
     }
 
@@ -70,6 +70,7 @@ void NineAxisSensor::onUpdate(const struct timespec& time)
 
 void NineAxisSensor::onClean()
 {
+	Debug::print(LOG_SUMMARY, "NineAxis Sensor is Finished\r\n");
 }
 
 bool NineAxisSensor::onCommand(const std::vector<std::string>& args)
@@ -79,6 +80,7 @@ bool NineAxisSensor::onCommand(const std::vector<std::string>& args)
 	switch (args.size())
 	{
 	case 1:
+		Debug::print(LOG_PRINT, "nineaxis show :switch show mode\r\n");
 		showData(true, true, true, true);
 		return true;
 		break;
@@ -95,7 +97,6 @@ bool NineAxisSensor::onCommand(const std::vector<std::string>& args)
 
 void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss)
 {
-	Debug::print(LOG_PRINT, "\033[1m---Nineaxis Data---\r\n\033[0m");
 	if(mIMUData.accelValid && enableAccel){
 		Debug::print(LOG_PRINT, "%s", RTMath::displayRadians("accel", mIMUData.accel));
 	}
@@ -108,7 +109,6 @@ void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableComp
 	if(mIMUData.fusionPoseValid && enableFusionPoss){
 		Debug::print(LOG_PRINT, "%s\r\n", RTMath::displayDegrees("fusion_poss", mIMUData.fusionPose));
 	}
-	Debug::print(LOG_PRINT, "\033[5A");
 	//Debug::print(LOG_PRINT, "\r\n");
 }
 

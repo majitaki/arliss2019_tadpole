@@ -15,6 +15,7 @@
 #include "../sensor/light.h"
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
+#include "../sensor/distance.h"
 #include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
@@ -48,7 +49,7 @@ bool TestingState::onInit(const struct timespec& time)
 	gBuzzer.setRunMode(true);
 	gLED.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
-
+	gDistanceSensor.setRunMode(true);
 	gServo.free();
 
 	std::function<void()> f = [&]()
@@ -106,7 +107,6 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 		else if (args[1].compare("demo") == 0)
 		{
 			gGPSSensor.isAlive();
-			gLightSensor.isAlive();
 			//gNineAxisSensor.isAlive();
 			gPressureSensor.isAlive();
 			//gDemo.setRunMode(true);

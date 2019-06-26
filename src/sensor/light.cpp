@@ -46,13 +46,6 @@ bool LightSensor::get() const
 {
 	return digitalRead(mPin) == 0;
 }
-bool LightSensor::isAlive()
-{
-	Debug::print(LOG_SUMMARY, "\nChecking light sensor \n");
-	if (get())Debug::print(LOG_SUMMARY, "light is high\r\n");
-	else Debug::print(LOG_SUMMARY, "light is low\r\n");
-	return true;
-}
 LightSensor::LightSensor() : mPin(PIN_LIGHT_SENSOR)
 {
 	setName("light");

@@ -25,7 +25,6 @@ protected:
 public:
 	//現在の明るさを取得する
 	bool get() const;
-	bool isAlive();
 
 	LightSensor();
 	~LightSensor();

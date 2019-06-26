@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 set(PROJ_NAME tadpole)
 set(VERSION_NAME develop)
 #SET(CMAKE_CXX_COMPILER /usr/bin/g++-6)
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
+SET(CMAKE_CXX_FLAGS "-std=c++0x -Wall -Wextra")
 
 project(${PROJ_NAME})
-
 
 # find opengl via pkg-config
 find_package(PkgConfig)
@@ -28,6 +27,7 @@ set(rover_src
 	sensor/light.cpp 
 	sensor/nineaxis.cpp 
 	sensor/pressure.cpp 
+    sensor/distance.cpp
 	noisy/buzzer.cpp
 	noisy/led.cpp
 	#manager/accel_manager.cpp
@@ -55,6 +55,7 @@ set(LIBRARIES
 	-lwiringPi
 	-lpigpio
 	-lpigpiod_if2
+	-lvl53l0x
 	${GPSD_LIBRARIES}
 	)
 

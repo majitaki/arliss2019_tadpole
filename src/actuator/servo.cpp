@@ -44,6 +44,7 @@ bool Servo::onInit(const struct timespec& time)
 	tcsetattr (fd,TCSANOW, &options) ;   // Set new options
 	delay(1000);
 
+	Debug::print(LOG_SUMMARY, "Servo is Ready!\r\n");
 	return true;
 }
 void Servo::onClean()

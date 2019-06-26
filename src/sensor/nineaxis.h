@@ -19,8 +19,8 @@ private:
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
-	virtual void onUpdate(const struct timespec& time);
 	virtual bool onCommand(const std::vector<std::string>& args);
+	virtual void onUpdate(const struct timespec& time);
 public:
 	RTIMU_DATA getNewImuData();
 	NineAxisSensor();

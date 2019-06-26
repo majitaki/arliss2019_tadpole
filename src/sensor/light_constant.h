@@ -1,2 +1,2 @@
 #pragma once
-const static int PIN_LIGHT_SENSOR = 0;//CdsƒZƒ“ƒTƒsƒ“ 
+const static int PIN_LIGHT_SENSOR = 0;//Cdsï¿½Zï¿½ï¿½ï¿½Tï¿½sï¿½ï¿½ 
