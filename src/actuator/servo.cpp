@@ -70,8 +70,8 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 	case 1:
 		Debug::print(LOG_PRINT,
 			"\r\n\
-servo wrap (value [-1,1])               : \r\n\
-servo turn (value [-1,1])               : \r\n\
+servo wrap (value [-1,1])               : -1 is outer, 1 is inner, 0 is run style \r\n\
+servo turn (value [-1,1])               : -1 is left, 1 is right \r\n\
 servo (id, raw_value[3500-11500])  		: \r\n\
 servo (name, raw_value[3500-11500])		: \r\n\
 servo free                  			: \r\n\
@@ -158,16 +158,36 @@ void Servo::wrap(double value){
 		return;
 	}
 
-	move(NECK_ID, NECK_INNER + (int)(((NECK_INNER - NECK_OUTER) / (-1.0 - 1.0)) * (value + 1)));
-	move(DIRECT_ID, DIRECT_CENTER);
-	move(WAIST_ID, WAIST_INNER +(int)(((WAIST_INNER - WAIST_OUTER) / (-1.0 - 1.0)) * (value + 1)));
-	move(STABI_ID, STABI_INNER +(int)(((STABI_INNER - STABI_OUTER) / (-1.0 - 1.0)) * (value + 1)));
+	if(value <= 0){
+		move(NECK_ID, NECK_CENTER + (int)(((NECK_CENTER - NECK_INNER) / (0.0 + 1.0)) * value));
+		move(DIRECT_ID, DIRECT_CENTER);
+		move(WAIST_ID, WAIST_CENTER +(int)(((WAIST_CENTER - WAIST_INNER) / (0.0 + 1.0)) * value));
+		move(STABI_ID, STABI_CENTER +(int)(((STABI_CENTER - STABI_INNER) / (0.0 + 1.0)) * value));
+		return;
+	}
+	
+	if(value > 0){
+		move(NECK_ID, NECK_CENTER + (int)(((NECK_CENTER - NECK_OUTER) / (0.0 - 1.0)) * value));
+		move(DIRECT_ID, DIRECT_CENTER);
+		move(WAIST_ID, WAIST_CENTER + (int)(((WAIST_CENTER - WAIST_OUTER) / (0.0 - 1.0)) * value));
+		move(STABI_ID, STABI_CENTER + (int)(((STABI_CENTER - STABI_OUTER) / (0.0 - 1.0)) * value));
+		return;
+	}	
 }
 void Servo::turn(double value){
 	if(value < -1 || value > 1){
 		Debug::print(LOG_PRINT, "Please value is from -1 to 1.\r\n");
 		return;
 	}
+
+	if(value <= 0){
+		move(DIRECT_ID, DIRECT_CENTER + (int)(((DIRECT_CENTER - DIRECT_LEFT) / (0.0 + 1.0)) * value));
+	}
+
+	if(value > 0){
+		move(DIRECT_ID, DIRECT_CENTER + (int)(((DIRECT_CENTER - DIRECT_RIGHT) / (0.0 - 1.0)) * value));
+	}
+
 	move(DIRECT_ID, DIRECT_RIGHT + (int)(((DIRECT_RIGHT - DIRECT_LEFT) / (-1.0 - 1.0)) * (value + 1)));
 }
 void Servo::move(int id, int raw_value){
