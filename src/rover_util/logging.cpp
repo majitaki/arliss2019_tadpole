@@ -7,12 +7,14 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <RTIMULib.h>
 
 #include "logging.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
+#include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../actuator/motor.h"
 //#include "../manager/accel_manager.h"
@@ -20,6 +22,131 @@
 
 SensorLogging gSensorLoggingState;
 MovementLogging gMovementLoggingState;
+UnitedLogging gUnitedLoggingState;
+
+
+
+bool UnitedLogging::onInit(const struct timespec& time)
+{
+	Debug::print(LOG_SUMMARY, "Sensor Log: Enabled\r\n");
+
+	gGPSSensor.setRunMode(true);
+	gPressureSensor.setRunMode(true);
+	gMotorDrive.setRunMode(true);
+	gNineAxisSensor.setRunMode(true);
+	mLastUpdateTime = time;
+
+	write(mFilenameUnitedLog, "time, event, latitude,longitude,height,ax,ay,az,gx,gy,gz,mx,my,mz,pressure,temperature,altitude,humidity\r\n");
+	return true;
+}
+void UnitedLogging::onUpdate(const struct timespec& time)
+{
+	if (Time::dt(time, mLastUpdateTime) < UNITEDLOGGING_UPDATE_INTERVAL_TIME)return;
+
+	mLastUpdateTime = time;
+	std::string str_timestamp = Time::getTimeStamp(true);
+	auto char_timestamp = str_timestamp.c_str();
+
+	VECTOR3 vec;
+	gGPSSensor.get(vec);
+	double nodate = 0;
+
+	//gps
+	double lati;
+	double longi;
+	double height;
+	//accel
+	double ax;
+	double ay;
+	double az;
+	//gyro
+	double gx;
+	double gy;
+	double gz;
+	//magnet
+	double mx;
+	double my;
+	double mz;
+	//pressure
+	double pressure;
+	double temp;
+	double alt;
+	double humidity;
+
+	if (gGPSSensor.isActive()) {
+		lati = vec.x;
+		longi = vec.y;
+		height = vec.z;
+	}
+	else {
+		lati = longi = height = nodate;
+	}
+
+	if (gPressureSensor.isActive()) {
+		pressure = gPressureSensor.getPressure();
+		temp = gPressureSensor.getTemperature();
+		alt = gPressureSensor.getAltitude();
+		humidity = gPressureSensor.getHumidity();
+	}
+	else {
+		pressure = temp = alt = humidity = nodate;
+	}
+
+
+	if (gNineAxisSensor.isActive()) {
+		ax = gNineAxisSensor.getAccel().x();
+		ay = gNineAxisSensor.getAccel().y();
+		az = gNineAxisSensor.getAccel().z();
+
+		mx = gNineAxisSensor.getMagnet().x();
+		my = gNineAxisSensor.getMagnet().y();
+		mz = gNineAxisSensor.getMagnet().z();
+
+		gx = gNineAxisSensor.getGyro().x();
+		gy = gNineAxisSensor.getGyro().y();
+		gz = gNineAxisSensor.getGyro().z();
+	}
+	else {
+		ax = ay = az = mx = my = mz = gx = gy = gz = nodate;
+	}
+
+	write(mFilenameUnitedLog, "%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f \r\n", char_timestamp, mEventMessage.c_str(), lati, longi, height, ax, ay, az, gx, gy, gz, mx, my, mz, pressure, temp, alt, humidity);
+	mEventMessage = "";
+}
+
+void UnitedLogging::write(const std::string& filename, const char* fmt, ...)
+{
+	std::ofstream of(filename.c_str(), std::ios::out | std::ios::app);
+
+	char buf[MAX_STRING_LENGTH];
+
+	va_list argp;
+	va_start(argp, fmt);
+	vsprintf(buf, fmt, argp);
+
+	of << buf;
+}
+void UnitedLogging::writeEventMessage(std::string str)
+{
+}
+UnitedLogging::UnitedLogging() : mLastUpdateTime(), mEventMessage("")
+{
+	setName("united_logging");
+	setPriority(UINT_MAX, TASK_INTERVAL_SEQUENCE);
+
+	//const int dir_err = mkdir(LOG_FOLDER, S_IRWXO | S_IROTH | S_IWOTH);
+
+	std::string str_timestamp = Time::getTimeStamp();
+	std::string str_log_dir = std::string(LOG_FOLDER);
+
+	Filename(str_log_dir + "/" + str_timestamp + "/" + str_timestamp + "_" + "log_united", ".csv").get(mFilenameUnitedLog);
+	Debug::print(LOG_SUMMARY, "%s\r\n", mFilenameUnitedLog.c_str());
+}
+UnitedLogging::~UnitedLogging()
+{
+}
+
+
 
 bool SensorLogging::onInit(const struct timespec& time)
 {
@@ -28,7 +155,7 @@ bool SensorLogging::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gMotorDrive.setRunMode(true);
-	//gAccelManager.setRunMode(true);
+	gNineAxisSensor.setRunMode(true);
 	mLastUpdateTime = time;
 
 	write(mFilenameGPS, "time,latitude,longitude,height\r\n");
@@ -55,14 +182,14 @@ void SensorLogging::onUpdate(const struct timespec& time)
 		if (gPressureSensor.isActive())write(mFilenamePressure, "%s,%f,%f,%f,%f\r\n", char_timestamp, gPressureSensor.getPressure(), gPressureSensor.getTemperature(), gPressureSensor.getAltitude(), gPressureSensor.getHumidity());
 		else write(mFilenamePressure, "unavailable\r\n");
 
-		//if (gAccelManager.isActive())write(mFilenameAccel, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getAx(), gAccelManager.getAy(), gAccelManager.getAz());
-		//else write(mFilenameAccel, "unavailable\r\n");
+		if (gNineAxisSensor.isActive())write(mFilenameAccel, "%s,%f,%f,%f\r\n", char_timestamp, gNineAxisSensor.getAccel().x(), gNineAxisSensor.getAccel().y(), gNineAxisSensor.getAccel().z());
+		else write(mFilenameAccel, "unavailable\r\n");
 
-		//if (gAccelManager.isActive())write(mFilenameGyro, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getGx(), gAccelManager.getGy(), gAccelManager.getGz());
-		//else write(mFilenameGyro, "unavailable\r\n");
+		if (gNineAxisSensor.isActive())write(mFilenameGyro, "%s,%f,%f,%f\r\n", char_timestamp, gNineAxisSensor.getGyro().x(), gNineAxisSensor.getGyro().y(), gNineAxisSensor.getGyro().z());
+		else write(mFilenameGyro, "unavailable\r\n");
 
-		//if (gAccelManager.isActive())write(mFilenameMagnet, "%s,%f,%f,%f\r\n", char_timestamp, gAccelManager.getMx(), gAccelManager.getMy(), gAccelManager.getMz());
-		//else write(mFilenameMagnet, "unavailable\r\n");
+		if (gNineAxisSensor.isActive())write(mFilenameMagnet, "%s,%f,%f,%f\r\n", char_timestamp, gNineAxisSensor.getMagnet().x(), gNineAxisSensor.getMagnet().y(), gNineAxisSensor.getMagnet().z());
+		else write(mFilenameMagnet, "unavailable\r\n");
 	}
 }
 
@@ -115,7 +242,7 @@ bool MovementLogging::onInit(const struct timespec& time)
 
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
-	//gAccelManager.setRunMode(true);
+	//gNineAxisSensor.setRunMode(true);
 	gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
 

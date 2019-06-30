@@ -2,10 +2,16 @@
 
 const static double SERVO_UPDATE_INTERVAL_TIME = 0.1; //second
 const static int ENIN_ID = 25;
+//basic
+const static int MAX_RAW_VALUE = 11500;
+const static int CENTER_RAW_VALUE = 7500;
+const static int MIN_RAW_VALUE = 3500;
+
 //neck
 const static int NECK_ID = 2;
-const static int NECK_INNER = 6500;
-const static int NECK_OUTER = 5000;
+const static int NECK_INNER = 7000;
+const static int NECK_CENTER = 7500;
+const static int NECK_OUTER = 9000;
 //direct
 const static int DIRECT_ID = 0;
 const static int DIRECT_RIGHT = 6000;

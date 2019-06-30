@@ -7,6 +7,24 @@
 
 const static double SENSORLOGGING_UPDATE_INTERVAL_TIME = 0.1;
 const static double MOVEMENTLOGGING_UPDATE_INTERVAL_TIME = 1;
+const static double UNITEDLOGGING_UPDATE_INTERVAL_TIME = 0.1;
+
+class UnitedLogging : public TaskBase
+{
+	struct timespec mLastUpdateTime;
+	std::string mFilenameUnitedLog;
+	std::string mEventMessage;
+	unsigned long long mLastEncL, mLastEncR;
+protected:
+	virtual bool onInit(const struct timespec& time);
+	virtual void onUpdate(const struct timespec& time);
+
+	void write(const std::string& filename, const char* fmt, ...);
+public:
+	void writeEventMessage(std::string str);
+	UnitedLogging();
+	~UnitedLogging();
+};
 
 class SensorLogging : public TaskBase
 {
@@ -48,3 +66,4 @@ public:
 
 extern SensorLogging gSensorLoggingState;
 extern MovementLogging gMovementLoggingState;
+extern UnitedLogging gUnitedLoggingState;

@@ -5,3 +5,5 @@
 !/build/log/
 # Log 
 /build/log/*
+#vscode
+/.vscode/*

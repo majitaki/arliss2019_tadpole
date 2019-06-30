@@ -32,7 +32,7 @@ bool NineAxisSensor::onInit(const struct timespec& time)
 
     imu = RTIMU::createIMU(settings);
 
-    if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_MPU9250)) {
+    if ((imu == NULL) || (imu->IMUType() != RTIMU_TYPE_MPU9250)) {
 		Debug::print(LOG_SUMMARY, "Failed to Begin NineAxis Sensor\r\n");
 		//setRunMode(false);
 		return false;
@@ -112,6 +112,18 @@ void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableComp
 	//Debug::print(LOG_PRINT, "\r\n");
 }
 
+RTVector3 NineAxisSensor::getAccel() const{
+	return mIMUData.accel;
+}
+RTVector3 NineAxisSensor::getGyro() const{
+	return mIMUData.gyro;
+}
+RTVector3 NineAxisSensor::getMagnet() const{
+	return mIMUData.compass;
+}
+RTVector3 NineAxisSensor::getFusionPose() const{
+	return mIMUData.fusionPose;
+}
 
 NineAxisSensor::NineAxisSensor() : mLastUpdateTime(), mIMUData(), imu(), isShowMode(false)
 {

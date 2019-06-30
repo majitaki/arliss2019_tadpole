@@ -12,6 +12,7 @@
 #include "separating_sequence.h"
 #include "navigating_sequence.h"
 #include "../rover_util/utils.h"
+#include "../rover_util/logging.h"
 
 #include "arliss_sequence.h"
 
@@ -26,11 +27,12 @@ bool ArlissState::onInit(const timespec & time)
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 
-	//‰Šú‰»
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	gWaitingState.SetNavigatingFlag(true);
 	gFallingState.SetNavigatingFlag(true);
 	gSeparatingState.SetNavigatingFlag(true);
 	gNavigatingState.SetNavigatingFlag(true);
+	
 	nextState();
 	return true;
 }
@@ -46,7 +48,6 @@ void ArlissState::onClean()
 
 void ArlissState::nextState()
 {
-	//Ÿ‚Ìó‘Ô‚ğİ’è
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Debug::print(LOG_SUMMARY, "Arliss Mission Start\r\n");
 	Debug::print(LOG_SUMMARY, "Good Luck!!!!!!!!!!!!!\r\n");
