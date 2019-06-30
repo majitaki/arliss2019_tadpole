@@ -72,6 +72,11 @@ void DistanceSensor::onUpdate(const struct timespec& time)
 	}
 }
 
+int DistanceSensor::getDistance()
+{
+	return this.mDistance;
+}
+
 
 void DistanceSensor::showData()
 {

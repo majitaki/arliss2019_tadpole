@@ -12,7 +12,7 @@
 #include "closing_sequence.h"
 #include "./navigating_sequence.h"
 #include "../sensor/distance.h"
-
+//#include "testing_sequence.h;
 ClosingState gClosingState;
 
 
@@ -22,6 +22,9 @@ bool ClosingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "[Closing State] Start\r\n");
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
+
+	mStartTime = time;
+	mLastUpdateTime = mClosingStartTime = time;
 
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
@@ -43,6 +46,8 @@ void ClosingState::onUpdate(const struct timespec& time)
 		nextState();
 		return;
 	}
+	double dt = Time::dt(time, mClosingStartTime);
+
 
   //timeout
 	if (dt > CLOSING_ABORT_TIME_FOR_LAST)
@@ -76,7 +81,7 @@ void ClosingState::nextState()
 {
 	Debug::print(LOG_SUMMARY, "[Closing State] Finished\r\n");
 	setRunMode(false);
-	gTestingState.setRunMode(true);
+	//gTestingState.setRunMode(true);
 
 }
 void ClosingState::SetNavigatingFlag(bool flag)
