@@ -70,15 +70,9 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 	case 1:
 		Debug::print(LOG_PRINT,
 			"\r\n\
-<<<<<<< HEAD
 servo wrap (range[-1.0,1.0])                : -1 is outer, 1 is inner, 0 is run style \r\n\
 servo turn (range[-1.0,1.0])                : -1 is left, 1 is right \r\n\
 servo (id, raw_value[3500,11500])       : \r\n\
-=======
-servo wrap (value [-1,1])               : -1 is outer, 1 is inner, 0 is run style \r\n\
-servo turn (value [-1,1])               : -1 is left, 1 is right \r\n\
-servo (id, raw_value[3500-11500])  		: \r\n\
->>>>>>> 1e5699d738261a433e39924bd17966a082bd4e04
 servo (name, raw_value[3500-11500])		: \r\n\
 servo free                  			: \r\n\
 servo free (id)                			: \r\n\
@@ -164,7 +158,6 @@ void Servo::wrap(double range){
 		return;
 	}
 
-<<<<<<< HEAD
 	if(range <= 0){
 		move(NECK_ID, translateToRawValue(range, -1, NECK_CENTER, NECK_OUTER));
 		move(DIRECT_ID, DIRECT_CENTER);
@@ -178,21 +171,6 @@ void Servo::wrap(double range){
 		move(DIRECT_ID, DIRECT_CENTER);
 		move(WAIST_ID, translateToRawValue(range, 1, WAIST_CENTER, WAIST_INNER));
 		move(STABI_ID, translateToRawValue(range, 1, STABI_CENTER, STABI_INNER));
-=======
-	if(value <= 0){
-		move(NECK_ID, NECK_CENTER + (int)(((NECK_CENTER - NECK_INNER) / (0.0 + 1.0)) * value));
-		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, WAIST_CENTER +(int)(((WAIST_CENTER - WAIST_INNER) / (0.0 + 1.0)) * value));
-		move(STABI_ID, STABI_CENTER +(int)(((STABI_CENTER - STABI_INNER) / (0.0 + 1.0)) * value));
-		return;
-	}
-	
-	if(value > 0){
-		move(NECK_ID, NECK_CENTER + (int)(((NECK_CENTER - NECK_OUTER) / (0.0 - 1.0)) * value));
-		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, WAIST_CENTER + (int)(((WAIST_CENTER - WAIST_OUTER) / (0.0 - 1.0)) * value));
-		move(STABI_ID, STABI_CENTER + (int)(((STABI_CENTER - STABI_OUTER) / (0.0 - 1.0)) * value));
->>>>>>> 1e5699d738261a433e39924bd17966a082bd4e04
 		return;
 	}	
 }
@@ -202,7 +180,6 @@ void Servo::turn(double range){
 		return;
 	}
 
-<<<<<<< HEAD
 	if(range <= 0){
 		move(DIRECT_ID, translateToRawValue(range, -1, DIRECT_CENTER, DIRECT_LEFT));
 	}
@@ -214,17 +191,6 @@ void Servo::turn(double range){
 
 double Servo::translateToRange(int raw_value, int end_value, int center_value, double end_range){
 	return ((0.0 - end_range) / (double)(center_value - end_value)) * (double)(raw_value - center_value);
-=======
-	if(value <= 0){
-		move(DIRECT_ID, DIRECT_CENTER + (int)(((DIRECT_CENTER - DIRECT_LEFT) / (0.0 + 1.0)) * value));
-	}
-
-	if(value > 0){
-		move(DIRECT_ID, DIRECT_CENTER + (int)(((DIRECT_CENTER - DIRECT_RIGHT) / (0.0 - 1.0)) * value));
-	}
-
-	move(DIRECT_ID, DIRECT_RIGHT + (int)(((DIRECT_RIGHT - DIRECT_LEFT) / (-1.0 - 1.0)) * (value + 1)));
->>>>>>> 1e5699d738261a433e39924bd17966a082bd4e04
 }
 
 int Servo::translateToRawValue(int range, int end_value, int center_value, double end_range){
