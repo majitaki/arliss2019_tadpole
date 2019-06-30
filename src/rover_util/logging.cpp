@@ -36,7 +36,7 @@ bool UnitedLogging::onInit(const struct timespec& time)
 	gNineAxisSensor.setRunMode(true);
 	mLastUpdateTime = time;
 
-	write(mFilenameUnitedLog, "time, event, latitude,longitude,height,ax,ay,az,gx,gy,gz,mx,my,mz,pressure,temperature,altitude,humidity\r\n");
+	write(mFilenameUnitedLog, "time, event, latitude,longitude,height,ax,ay,az,gx,gy,gz,mx,my,mz,pressure,temperature,altitude,humidity,l2_accel\r\n");
 	return true;
 }
 void UnitedLogging::onUpdate(const struct timespec& time)
@@ -72,6 +72,8 @@ void UnitedLogging::onUpdate(const struct timespec& time)
 	double temp;
 	double alt;
 	double humidity;
+	//other
+	double l2_accel;
 
 	if (gGPSSensor.isActive()) {
 		lati = vec.x;
@@ -110,7 +112,9 @@ void UnitedLogging::onUpdate(const struct timespec& time)
 		ax = ay = az = mx = my = mz = gx = gy = gz = nodate;
 	}
 
-	write(mFilenameUnitedLog, "%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f \r\n", char_timestamp, mEventMessage.c_str(), lati, longi, height, ax, ay, az, gx, gy, gz, mx, my, mz, pressure, temp, alt, humidity);
+	l2_accel = std::sqrt(pow(ax, 2) + std::pow(ay, 2) + std::pow(az, 2));
+
+	write(mFilenameUnitedLog, "%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f \r\n", char_timestamp, mEventMessage.c_str(), lati, longi, height, ax, ay, az, gx, gy, gz, mx, my, mz, pressure, temp, alt, humidity, l2_accel);
 	mEventMessage = "";
 }
 
