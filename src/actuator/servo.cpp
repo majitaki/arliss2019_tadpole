@@ -68,10 +68,11 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 	switch (args.size())
 	{
 	case 1:
+		showRangeData();
 		Debug::print(LOG_PRINT,
 			"\r\n\
-servo wrap (range[-1.0,1.0])                : -1 is outer, 1 is inner, 0 is run style \r\n\
-servo turn (range[-1.0,1.0])                : -1 is left, 1 is right \r\n\
+servo wrap (range[-1.0,1.0])            : -1 is outer, 1 is inner, 0 is run style \r\n\
+servo turn (range[-1.0,1.0])            : -1 is left, 1 is right \r\n\
 servo (id, raw_value[3500,11500])       : \r\n\
 servo (name, raw_value[3500-11500])		: \r\n\
 servo free                  			: \r\n\
@@ -159,18 +160,18 @@ void Servo::wrap(double range){
 	}
 
 	if(range <= 0){
-		move(NECK_ID, translateToRawValue(range, -1, NECK_CENTER, NECK_OUTER));
+		move(NECK_ID, translateToRawValue(range, NECK_OUTER, NECK_CENTER, -1));
 		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, translateToRawValue(range, -1, WAIST_CENTER, WAIST_OUTER));
-		move(STABI_ID, translateToRawValue(range, -1, STABI_CENTER, STABI_OUTER));
+		move(WAIST_ID, translateToRawValue(range, WAIST_OUTER, WAIST_CENTER, -1));
+		move(STABI_ID, translateToRawValue(range, STABI_OUTER, STABI_CENTER, -1));
 		return;
 	}
 	
 	if(range > 0){
-		move(NECK_ID, translateToRawValue(range, 1, NECK_CENTER, NECK_INNER));
+		move(NECK_ID, translateToRawValue(range, NECK_INNER, NECK_CENTER, 1));
 		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, translateToRawValue(range, 1, WAIST_CENTER, WAIST_INNER));
-		move(STABI_ID, translateToRawValue(range, 1, STABI_CENTER, STABI_INNER));
+		move(WAIST_ID, translateToRawValue(range, WAIST_INNER, WAIST_CENTER, 1));
+		move(STABI_ID, translateToRawValue(range, STABI_INNER, STABI_CENTER, 1));
 		return;
 	}	
 }
@@ -181,11 +182,11 @@ void Servo::turn(double range){
 	}
 
 	if(range <= 0){
-		move(DIRECT_ID, translateToRawValue(range, -1, DIRECT_CENTER, DIRECT_LEFT));
+		move(DIRECT_ID, translateToRawValue(range, DIRECT_LEFT, DIRECT_CENTER, -1));
 	}
 
 	if(range > 0){
-		move(DIRECT_ID, translateToRawValue(range, 1, DIRECT_CENTER, DIRECT_RIGHT));
+		move(DIRECT_ID, translateToRawValue(range, DIRECT_RIGHT, DIRECT_CENTER, 1));
 	}
 }
 
@@ -193,24 +194,32 @@ double Servo::translateToRange(int raw_value, int end_value, int center_value, d
 	return ((0.0 - end_range) / (double)(center_value - end_value)) * (double)(raw_value - center_value);
 }
 
-int Servo::translateToRawValue(int range, int end_value, int center_value, double end_range){
-	double lower = 0 - end_range;
-	double upper = center_value - end_value;
+int Servo::translateToRawValue(double range, int end_value, int center_value, double end_range){
+	return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
+}
 
-	return center_value + (int)((upper / lower) * range);
-
-	//return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
+void Servo::registRangeData(int id, int raw_value){
+	if(id == NECK_ID){
+		mServoRawData.neck = raw_value;
+	}else if(id == DIRECT_ID){
+		mServoRawData.direct = raw_value;
+	}else if(id == WAIST_ID){
+		mServoRawData.waist = raw_value;
+	}else if(id == STABI_ID){
+		mServoRawData.stabi = raw_value;
+	}
 }
 
 void Servo::move(int id, int raw_value){
-	Debug::print(LOG_PRINT, "raw_value = %d\r\n", raw_value);
+	registRangeData(id, raw_value);
+
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
 	serialPutchar(fd,0x80 | (id & 0x1f));
 	serialPutchar(fd,(raw_value >> 7) & 0x7f);
 	serialPutchar(fd, raw_value & 0x7f);
 	serialFlush(fd);
-	delay(1000);
+	delay(100);
 }
 void Servo::move(std::string servo_name, int raw_value){
 	int servo_id = getServoID(servo_name);
@@ -218,6 +227,8 @@ void Servo::move(std::string servo_name, int raw_value){
 }
 
 void Servo::free(int id){
+	registRangeData(id, 0);
+
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
     serialPutchar(fd, (0x80 | id));
@@ -238,22 +249,41 @@ void Servo::free(){
 	free(STABI_ID);
 }
 int Servo::getServoID(std::string name){
-	if(name == "neck"){
+	if(name == NECK_NAME){
 		return NECK_ID;
-	}else if(name == "direct"){
+	}else if(name == DIRECT_NAME){
 		return DIRECT_ID;
-	}else if(name == "waist"){
+	}else if(name == WAIST_NAME){
 		return WAIST_ID;
-	}else if(name == "stabi"){
+	}else if(name == STABI_NAME){
 		return STABI_ID;
-	}else{
-		return -1;
 	}
+	return -1;
 }
-Servo::Servo(): mLastUpdateTime(), neck_range(), direct_range(), waist_range(), stabi_range()
+
+std::string Servo::getServoName(int id){
+	if(id == NECK_ID){
+		return NECK_NAME;
+	}else if(id == DIRECT_ID){
+		return DIRECT_NAME;
+	}else if(id == WAIST_ID){
+		return WAIST_NAME;
+	}else if(id == STABI_ID){
+		return STABI_NAME;
+	}
+	return "";
+}
+
+void Servo::showRangeData(){
+	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", NECK_NAME.c_str(), mServoRawData.neck, NECK_OUTER, NECK_INNER);
+	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
+	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mServoRawData.waist, WAIST_OUTER, WAIST_INNER);
+	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", STABI_NAME.c_str(), mServoRawData.stabi, STABI_OUTER, STABI_INNER);
+}
+
+Servo::Servo(): mLastUpdateTime(), mServoRawData{0, 0, 0, 0}
 {
 	setName("servo");
-	//setPriority(TASK_PRIORITY_ACTUATOR, UINT_MAX);
 	setPriority(TASK_PRIORITY_ACTUATOR, TASK_INTERVAL_MOTOR);
 }
 Servo::~Servo()

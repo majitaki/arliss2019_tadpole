@@ -5,19 +5,24 @@
 #include "../rover_util/utils.h"
 #include "servo_constant.h"
 
+struct ServoRawData{
+	int neck;
+	int direct;
+	int waist;
+	int stabi;
+};
+
 class Servo : public TaskBase
 {
 private:
 	int fd;
 	PID mParaServoPID;
 	PID mDirectServoPID;
-	double neck_range;
-	double direct_range;
-	double waist_range;
-	double stabi_range;
+	ServoRawData mServoRawData;
 	struct timespec mLastUpdateTime;
 	double translateToRange(int raw_value, int end_value, int center_value, double end_range);
-	int translateToRawValue(int range, int end_value, int center_value, double end_range);
+	int translateToRawValue(double range, int end_value, int center_value, double end_range);
+	void registRangeData(int id, int raw_value);
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -32,6 +37,8 @@ public:
 	void free(std::string servo_name);	
 	void free();	
 	int getServoID(std::string name);
+	std::string getServoName(int id);
+	void showRangeData();
 	Servo();
 	~Servo();
 };

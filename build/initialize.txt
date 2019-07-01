@@ -24,13 +24,14 @@ alias dd motor d
 //servo
 alias hd servo wrap -1
 alias rl servo wrap 1
-alias rr servo turn -1
-alias ll servo turn 1
+alias st servo wrap 0 
+alias rr servo turn 1
+alias ll servo turn -1
 alias cc servo turn 0
 //sensor
 alias nx nineaxis
 alias pr pressure
-alias ac accel
+alias di distance
 //sequence
 alias navi start navigating
 alias wake start waking
