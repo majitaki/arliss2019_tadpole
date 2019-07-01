@@ -29,20 +29,20 @@ bool SeparatingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//•K—v‚Èƒ^ƒXƒN‚ğg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	//ï¿½Kï¿½vï¿½Èƒ^ï¿½Xï¿½Nï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
 	gServo.setRunMode(true);
 	gSerialCommand.setRunMode(true);
 	gMotorDrive.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gSensorLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
 
-	//‰Šú‰»
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	gServo.holdPara();
 	gServo.centerDirect();
 
@@ -65,15 +65,15 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		mLastUpdateTime = time;
 		break;
 	case STEP_WAIT_STABI_OPEN:
-		if (Time::dt(time, mLastUpdateTime) > 0.5)//ƒXƒ^ƒr“WŠJ“®ìŒã‘Ò‹@‚·‚é
+		if (Time::dt(time, mLastUpdateTime) > 0.5)//ï¿½Xï¿½^ï¿½rï¿½Wï¿½Jï¿½ï¿½ï¿½ï¿½ï¿½Ò‹@ï¿½ï¿½ï¿½ï¿½
 		{
-			//Ÿó‘Ô‚É‘JˆÚ
+			//ï¿½ï¿½ï¿½ï¿½Ô‚É‘Jï¿½ï¿½
 			mLastUpdateTime = time;
 			mCurStep = STEP_SEPARATE;
 		}
 		break;
 	case STEP_SEPARATE:
-		//ƒpƒ‰ƒVƒ…[ƒg‚ğØ‚è—£‚·
+		//ï¿½pï¿½ï¿½ï¿½Vï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½Ø‚è—£ï¿½ï¿½
 		if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL)return;
 		mLastUpdateTime = time;
 
@@ -93,9 +93,9 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		++mServoCount;
 		Debug::print(LOG_SUMMARY, "Separating...(%d/%d)\r\n", mServoCount, SEPARATING_SERVO_COUNT);
 
-		if (mServoCount >= SEPARATING_SERVO_COUNT)//ƒT[ƒ{‚ğ‹K’è‰ñ”“®‚©‚µ‚½
+		if (mServoCount >= SEPARATING_SERVO_COUNT)//ï¿½Tï¿½[ï¿½{ï¿½ï¿½ï¿½Kï¿½ï¿½ñ”“ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
-			//Ÿó‘Ô‚É‘JˆÚ
+			//ï¿½ï¿½ï¿½ï¿½Ô‚É‘Jï¿½ï¿½
 			gServo.releasePara();
 			gServo.centerDirect();
 			mLastUpdateTime = time;
@@ -107,11 +107,11 @@ void SeparatingState::onUpdate(const struct timespec& time)
 }
 void SeparatingState::nextState()
 {
-	//‚±‚Ìó‘Ô‚ğI—¹
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ï¿½ï¿½Iï¿½ï¿½
 	setRunMode(false);
 
-	//Ÿ‚Ìó‘Ô‚ğİ’è
-	//ƒiƒrƒQ[ƒVƒ‡ƒ“’†‚Å‚È‚¯‚ê‚Îtesting‚É–ß‚é
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ï¿½İ’ï¿½
+	//ï¿½iï¿½rï¿½Qï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚È‚ï¿½ï¿½ï¿½ï¿½testingï¿½É–ß‚ï¿½
 	if (!mNavigatingFlag)
 	{
 		gTestingState.setRunMode(true);

@@ -1,7 +1,7 @@
 #pragma once
 #include <string.h>
 
-const static double SERVO_UPDATE_INTERVAL_TIME = 0.1; //second
+const static double SERVO_UPDATE_INTERVAL_TIME = 1.0; //second
 const static int ENIN_ID = 25;
 //basic
 const static int MAX_RAW_VALUE = 11500;

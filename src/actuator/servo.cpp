@@ -56,8 +56,13 @@ void Servo::onUpdate(const timespec & time)
 {
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < SERVO_UPDATE_INTERVAL_TIME)return;
-	mLastUpdateTime = time;
 
+	move(NECK_ID, mServoRawData.neck);
+	move(DIRECT_ID, mServoRawData.direct);
+	move(WAIST_ID, mServoRawData.waist);
+	move(STABI_ID, mServoRawData.stabi);
+
+	mLastUpdateTime = time;
 }
 bool Servo::onCommand(const std::vector<std::string>& args)
 {
@@ -211,8 +216,12 @@ void Servo::registRangeData(int id, int raw_value){
 }
 
 void Servo::move(int id, int raw_value){
-	registRangeData(id, raw_value);
+	if(raw_value == 0){
+		free(id);
+		return;
+	}
 
+	registRangeData(id, raw_value);
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
 	serialPutchar(fd,0x80 | (id & 0x1f));
