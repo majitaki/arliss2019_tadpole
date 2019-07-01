@@ -8,7 +8,7 @@ const static int CENTER_RAW_VALUE = 7500;
 const static int MIN_RAW_VALUE = 3500;
 
 //neck
-const static int NECK_ID = 2;
+const static int NECK_ID = 3;
 const static int NECK_INNER = 7600;
 const static int NECK_CENTER = 7600;
 const static int NECK_OUTER = 5700;

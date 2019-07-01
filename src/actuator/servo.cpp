@@ -194,17 +194,23 @@ double Servo::translateToRange(int raw_value, int end_value, int center_value, d
 }
 
 int Servo::translateToRawValue(int range, int end_value, int center_value, double end_range){
-	return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
+	double lower = 0 - end_range;
+	double upper = center_value - end_value;
+
+	return center_value + (int)((upper / lower) * range);
+
+	//return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
 }
 
 void Servo::move(int id, int raw_value){
+	Debug::print(LOG_PRINT, "raw_value = %d\r\n", raw_value);
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
 	serialPutchar(fd,0x80 | (id & 0x1f));
 	serialPutchar(fd,(raw_value >> 7) & 0x7f);
 	serialPutchar(fd, raw_value & 0x7f);
 	serialFlush(fd);
-	delay(100);
+	delay(1000);
 }
 void Servo::move(std::string servo_name, int raw_value){
 	int servo_id = getServoID(servo_name);

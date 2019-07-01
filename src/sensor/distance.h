@@ -17,7 +17,7 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 	virtual void onUpdate(const struct timespec& time);
 public:
-	getDistance();
+	int getDistance();
 	DistanceSensor();
 	~DistanceSensor();
 };
