@@ -1,0 +1,46 @@
+start testing
+//start arliss
+detecting setmode ON
+cdetecting setmode ON
+//���̗�
+//navigating 40.87884 -119.11606
+//true goal
+navigating 40.880068 -119.121620
+//�T���W�I���� �S�_�[����
+//�\��S�[��
+//navigating 40.14240 139.98732
+//navigating 40.21624 140.01434
+//�x�m������ �J�����Ƃ�
+//navigating 35.659329 139.541576
+
+motor r 100 100 100
+
+//morot
+alias ww motor w
+alias ss motor s
+alias hh motor h
+alias aa motor a
+alias dd motor d
+//servo
+alias hd servo wrap 1
+alias rl servo wrap -1
+alias st servo wrap 0 
+alias rr servo turn 1
+alias ll servo turn -1
+alias cc servo turn 0
+//sensor
+alias nx nineaxis
+alias pr pressure
+alias di distance
+//sequence
+alias navi start navigating
+alias wake start waking
+alias sepa start separating
+alias setgoal navigating here
+alias near start near_navigating
+alias stuck start stucking
+//other
+alias wifistop waiting wifistop
+
+//load individual adjustment
+exec individual_adjustment.txt
