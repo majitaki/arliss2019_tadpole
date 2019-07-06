@@ -8,6 +8,8 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <math.h>
+#include <string.h>
 
 //詳細なログ表示が必要な場合はつかってください
 //#define _LOG_DETAIL 1
@@ -34,5 +36,6 @@ const static unsigned int TASK_INTERVAL_SEQUENCE = 0;
 //////////////////////////////////////////////
 //その他
 //////////////////////////////////////////////
-const static char INITIALIZE_SCRIPT_FILENAME[] = "initialize.txt";
+const static std::string SETTING_FOLDER = "../setting/";
+const static std::string INITIALIZE_SCRIPT_FILENAME = SETTING_FOLDER + "initialize.txt";
 
