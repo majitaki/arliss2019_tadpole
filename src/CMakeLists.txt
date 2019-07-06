@@ -30,7 +30,6 @@ set(rover_src
     sensor/distance.cpp
 	noisy/buzzer.cpp
 	noisy/led.cpp
-	#manager/accel_manager.cpp
 	sequence/testing_sequence.cpp
 	#sequence/separating_sequence.cpp
 	#sequence/waiting_sequence.cpp

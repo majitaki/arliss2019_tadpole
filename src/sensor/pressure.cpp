@@ -47,7 +47,8 @@ bool PressureSensor::onInit(const struct timespec& time)
 	double h = compensateHumidity(raw.humidity, &cal, t_fine);       // %
 	double a = getAltitude(p);                         // meters
 
-	Debug::print(LOG_SUMMARY, "Pressure Sensor is Ready! :{\"humidity\":%.2f, \"pressure\":%.2f, \"temperature\":%.2f, \"altitude\":%.2f}\n", h, p, t, a);
+	//Debug::print(LOG_SUMMARY, "Pressure Sensor is Ready! :{\"humidity\":%.2f, \"pressure\":%.2f, \"temperature\":%.2f, \"altitude\":%.2f}\n", h, p, t, a);
+	Debug::print(LOG_SUMMARY, "Pressure Sensor is Ready!\r\n");
 
 	mLastUpdateTime = time;
 	return true;
@@ -64,7 +65,7 @@ void PressureSensor::onUpdate(const struct timespec& time)
 	if (Time::dt(time, mLastUpdateTime) < PRESSURE_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
 
-	//‹Cˆ³’lXV
+	//ï¿½Cï¿½ï¿½ï¿½lï¿½Xï¿½V
 	wiringPiI2CWriteReg8(mFileHandle, BME280_REGISTER_CONTROLHUMID, 0x01);   // humidity oversampling x 1
 	wiringPiI2CWriteReg8(mFileHandle, BME280_REGISTER_CONTROL, 0x25);   // pressure and temperature oversampling x 1, mode normal
 
@@ -233,24 +234,6 @@ double PressureSensor::getAltitude()
 double PressureSensor::getAltitude(double pressure)
 {
 	return 44330.0 * (1.0 - pow(pressure / MEAN_SEA_LEVEL_PRESSURE, 0.190294957));
-}
-
-bool PressureSensor::isAlive()
-{
-	Debug::print(LOG_SUMMARY, "\nChecking Pressure sensor\n");
-
-	if ((mFileHandle = wiringPiI2CSetup(BME280_ADDRESS)) == -1)
-	{
-		Debug::print(LOG_SUMMARY, "Failed to setup Pressure Sensor\r\n");
-		return false;
-	}
-	Debug::print(LOG_SUMMARY,
-		"Pressure: %f\r\n\
-Temperature: %f\r\n\
-Altitude: %f\r\n\
-Humidity: %f\r\n",
-mPressure, mTemperature, getAltitude(), mHumidity);
-	return true;
 }
 
 PressureSensor::PressureSensor() : mPressure(0), mTemperature(0), mHumidity(0), mFileHandle(-1)

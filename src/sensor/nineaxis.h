@@ -15,7 +15,6 @@ private:
 	RTIMU_DATA mIMUData;
 	RTIMU *imu;
 	bool isShowMode;
-	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -26,6 +25,7 @@ public:
 	RTVector3 getGyro() const;
 	RTVector3 getMagnet() const;
 	RTVector3 getFusionPose() const;
+	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 	NineAxisSensor();
 	~NineAxisSensor();
 };

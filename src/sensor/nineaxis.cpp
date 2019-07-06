@@ -32,13 +32,13 @@ bool NineAxisSensor::onInit(const struct timespec& time)
 
     imu = RTIMU::createIMU(settings);
 
-    if ((imu == NULL) || (imu->IMUType() != RTIMU_TYPE_MPU9250)) {
+    if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL) || !imu->IMUInit()) {
 		Debug::print(LOG_SUMMARY, "Failed to Begin NineAxis Sensor\r\n");
 		//setRunMode(false);
 		return false;
     }
 
-	imu->IMUInit();
+	//imu->IMUInit();
 	imu->setSlerpPower(0.02);
     imu->setGyroEnable(true);
     imu->setAccelEnable(true);

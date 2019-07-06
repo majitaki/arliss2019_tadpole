@@ -1,8 +1,8 @@
 /*
-ƒZƒ“ƒT§ŒäƒvƒƒOƒ‰ƒ€
+ï¿½Zï¿½ï¿½ï¿½Tï¿½ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½
 
-ƒ‚[ƒ^ˆÈŠO‚ÌÀ¢ŠE‚©‚çî•ñ‚ğæ“¾‚·‚éƒ‚ƒWƒ…[ƒ‹‚ğ‘€ì‚µ‚Ü‚·
-task.h‚àQÆ
+ï¿½ï¿½ï¿½[ï¿½^ï¿½ÈŠOï¿½Ìï¿½ï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ“¾ï¿½ï¿½ï¿½éƒ‚ï¿½Wï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ğ‘€ì‚µï¿½Ü‚ï¿½
+task.hï¿½ï¿½ï¿½Qï¿½ï¿½
 */
 #pragma once
 #include <pthread.h>
@@ -17,7 +17,7 @@ class PressureSensor : public TaskBase
 {
 private:
 	double mPressure, mTemperature, mHumidity;
-	int mFileHandle;//winringPi i2c@‚Ìƒtƒ@ƒCƒ‹ƒnƒ“ƒhƒ‰
+	int mFileHandle;//winringPi i2cï¿½@ï¿½Ìƒtï¿½@ï¿½Cï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
 	struct timespec mLastUpdateTime;
 	void readCalibrationData(int fd, bme280_calib_data *cal);
 	int32_t getTemperatureCalibration(bme280_calib_data *cal, int32_t adc_T);
@@ -37,8 +37,6 @@ public:
 	double getHumidity();
 	double getAltitude();
 	double getAltitude(double p);
-	bool isAlive();
-
 
 	PressureSensor();
 	~PressureSensor();

@@ -10,7 +10,6 @@ private:
 	int mDistance;
 	bool isShowMode;
 	bool isParalysised;
-	void showData();
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -18,6 +17,7 @@ protected:
 	virtual void onUpdate(const struct timespec& time);
 public:
 	int getDistance();
+	void showData();
 	DistanceSensor();
 	~DistanceSensor();
 };

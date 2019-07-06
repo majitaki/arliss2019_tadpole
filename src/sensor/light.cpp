@@ -36,15 +36,17 @@ void LightSensor::onClean()
 bool LightSensor::onCommand(const std::vector<std::string>& args)
 {
 	if (args[0].compare(getName()) != 0) return true;
-
-	if (get())Debug::print(LOG_SUMMARY, "light is high\r\n");
-	else Debug::print(LOG_SUMMARY, "light is low\r\n");
+	showData();
 	return true;
-
 }
 bool LightSensor::get() const
 {
 	return digitalRead(mPin) == 0;
+}
+void LightSensor::showData() const
+{
+	if (get())Debug::print(LOG_PRINT, "light is high\r\n");
+	else Debug::print(LOG_PRINT, "light is low\r\n");
 }
 LightSensor::LightSensor() : mPin(PIN_LIGHT_SENSOR)
 {

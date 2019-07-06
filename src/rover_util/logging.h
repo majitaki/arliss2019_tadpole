@@ -26,22 +26,6 @@ public:
 	~UnitedLogging();
 };
 
-class SensorLogging : public TaskBase
-{
-	struct timespec mLastUpdateTime;
-	std::string mFilenameGPS, mFilenameGyro, mFilenamePressure, mFilenameEncoder, mFilenameAccel, mFilenameMagnet;
-	unsigned long long mLastEncL, mLastEncR;
-protected:
-	virtual bool onInit(const struct timespec& time);
-	virtual void onUpdate(const struct timespec& time);
-
-	void write(const std::string& filename, const char* fmt, ...);
-public:
-	SensorLogging();
-	~SensorLogging();
-};
-
-
 class MovementLogging : public TaskBase
 {
 	struct timespec mLastUpdateTime;
@@ -64,6 +48,5 @@ public:
 	~MovementLogging();
 };
 
-extern SensorLogging gSensorLoggingState;
 extern MovementLogging gMovementLoggingState;
 extern UnitedLogging gUnitedLoggingState;

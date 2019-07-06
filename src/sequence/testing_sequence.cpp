@@ -69,31 +69,30 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 
 	if (args.size() == 2)
 	{
-		if (args[1].compare("info") == 0)
-		{
-			Debug::print(LOG_SUMMARY, "*** info ***\r\n");
-		}
-
-
 		if (args[1].compare("sensor") == 0)
 		{
 			Debug::print(LOG_SUMMARY, "*** Sensor states ***\r\n");
 
 			VECTOR3 vec;
 			gGPSSensor.get(vec);
-			if (gGPSSensor.isActive())Debug::print(LOG_SUMMARY, " GPS      (%f %f %f)\r\n", vec.x, vec.y, vec.z);
-			else Debug::print(LOG_SUMMARY, " GPS is NOT working\r\n");
+			if (gGPSSensor.isActive())Debug::print(LOG_PRINT, " GPS      (%f %f %f)\r\n", vec.x, vec.y, vec.z);
+			else Debug::print(LOG_PRINT, " GPS is NOT working\r\n");
 
-			if (gPressureSensor.isActive())Debug::print(LOG_SUMMARY, " Pressure (%f) hPa\r\n", gPressureSensor.getPressure());
-			else Debug::print(LOG_SUMMARY, " Pressure is NOT working\r\n");
+			if (gPressureSensor.isActive())Debug::print(LOG_PRINT, " Pressure (%f) hPa\r\n", gPressureSensor.getPressure());
+			else Debug::print(LOG_PRINT, " Pressure is NOT working\r\n");
+			
+			if (gNineAxisSensor.isActive())gNineAxisSensor.showData(true, true, true, true);
+			else Debug::print(LOG_PRINT, " NineAxis is NOT working\r\n");
 
+			if (gLightSensor.isActive())gLightSensor.showData();
+			else Debug::print(LOG_PRINT, " Light is NOT working\r\n");
+
+			if (gDistanceSensor.isActive())gDistanceSensor.showData();
+			else Debug::print(LOG_PRINT, " Distance is NOT working\r\n");
+	
 
 
 			return true;
-		}
-		else if (args[1].compare("waking") == 0)
-		{
-			//gWakingState.setRunMode(true);
 		}
 		else if (args[1].compare("time") == 0)
 		{
@@ -103,14 +102,6 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 		else if (args[1].compare("version") == 0)
 		{
 			Debug::print(LOG_SUMMARY, "Version: %d\r\n", VERSION);
-			return true;
-		}
-		else if (args[1].compare("demo") == 0)
-		{
-			gGPSSensor.isAlive();
-			//gNineAxisSensor.isAlive();
-			gPressureSensor.isAlive();
-			//gDemo.setRunMode(true);
 			return true;
 		}
 	}
@@ -158,7 +149,8 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 							testing time                      : show current time\r\n\
 							testing sensor                    : check sensor values\r\n\
 							testing pin [PinNum] [output(0|1)]: digitalWrite(PinNum,output)\r\n\
-							testing version                   : show program version\r\n");
+							testing version                   : show program version\r\n\
+							testing sensor                   : show all sensor value\r\n");
 
 	return true;
 }

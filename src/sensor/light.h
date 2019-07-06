@@ -15,17 +15,13 @@ class LightSensor : public TaskBase
 private:
 	int mPin;
 protected:
-	//初期化
 	virtual bool onInit(const struct timespec& time);
-	//センサの使用を終了する
 	virtual void onClean();
-	//コマンドを処理する
 	virtual bool onCommand(const std::vector<std::string>& args);
 
 public:
-	//現在の明るさを取得する
 	bool get() const;
-
+	void showData() const;
 	LightSensor();
 	~LightSensor();
 };
