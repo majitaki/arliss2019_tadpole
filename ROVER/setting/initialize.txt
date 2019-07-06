@@ -39,7 +39,7 @@ alias sepa start separating
 alias setgoal navigating here
 alias near start near_navigating
 alias stuck start stucking
-alias testing sensor sensor
+alias test testing sensor
 //other
 alias wifistop waiting wifistop
 

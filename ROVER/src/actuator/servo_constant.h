@@ -17,9 +17,9 @@ const static int NECK_OUTER = 5700;
 //direct
 const static int DIRECT_ID = 0;
 const static std::string DIRECT_NAME = "direct";
-const static int DIRECT_RIGHT = 6000;
+const static int DIRECT_RIGHT = 5000;
 const static int DIRECT_CENTER = 7500;
-const static int DIRECT_LEFT = 9000;
+const static int DIRECT_LEFT = 9500;
 //waist
 const static int WAIST_ID = 2;
 const static std::string WAIST_NAME = "waist";
