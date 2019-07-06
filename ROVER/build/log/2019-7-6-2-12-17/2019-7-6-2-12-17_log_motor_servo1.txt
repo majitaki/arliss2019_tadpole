@@ -1,0 +1,1 @@
+time,motor, para, direct

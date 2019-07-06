@@ -1,0 +1,90 @@
+[2019-7-6-2-47-53] Failed make log sub folder
+[2019-7-6-2-47-53] Success make log sub folder
+[2019-7-6-2-47-53] Reading initialize.txt...[2019-7-6-2-47-53] Executing Initializing Commands...
+[2019-7-6-2-47-53] > start testing
+[2019-7-6-2-47-53] Start testing (stopped)
+[2019-7-6-2-47-53] > detecting setmode ON
+[2019-7-6-2-47-53] 
+Failed to exec command!
+[2019-7-6-2-47-53] > cdetecting setmode ON
+[2019-7-6-2-47-53] 
+Failed to exec command!
+[2019-7-6-2-47-53] > navigating 40.880068 -119.121620
+[2019-7-6-2-47-53] 
+Failed to exec command!
+[2019-7-6-2-47-53] > motor r 100 100 100
+[2019-7-6-2-47-53] > alias ww motor w
+[2019-7-6-2-47-53] alias ww='motor w '
+[2019-7-6-2-47-53] > alias ss motor s
+[2019-7-6-2-47-53] alias ss='motor s '
+[2019-7-6-2-47-53] > alias hh motor h
+[2019-7-6-2-47-53] alias hh='motor h '
+[2019-7-6-2-47-53] > alias aa motor a
+[2019-7-6-2-47-53] alias aa='motor a '
+[2019-7-6-2-47-53] > alias dd motor d
+[2019-7-6-2-47-53] alias dd='motor d '
+[2019-7-6-2-47-53] > alias hd servo wrap -1
+[2019-7-6-2-47-53] alias hd='servo wrap -1 '
+[2019-7-6-2-47-53] > alias rl servo wrap 1
+[2019-7-6-2-47-53] alias rl='servo wrap 1 '
+[2019-7-6-2-47-53] > alias st servo wrap 0 
+[2019-7-6-2-47-53] alias st='servo wrap 0 '
+[2019-7-6-2-47-53] > alias rr servo turn 1
+[2019-7-6-2-47-53] alias rr='servo turn 1 '
+[2019-7-6-2-47-53] > alias ll servo turn -1
+[2019-7-6-2-47-53] alias ll='servo turn -1 '
+[2019-7-6-2-47-53] > alias cc servo turn 0
+[2019-7-6-2-47-53] alias cc='servo turn 0 '
+[2019-7-6-2-47-53] > alias nx nineaxis
+[2019-7-6-2-47-53] alias nx='nineaxis '
+[2019-7-6-2-47-53] > alias pr pressure
+[2019-7-6-2-47-53] alias pr='pressure '
+[2019-7-6-2-47-53] > alias di distance
+[2019-7-6-2-47-53] alias di='distance '
+[2019-7-6-2-47-53] > alias navi start navigating
+[2019-7-6-2-47-53] alias navi='start navigating '
+[2019-7-6-2-47-53] > alias wake start waking
+[2019-7-6-2-47-53] alias wake='start waking '
+[2019-7-6-2-47-53] > alias sepa start separating
+[2019-7-6-2-47-53] alias sepa='start separating '
+[2019-7-6-2-47-53] > alias setgoal navigating here
+[2019-7-6-2-47-53] alias setgoal='navigating here '
+[2019-7-6-2-47-53] > alias near start near_navigating
+[2019-7-6-2-47-53] alias near='start near_navigating '
+[2019-7-6-2-47-53] > alias stuck start stucking
+[2019-7-6-2-47-53] alias stuck='start stucking '
+[2019-7-6-2-47-53] > alias wifistop waiting wifistop
+[2019-7-6-2-47-53] alias wifistop='waiting wifistop '
+[2019-7-6-2-47-53] > exec individual_adjustment.txt
+[2019-7-6-2-47-53] Reading individual_adjustment.txt...[2019-7-6-2-47-53] FAILED
+[2019-7-6-2-47-53] 
+Failed to exec command!
+[2019-7-6-2-47-53] Ready.
+[2019-7-6-2-47-53] -------------------------
+[2019-7-6-2-47-53] [Testing State] Start
+[2019-7-6-2-47-53] -------------------------
+[2019-7-6-2-47-53] Time --> 2019:7:6:2:47:53
+[2019-7-6-2-47-53] light sensor is Ready
+[2019-7-6-2-47-53] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-53] FAILED to initialize task nineaxis (1/5)
+[2019-7-6-2-47-53] Pressure Sensor is Ready!
+[2019-7-6-2-47-53] Distance Sensor is Ready!
+[2019-7-6-2-47-54] Servo is Ready!
+[2019-7-6-2-47-54] Movement Log: Enabled
+[2019-7-6-2-47-54] Sensor Log: Enabled
+[2019-7-6-2-47-54] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-54] FAILED to initialize task nineaxis (1/5)
+[2019-7-6-2-47-54] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-54] FAILED to initialize task nineaxis (2/5)
+[2019-7-6-2-47-54] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-54] FAILED to initialize task nineaxis (3/5)
+[2019-7-6-2-47-54] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-54] FAILED to initialize task nineaxis (4/5)
+[2019-7-6-2-47-54] Failed to Begin NineAxis Sensor
+[2019-7-6-2-47-54] FAILED to initialize task nineaxis (5/5)
+[2019-7-6-2-47-54] Distance Sensor is not working!
+[2019-7-6-2-47-54] Distance Sensor is Finished
+[2019-7-6-2-47-57] Ctrl-C is disabled
+[2019-7-6-2-47-57] To quit, Press Ctrl-C again!
+[2019-7-6-2-47-58] Shutting down...
+[2019-7-6-2-47-58] [Testing State] Finished

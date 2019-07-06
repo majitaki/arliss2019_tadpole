@@ -1,0 +1,83 @@
+[2019-7-6-4-15-48] Failed make log sub folder
+[2019-7-6-4-15-48] Success make log sub folder
+[2019-7-6-4-15-48] Reading initialize.txt...[2019-7-6-4-15-48] Executing Initializing Commands...
+[2019-7-6-4-15-48] > start testing
+[2019-7-6-4-15-48] Start testing (stopped)
+[2019-7-6-4-15-48] > detecting setmode ON
+[2019-7-6-4-15-48] 
+Failed to exec command!
+[2019-7-6-4-15-48] > cdetecting setmode ON
+[2019-7-6-4-15-48] 
+Failed to exec command!
+[2019-7-6-4-15-48] > navigating 40.880068 -119.121620
+[2019-7-6-4-15-48] 
+Failed to exec command!
+[2019-7-6-4-15-48] > motor r 100 100 100
+[2019-7-6-4-15-48] > alias ww motor w
+[2019-7-6-4-15-48] alias ww='motor w '
+[2019-7-6-4-15-48] > alias ss motor s
+[2019-7-6-4-15-48] alias ss='motor s '
+[2019-7-6-4-15-48] > alias hh motor h
+[2019-7-6-4-15-48] alias hh='motor h '
+[2019-7-6-4-15-48] > alias aa motor a
+[2019-7-6-4-15-48] alias aa='motor a '
+[2019-7-6-4-15-48] > alias dd motor d
+[2019-7-6-4-15-48] alias dd='motor d '
+[2019-7-6-4-15-48] > alias hd servo wrap -1
+[2019-7-6-4-15-48] alias hd='servo wrap -1 '
+[2019-7-6-4-15-48] > alias rl servo wrap 1
+[2019-7-6-4-15-48] alias rl='servo wrap 1 '
+[2019-7-6-4-15-48] > alias st servo wrap 0 
+[2019-7-6-4-15-48] alias st='servo wrap 0 '
+[2019-7-6-4-15-48] > alias rr servo turn 1
+[2019-7-6-4-15-48] alias rr='servo turn 1 '
+[2019-7-6-4-15-48] > alias ll servo turn -1
+[2019-7-6-4-15-48] alias ll='servo turn -1 '
+[2019-7-6-4-15-48] > alias cc servo turn 0
+[2019-7-6-4-15-48] alias cc='servo turn 0 '
+[2019-7-6-4-15-48] > alias nx nineaxis
+[2019-7-6-4-15-48] alias nx='nineaxis '
+[2019-7-6-4-15-48] > alias pr pressure
+[2019-7-6-4-15-48] alias pr='pressure '
+[2019-7-6-4-15-48] > alias di distance
+[2019-7-6-4-15-48] alias di='distance '
+[2019-7-6-4-15-48] > alias navi start navigating
+[2019-7-6-4-15-48] alias navi='start navigating '
+[2019-7-6-4-15-48] > alias wake start waking
+[2019-7-6-4-15-48] alias wake='start waking '
+[2019-7-6-4-15-48] > alias sepa start separating
+[2019-7-6-4-15-48] alias sepa='start separating '
+[2019-7-6-4-15-48] > alias setgoal navigating here
+[2019-7-6-4-15-48] alias setgoal='navigating here '
+[2019-7-6-4-15-48] > alias near start near_navigating
+[2019-7-6-4-15-48] alias near='start near_navigating '
+[2019-7-6-4-15-48] > alias stuck start stucking
+[2019-7-6-4-15-48] alias stuck='start stucking '
+[2019-7-6-4-15-48] > alias wifistop waiting wifistop
+[2019-7-6-4-15-48] alias wifistop='waiting wifistop '
+[2019-7-6-4-15-48] > exec individual_adjustment.txt
+[2019-7-6-4-15-48] Reading individual_adjustment.txt...[2019-7-6-4-15-48] FAILED
+[2019-7-6-4-15-48] 
+Failed to exec command!
+[2019-7-6-4-15-48] Ready.
+[2019-7-6-4-15-48] -------------------------
+[2019-7-6-4-15-48] [Testing State] Start
+[2019-7-6-4-15-48] -------------------------
+[2019-7-6-4-15-48] Time --> 2019:7:6:4:15:48
+[2019-7-6-4-15-48] light sensor is Ready
+[2019-7-6-4-15-48] NineAxis Sensor is Ready!
+[2019-7-6-4-15-48] Pressure Sensor is Ready!
+[2019-7-6-4-15-48] Distance Sensor is Ready!
+[2019-7-6-4-15-49] Servo is Ready!
+[2019-7-6-4-15-49] Movement Log: Enabled
+[2019-7-6-4-15-49] Sensor Log: Enabled
+[2019-7-6-4-15-50] Distance Sensor is not working!
+[2019-7-6-4-15-50] Distance Sensor is Finished
+[2019-7-6-4-15-52] > servo wrap 0 
+[2019-7-6-4-15-56] > servo wrap -1 
+[2019-7-6-4-15-59] > servo wrap 1 
+[2019-7-6-4-16-1] Ctrl-C is disabled
+[2019-7-6-4-16-1] To quit, Press Ctrl-C again!
+[2019-7-6-4-16-1] Shutting down...
+[2019-7-6-4-16-1] NineAxis Sensor is Finished
+[2019-7-6-4-16-1] [Testing State] Finished
