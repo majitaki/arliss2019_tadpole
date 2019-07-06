@@ -89,6 +89,16 @@ bool NineAxisSensor::onCommand(const std::vector<std::string>& args)
 			isShowMode = !isShowMode;
 			return true;
 		}
+		else if(args[1].compare("side") == 0){
+			Debug::print(LOG_PRINT, "nineaxis back :checking isTurnSide\r\n");
+			if(isTurnSide()) Debug::print(LOG_PRINT, "true\r\n");
+			else Debug::print(LOG_PRINT, "false\r\n");
+		}
+		else if(args[1].compare("back") == 0){
+			Debug::print(LOG_PRINT, "nineaxis back :checking isTurnBack\r\n");
+			if(isTurnBack()) Debug::print(LOG_PRINT, "true\r\n");
+			else Debug::print(LOG_PRINT, "false\r\n");
+		}
 		break;
 	}
 	Debug::print(LOG_PRINT, "Failed Command\r\n");
@@ -123,6 +133,18 @@ RTVector3 NineAxisSensor::getMagnet() const{
 }
 RTVector3 NineAxisSensor::getFusionPose() const{
 	return mIMUData.fusionPose;
+}
+
+bool NineAxisSensor::isTurnSide() const{
+	if(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < TURNSIDE_DEGREE_THRESHOLD)
+		return true;
+	return false;
+}
+
+bool NineAxisSensor::isTurnBack() const{
+	if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < TURNSIDE_DEGREE_THRESHOLD)
+		return true;
+	return false;
 }
 
 NineAxisSensor::NineAxisSensor() : mLastUpdateTime(), mIMUData(), imu(), isShowMode(false)
