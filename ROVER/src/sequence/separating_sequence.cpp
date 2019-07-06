@@ -39,12 +39,13 @@ bool SeparatingState::onInit(const struct timespec& time)
 	//gAccelManager.setRunMode(true);
 	gGPSSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
-	gSensorLoggingState.setRunMode(true);
+	//gSensorLoggingState.setRunMode(true);
+	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
 
 	//������
 	gServo.holdPara();
-	gServo.centerDirect();
+	//gServo.centerDirect();
 
 	mLastUpdateTime = time;
 	mCurServoState = false;
@@ -59,7 +60,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 	{
 	case STEP_STABI_OPEN:
 		gServo.holdPara();
-		gServo.centerDirect();
+		//gServo.centerDirect();
 
 		mCurStep = STEP_WAIT_STABI_OPEN;
 		mLastUpdateTime = time;
@@ -82,12 +83,12 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (mCurServoState)
 		{
 			gServo.releasePara();
-			gServo.centerDirect();
+			//gServo.centerDirect();
 		}
 		else
 		{
 			gServo.holdPara();
-			gServo.centerDirect();
+			//gServo.centerDirect();
 		}
 
 		++mServoCount;
@@ -97,7 +98,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		{
 			//����ԂɑJ��
 			gServo.releasePara();
-			gServo.centerDirect();
+			//gServo.centerDirect();
 			mLastUpdateTime = time;
 			//gWakingState.setRunMode(true);
 			nextState();
@@ -109,6 +110,7 @@ void SeparatingState::nextState()
 {
 	//���̏�Ԃ��I��
 	setRunMode(false);
+    gServo.turn(0.0);
 
 	//���̏�Ԃ�ݒ�
 	//�i�r�Q�[�V�������łȂ����testing�ɖ߂�
@@ -118,8 +120,8 @@ void SeparatingState::nextState()
 	}
 	else
 	{
-		gNavigatingState.setRunMode(true);
-		gNavigatingState.SetNavigatingFlag(true);
+		//gNavigatingState.setRunMode(true);
+		//gNavigatingState.SetNavigatingFlag(true);
 	}
 
 

@@ -71,23 +71,38 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 	{
 		if (args[1].compare("sensor") == 0)
 		{
-			Debug::print(LOG_SUMMARY, "*** Sensor states ***\r\n");
+			Debug::print(LOG_PRINT, "*** Sensor states ***\r\n");
 
 			VECTOR3 vec;
 			gGPSSensor.get(vec);
-			if (gGPSSensor.isActive())Debug::print(LOG_PRINT, " GPS      (%f %f %f)\r\n", vec.x, vec.y, vec.z);
+			if (gGPSSensor.isActive()){
+                Debug::print(LOG_PRINT, " - GPS is working\r\n");
+                Debug::print(LOG_PRINT, "   x:%f y:%f z:%f\r\n", vec.x, vec.y, vec.z);
+            }
 			else Debug::print(LOG_PRINT, " GPS is NOT working\r\n");
 
-			if (gPressureSensor.isActive())Debug::print(LOG_PRINT, " Pressure (%f) hPa\r\n", gPressureSensor.getPressure());
+			if (gPressureSensor.isActive()){
+                Debug::print(LOG_PRINT, " - Pressure is working\r\n");
+                Debug::print(LOG_PRINT, "   %f hPa\r\n", gPressureSensor.getPressure());
+            }
 			else Debug::print(LOG_PRINT, " Pressure is NOT working\r\n");
 			
-			if (gNineAxisSensor.isActive())gNineAxisSensor.showData(true, true, true, true);
-			else Debug::print(LOG_PRINT, " NineAxis is NOT working\r\n");
+			if (gNineAxisSensor.isActive()){
+                Debug::print(LOG_PRINT, " - NineAxis is working\r\n");
+                gNineAxisSensor.showData(true, true, true, true);
+            }
+			else Debug::print(LOG_PRINT, "- NineAxis is NOT working\r\n");
 
-			if (gLightSensor.isActive())gLightSensor.showData();
-			else Debug::print(LOG_PRINT, " Light is NOT working\r\n");
+			if (gLightSensor.isActive()){
+                Debug::print(LOG_PRINT, " - Light is working\r\n");
+                gLightSensor.showData();
+            }
+			else Debug::print(LOG_PRINT, "- Light is NOT working\r\n");
 
-			if (gDistanceSensor.isActive())gDistanceSensor.showData();
+			if (gDistanceSensor.isActive()){
+                Debug::print(LOG_PRINT, " - Distance is working\r\n");
+                gDistanceSensor.showData();
+            }
 			else Debug::print(LOG_PRINT, " Distance is NOT working\r\n");
 	
 

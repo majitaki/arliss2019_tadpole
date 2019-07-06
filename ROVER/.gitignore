@@ -1,0 +1,8 @@
+# build 
+/build/*
+# Log 
+/build/log/*
+#vscode
+/.vscode/*
+#swap
+*.swp

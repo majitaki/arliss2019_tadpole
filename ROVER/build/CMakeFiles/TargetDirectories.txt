@@ -1,3 +1,0 @@
-/home/pi/arliss2019_tadpole/rover/build/CMakeFiles/rebuild_cache.dir
-/home/pi/arliss2019_tadpole/rover/build/CMakeFiles/edit_cache.dir
-/home/pi/arliss2019_tadpole/rover/build/CMakeFiles/tadpole.dir

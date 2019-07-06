@@ -215,6 +215,13 @@ void Servo::registRangeData(int id, int raw_value){
 	}
 }
 
+void Servo::holdPara(){
+   turn(0.0); 
+}
+void Servo::releasePara(){
+   turn(1.0); 
+}
+
 void Servo::move(int id, int raw_value){
 	if(raw_value == 0){
 		free(id);

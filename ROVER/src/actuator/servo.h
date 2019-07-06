@@ -33,6 +33,8 @@ public:
 	void turn(double range);	
 	void move(int id, int raw_value);	
 	void move(std::string servo_name, int raw_value);	
+    void holdPara();
+    void releasePara();
 	void free(int id);	
 	void free(std::string servo_name);	
 	void free();	
