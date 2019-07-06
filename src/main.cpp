@@ -45,7 +45,7 @@ bool parseInitializer()
 int main(int argc, char** argv)
 {
 	Time::showNowTime();
-	Debug::print(LOG_SUMMARY, "2018 Takadama-lab ARLISS\r\n*** Ares Team ***\r\n");
+	Debug::print(LOG_SUMMARY, "2019 Takadama-lab ARLISS\r\n*** Tadpole Team ***\r\n");
 
 	//キーボードによる終了を阻止
 	if (!(setSighandle(SIGINT) && setSighandle(SIGQUIT)))
