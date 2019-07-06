@@ -29,7 +29,6 @@ NineAxisSensor gNineAxisSensor;
 bool NineAxisSensor::onInit(const struct timespec& time)
 {
 	RTIMUSettings *settings = new RTIMUSettings(SETTING_FOLDER.c_str(), "RTIMULib");
-
     imu = RTIMU::createIMU(settings);
 
     if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL) || !imu->IMUInit()) {
