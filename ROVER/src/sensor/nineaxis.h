@@ -25,6 +25,8 @@ public:
 	RTVector3 getGyro() const;
 	RTVector3 getMagnet() const;
 	RTVector3 getFusionPose() const;
+	bool isTurnSide() const;
+	bool isTurnBack() const;
 	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 	NineAxisSensor();
 	~NineAxisSensor();
