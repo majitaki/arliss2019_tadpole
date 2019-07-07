@@ -139,13 +139,13 @@ RTVector3 NineAxisSensor::getFusionPose() const{
 	return mIMUData.fusionPose;
 }
 bool NineAxisSensor::isTurnSide() const{
-	if(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < TURNSIDE_DEGREE_THRESHOLD)
+	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNSIDE_DEGREE_THRESHOLD && abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) < TURNBACK_DEGREE_THRESHOLD)
 		return true;
 	return false;
 }
 
  bool NineAxisSensor::isTurnBack() const{
-	if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < TURNSIDE_DEGREE_THRESHOLD)
+	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD)
 		return true;
 	return false;
 }
