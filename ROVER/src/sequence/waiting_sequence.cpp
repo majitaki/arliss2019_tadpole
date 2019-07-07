@@ -38,9 +38,10 @@ bool WaitingState::onInit(const struct timespec& time)
 	setRunMode(true);
 	gLightSensor.setRunMode(true);
 	gSerialCommand.setRunMode(true);
-	gSensorLoggingState.setRunMode(true);
+	//gSensorLoggingState.setRunMode(true);
+    gUnitedLoggingState.setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
 	gServo.setRunMode(true);
 	gLED.setRunMode(true);
 	gLED.setColor(255, 0, 255);
@@ -54,8 +55,8 @@ bool WaitingState::onInit(const struct timespec& time)
 	mMaxAltitude = 0;
 
 	//サーボ位置初期化
-	gServo.holdPara();
-	gServo.centerDirect();
+	//gServo.holdPara();
+	//gServo.centerDirect();
 
 	////wifi stop
 	//if (mNavigatingFlag)
@@ -209,8 +210,8 @@ void WaitingState::nextState()
 	}
 	else
 	{
-		gFallingState.setRunMode(true);
-		gFallingState.SetNavigatingFlag(true);
+		//gFallingState.setRunMode(true);
+		//gFallingState.SetNavigatingFlag(true);
 	}
 }
 void WaitingState::SetNavigatingFlag(bool flag)

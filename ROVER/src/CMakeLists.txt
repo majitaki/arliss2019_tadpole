@@ -32,7 +32,7 @@ set(rover_src
 	noisy/led.cpp
 	sequence/testing_sequence.cpp
 	sequence/separating_sequence.cpp
-	#sequence/waiting_sequence.cpp
+	sequence/waiting_sequence.cpp
 	#sequence/falling_sequence.cpp
 	#sequence/navigating_sequence.cpp
 	sequence/closing_sequence.cpp
