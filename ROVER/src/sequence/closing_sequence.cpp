@@ -13,9 +13,13 @@
 #include "closing_sequence.h"
 #include "./navigating_sequence.h"
 #include "../sensor/distance.h"
+#include "../sensor/nineaxis.h"
 #include "../actuator/servo.h"
 #include "../actuator/motor.h"
 #include "testing_sequence.h"
+#include "../sub_sequence/waking_turnside.h"
+#include "../sub_sequence/waking_turnback.h"
+#
 ClosingState gClosingState;
 
 
@@ -38,6 +42,7 @@ bool ClosingState::onInit(const struct timespec& time)
 	gDistanceSensor.setRunMode(true);
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
+    gNineAxisSensor.setRunMode(true);
 
 	return true;
 }
@@ -49,6 +54,10 @@ void ClosingState::onUpdate(const struct timespec& time)
 	double dt = Time::dt(time, mClosingStartTime);
 	mDistToGoal = gDistanceSensor.getDistance();
 	Debug::print(LOG_SUMMARY, "Goal Distance :%d\r\n",mDistToGoal);
+    
+    if (gWakingFromTurnSide.isActive())return;
+	if (gWakingFromTurnBack.isActive())return;
+
 
  	 //finish
 	if (mDistToGoal < 50)
@@ -56,6 +65,17 @@ void ClosingState::onUpdate(const struct timespec& time)
 		nextState();
 		return;
 	}
+
+    //turn side
+    if (gNineAxisSensor.isTurnSide())
+    {
+        gWakingFromTurnSide.setRunMode(true);
+    }
+    // turn back
+    if (gNineAxisSensor.isTurnBack())
+    {
+        gWakingFromTurnBack.setRunMode(true);
+    }
 
   	//timeout
 	if (dt > CLOSING_ABORT_TIME_FOR_LAST)
@@ -77,11 +97,11 @@ void ClosingState::onUpdate(const struct timespec& time)
 			//if goal position detected
 			if(mDistToGoal!=8191)
 			{
-				//gMotorDrive.drive(0);
-				//mState = Approach;
+				gMotorDrive.drive(0);
+				mState = Approach;
 			}
-			//gMotorDrive.drive(80);
-			//gServo.turn(1);
+			gMotorDrive.drive(80);
+			gServo.turn(1);
 			break;
 		case Snaky:
 			Debug::print(LOG_SUMMARY, "Snaky State\r\n");
@@ -96,16 +116,16 @@ void ClosingState::onUpdate(const struct timespec& time)
 				mState = Approach;
 			}
 			mDirection *= -1;
-			//gServo.turn(mDirection);
-			//gMotorDrive.drive(80);	
+			gServo.turn(mDirection);
+			gMotorDrive.drive(80);	
 			break;
 		case Approach:
 			Debug::print(LOG_SUMMARY, "Approach State\r\n");
 			//if goal position is unclear
 			if(mDistToGoal != 8191)
 			{
-				//gServo.turn(0);
-				//gMotorDrive.drive(100);
+				gServo.turn(0);
+				gMotorDrive.drive(100);
 
 			}
 			else

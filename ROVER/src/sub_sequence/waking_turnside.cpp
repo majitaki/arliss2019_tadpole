@@ -5,8 +5,10 @@
 #include "../actuator/motor.h"
 #include "../actuator/motor_constant.h"
 #include "../constants.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
+#include "../sensor/nineaxis.h"
 #include "../actuator/servo.h"
+#include "../actuator/servo_constant.h"
 #include "waking_turnside.h"
 #include "waking_turnside_constant.h"
 
@@ -19,6 +21,7 @@ bool WakingFromTurnSide::onInit(const timespec & time)
 	Time::showNowTime();
 
 	//initialize
+    //gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
 	mSubState = Rolling;
 	mCurrentPower = 30;
@@ -37,26 +40,42 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 	{
 	case Rolling:
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Rolling\r\n");
-		gMotorDrive.drive(MOTOR_MAX_POWER, mWakePID);
-		gServo.releasePara();
-		if (mCurrentPower > MOTOR_MAX_POWER || !gAccelManager.isTurnSide())
+        gServo.wrap(1);
+		//gMotorDrive.drive(MOTOR_MAX_POWER, mWakePID);
+        //right
+        if(gNineAxisSensor.whichSide()==1)
+        {
+            //int raw_value=atoi(6000);
+            gServo.move(DIRECT_ID,6000);
+        }
+        else if(gNineAxisSensor.whichSide()==-1)
+        {
+            //int raw_value=atoi(8000);
+            gServo.move(DIRECT_ID,8000);
+        }
+
+        gMotorDrive.drive(100);
+		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())
+		if ( Time::dt(time, mCheckTime) > 10 || !gNineAxisSensor.isTurnSide())
 		{
-			gMotorDrive.drive(0);
+            gServo.wrap(0);
+            gMotorDrive.drive(0);
+            //gServo.wrap(0);
 			mSubState = Checking;
 			mCheckTime = time;
 			break;
 		}
 		//mCurrentPower = WAKING_TURN_SIDE_SPEED_UP_PERIOD * mCurrentPower;
-		mCurrentPower = gMotorDrive.getPowerR();
+		//mCurrentPower = gMotorDrive.getPowerR();
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] %f/%d\r\n", mCurrentPower, MOTOR_MAX_POWER);
 		break;
 	case Checking:
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Checking\r\n");
 		if (Time::dt(time, mCheckTime) > 3)
 		{
-			if (!gAccelManager.isTurnSide())
+            if(!gNineAxisSensor.isTurnSide())
 			{
-				Debug::print(LOG_SUMMARY, "[WakingTurnSide] Successed\r\n");
+				Debug::print(LOG_SUMMARY, "[WakingTurnSide] Succeed\r\n");
 				setRunMode(false);
 				return;
 			}
@@ -68,7 +87,7 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 			}
 			Debug::print(LOG_SUMMARY, "[WakingTurnSide] Retry Count %d\r\n", mWakeRetryCount);
 			mSubState = Rolling;
-			mCurrentPower = 30;
+			//mCurrentPower = 30;
 		}
 		break;
 	}
@@ -82,7 +101,6 @@ bool WakingFromTurnSide::onCommand(const std::vector<std::string>& args)
 void WakingFromTurnSide::onClean()
 {
 	gMotorDrive.drive(0);
-	gServo.holdPara();
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Debug::print(LOG_SUMMARY, "[WakingTurnSide] Finished\r\n");
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");

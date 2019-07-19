@@ -27,6 +27,7 @@ public:
 	RTVector3 getFusionPose() const;
 	bool isTurnSide() const;
 	bool isTurnBack() const;
+    int whichSide() const;
 	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 	NineAxisSensor();
 	~NineAxisSensor();

@@ -17,8 +17,8 @@
 #include "./waiting_sequence.h"
 #include "./falling_sequence.h"
 #include "../actuator/servo.h"
-#include "../noisy/led.h"
-#include "../noisy/buzzer.h"
+//#include "../noisy/led.h"
+//#include "../noisy/buzzer.h"
 
 WaitingState gWaitingState;
 
@@ -43,9 +43,9 @@ bool WaitingState::onInit(const struct timespec& time)
 	gDelayedExecutor.setRunMode(true);
 	//gAccelManager.setRunMode(true);
 	gServo.setRunMode(true);
-	gLED.setRunMode(true);
-	gLED.setColor(255, 0, 255);
-	gBuzzer.setRunMode(true);
+	//gLED.setRunMode(true);
+	//gLED.setColor(255, 0, 255);
+	//gBuzzer.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 
 	//初期化
@@ -171,13 +171,13 @@ void WaitingState::CheckLightCount(const timespec & time)
 				Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Success.\r\n");
 				mLightCountSuccessFlag = true;
 				mContinuousLightCount = 0;
-				gBuzzer.start(70, 1);
+				//gBuzzer.start(70, 1);
 				return;
 			}
 			//LED制御
-			gLED.brink(0.2);
+			//gLED.brink(0.2);
 			//ブザー
-			gBuzzer.start(25, 2);
+			//gBuzzer.start(25, 2);
 
 			mContinuousLightCount++;
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Update %d(s) / %d(s)\r\n", diff_time, GYRO_COUNT_TIME);
@@ -189,9 +189,9 @@ void WaitingState::CheckLightCount(const timespec & time)
 		{
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Failed.\r\n");
 			mContinuousLightCount = 0;
-			gBuzzer.start(50);
-			gLED.stopBrink();
-			gLED.setColor(255, 0, 255);
+			//gBuzzer.start(50);
+			//gLED.stopBrink();
+			//gLED.setColor(255, 0, 255);
 			return;
 		}
 	}
@@ -199,7 +199,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 
 void WaitingState::nextState()
 {
-	gLED.clearLED();
+	//gLED.clearLED();
 	//この状態を終了
 	setRunMode(false);
 	//次の状態を設定

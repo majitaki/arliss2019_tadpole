@@ -220,6 +220,10 @@ void Servo::holdPara(){
 }
 void Servo::releasePara(){
    turn(1.0); 
+   delay(1000);
+   move(WAIST_ID, 9000);
+   delay(1000);
+   move(WAIST_ID, 5000);
 }
 
 void Servo::move(int id, int raw_value){

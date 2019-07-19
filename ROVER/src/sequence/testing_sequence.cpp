@@ -47,8 +47,8 @@ bool TestingState::onInit(const struct timespec& time)
 	//gSensorLoggingState.setRunMode(true);
 	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
-	gBuzzer.setRunMode(true);
-	gLED.setRunMode(true);
+	//gBuzzer.setRunMode(true);
+	//gLED.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
 	gServo.free();

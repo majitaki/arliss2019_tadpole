@@ -5,10 +5,11 @@
 #include "../actuator/motor_constant.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "../sequence/testing_sequence.h"
 #include "../sequence/navigating_sequence.h"
 #include "../sensor/gps.h"
+#include "../sensor/nineaxis.h"
 #include "../actuator/servo.h"
 //#include "../actuator/servo_constant.h"
 #include "./waking_turnside.h"
@@ -28,7 +29,8 @@ bool WakingFromTurnBack::onInit(const timespec & time)
 	mStartPower = 50;
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
-	gAccelManager.setRunMode(true);
+	//gAccelManager.setRunMode(true);
+    gNineAxisSensor.setRunMode(true);
 	mWakeRetryCount = 0;
 	mLastUpdateTime = time;
 	return true;
@@ -42,13 +44,12 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 	switch (mCurStep)
 	{
 	case STEP_CHECK_LIE:
-		if (gAccelManager.isTurnSide())
+		if (gNineAxisSensor.isTurnSide())
 		{
 			gWakingFromTurnSide.setRunMode(true);
 			mCurStep = STEP_WAIT_LIE;
 			return;
 		}
-		gServo.holdPara();//角度調節
 	case STEP_WAIT_LIE:
 		if (gWakingFromTurnSide.isActive())return;
 		gMotorDrive.drive(mStartPower);
@@ -62,7 +63,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 			setRunMode(false);
 			gMotorDrive.drive(0);
 		}
-		if (!gAccelManager.isTurnBack())
+		if (!gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "Waking Landed!\r\n");
 			mLastUpdateTime = time;
@@ -80,7 +81,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 			mCurStep = STEP_VERIFY;
 			gMotorDrive.drive(0);
 		}
-		if (gAccelManager.isTurnBack())
+		if (gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "Waking Detected Rotation!\r\n");
 			mLastUpdateTime = time;
@@ -110,9 +111,8 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 			return;
 		}
 
-		if (!gAccelManager.isTurnBack())
+		if (!gNineAxisSensor.isTurnBack())
 		{
-			gServo.releasePara();
 			Debug::print(LOG_SUMMARY, "Waking Successed!\r\n");
 			setRunMode(false);
 			return;
@@ -133,7 +133,6 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 				return;
 			}
 
-			gServo.holdPara();
 			Debug::print(LOG_SUMMARY, "Waking will be retried (%d / %d) by power %f\r\n", mWakeRetryCount, WAKING_TURN_BACK_RETRY_COUNT, power);
 		}
 		break;

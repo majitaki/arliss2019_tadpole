@@ -3,7 +3,7 @@
 #include <list>
 #include "../rover_util/task.h"
 
-const static int PIN_BUZZER = 7;             
+const static int PIN_BUZZER = 2;             
 
 class Buzzer : public TaskBase
 {
