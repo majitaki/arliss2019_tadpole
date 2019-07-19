@@ -32,21 +32,37 @@ void Digging::onUpdate(const timespec & time)
 {
 	switch (mCurStep)
 	{
-	case STEP_CHECK_LIE:
-		if (gAccelManager.isTurnSide())
+	case CHECK_STATUS:
+		if (gNineAxisSensor.isTurnSide() || gNineAxisSensor.isTurnBack())
 		{
-			gWakingFromTurnSide.setRunMode(true);
-			mCurStep = STEP_WAIT_LIE;
+            setRunMode(false);
 			return;
 		}
-		gServo.holdPara();//角度調節
-	case STEP_WAIT_LIE:
-		if (gWakingFromTurnSide.isActive())return;
-		gMotorDrive.drive(mStartPower);
-		mLastUpdateTime = time;
-		mCurStep = STEP_START;
+        else
+        {
+            mLastUpdateTime = time;
+            Debug::print(LOG_SUMMARY, "digging!");
+            mCurStep = DIG;
+        }
+    case DIG_OPEN:
+        if(mCurDigCount<DIGGIG_COUNT)
+        {
+            Debug::print(LOG_SUMMARY,"[%d/%d] Digging Count",mCurDigCount,DIGGING_COUNT);
+            gServo.move(STABI_ID,STABI_OUTER);
+            mCurStep = DIG_CLOSE;
+        }
+        else
+        {
+            mLastUpdateTime = time;
+            mCurStep = CHECK_STATUS;
+        }
+        break;
+	case DIG_CLOSE:
+        gServo.move(STABI_ID,STABI_INNER);
+        mCurDigCount++;
+        mCurStep = DIG_OPEN;1
 		break;
-	case STEP_STOP:
+	case :
 		if (Time::dt(time, mLastUpdateTime) > 2)
 		{
 			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to land\r\n");

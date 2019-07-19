@@ -41,18 +41,11 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 	case Rolling:
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Rolling\r\n");
         gServo.wrap(1);
-		//gMotorDrive.drive(MOTOR_MAX_POWER, mWakePID);
         //right
         if(gNineAxisSensor.whichSide()==1)
-        {
-            //int raw_value=atoi(6000);
-            gServo.move(DIRECT_ID,6000);
-        }
-        else if(gNineAxisSensor.whichSide()==-1)
-        {
-            //int raw_value=atoi(8000);
             gServo.move(DIRECT_ID,8000);
-        }
+        else if(gNineAxisSensor.whichSide()==-1)
+            gServo.move(DIRECT_ID,6000);
 
         gMotorDrive.drive(100);
 		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())

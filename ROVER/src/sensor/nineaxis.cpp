@@ -154,7 +154,7 @@ int NineAxisSensor::whichSide() const{
 }
 
  bool NineAxisSensor::isTurnBack() const{
-	if(abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD)
+	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD)
 		return true;
 	return false;
 }

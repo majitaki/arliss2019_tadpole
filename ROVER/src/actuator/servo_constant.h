@@ -29,7 +29,7 @@ const static int WAIST_OUTER = 9500;
 //stabi
 const static int STABI_ID = 1;
 const static std::string STABI_NAME = "stabi";
-const static int STABI_INNER = 7500;
+const static int STABI_INNER = 8000;
 const static int STABI_CENTER = 5000;
 const static int STABI_OUTER = 5000;
 

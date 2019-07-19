@@ -97,6 +97,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (mServoCount >= SEPARATING_SERVO_COUNT)//�T�[�{���K��񐔓�������
 		{
 			//����ԂɑJ��
+            gServo.holdPara();
 			gServo.releasePara();
 			//gServo.centerDirect();
 			mLastUpdateTime = time;

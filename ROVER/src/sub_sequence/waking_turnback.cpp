@@ -25,7 +25,7 @@ bool WakingFromTurnBack::onInit(const timespec & time)
 	Time::showNowTime();
 
 	//initialize
-	mCurStep = STEP_CHECK_LIE;
+	mCurStep = STEP_START;
 	mStartPower = 50;
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
@@ -84,6 +84,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		if (gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "Waking Detected Rotation!\r\n");
+            gMotorDrive.drive(-100);
 			mLastUpdateTime = time;
 			mCurStep = STEP_DEACCELERATE;
 		}
@@ -91,7 +92,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 
 	case STEP_DEACCELERATE:	//�������茸������
 		dt = Time::dt(time, mLastUpdateTime);
-		if (dt > mDeaccelerateDuration)
+		if (dt > DEACCELERATE_DURATION)
 		{
 			Debug::print(LOG_SUMMARY, "Waking Deaccelerate finished!\r\n");
 			mLastUpdateTime = time;
@@ -100,8 +101,9 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		}
 		else
 		{
-			int tmp_power = std::max((int)((1 - dt / mDeaccelerateDuration) * (mStartPower / 2/*2�Ŋ���*/)), 0);
-			gMotorDrive.drive(tmp_power);
+            gMotorDrive.drive(100);
+			//int tmp_power = std::max((int)((1 - dt / DEACCELERATE_DURTION) * (mStartPower / 2/*2�Ŋ���*/)), 0);
+			//gMotorDrive.drive(tmp_power);
 		}
 		break;
 
@@ -120,11 +122,12 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		else
 		{
 			mLastUpdateTime = time;
-			//mCurStep = STEP_START;
-			mCurStep = STEP_VERIFY;
-			power = std::min((unsigned int)100, mStartPower + ((mWakeRetryCount + 1) * 5));	//���s�񐔂��ƂɃ��[�^�o�͂��グ��
+			mCurStep = STEP_START;
+			//mCurStep = STEP_VERIFY;
+			//power = std::min((unsigned int)100, mStartPower + ((mWakeRetryCount + 1) * 5));	//���s�񐔂��ƂɃ��[�^�o�͂��グ��
 																							//gMotorDrive.drive(power);
-			gMotorDrive.drive(power, power, 0);
+			//gMotorDrive.drive(power, power, 0);
+            //gMotorDrive.drive(100);
 
 			if (++mWakeRetryCount > WAKING_TURN_BACK_RETRY_COUNT)
 			{
