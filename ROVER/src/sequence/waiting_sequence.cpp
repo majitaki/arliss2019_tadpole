@@ -30,7 +30,6 @@ bool WaitingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//���݂̎�����ۑ�
 	mStartTime = time;
 
 	//�K�v�ȃ^�X�N���g�p�ł���悤�ɂ���
@@ -38,33 +37,30 @@ bool WaitingState::onInit(const struct timespec& time)
 	setRunMode(true);
 	gLightSensor.setRunMode(true);
 	gSerialCommand.setRunMode(true);
-	//gSensorLoggingState.setRunMode(true);
     gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
-	//gAccelManager.setRunMode(true);
 	gServo.setRunMode(true);
 	//gLED.setRunMode(true);
 	//gLED.setColor(255, 0, 255);
 	//gBuzzer.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 
-	//������
 	mLastUpdateTime = mWaitingStartTime = time;
 	mContinuousLightCount = 0;
 	mLightCountSuccessFlag = false;
 	mMaxAltitude = 0;
 
 	gServo.waitingHoldPara();
-	//�T�[�{�ʒu������
 	//gServo.holdPara();
 	//gServo.centerDirect();
 
 	////wifi stop
-	//if (mNavigatingFlag)
-	//{
-	//	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	//	system("sudo ip l set wlan0 down");//������on -> off��
-	//}
+	if (mNavigatingFlag)
+	{
+		Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
+		system("sudo ip l set wlan0 down");//������on -> off��
+	}
 
 	return true;
 }

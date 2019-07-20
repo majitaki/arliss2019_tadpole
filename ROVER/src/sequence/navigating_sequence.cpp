@@ -5,7 +5,7 @@
 #include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
 #include "../sensor/gps.h"
@@ -18,7 +18,7 @@
 
 
 NavigatingState gNavigatingState;
-//ƒS[ƒ‹‚Ö‚ÌˆÚ“®’†
+//ï¿½Sï¿½[ï¿½ï¿½ï¿½Ö‚ÌˆÚ“ï¿½ï¿½ï¿½
 bool NavigatingState::onInit(const struct timespec& time)
 {
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
@@ -27,20 +27,18 @@ bool NavigatingState::onInit(const struct timespec& time)
 	Time::showNowTime();
 
 
-	//•K—v‚Èƒ^ƒXƒN‚ğg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	//ï¿½Kï¿½vï¿½Èƒ^ï¿½Xï¿½Nï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
 	gGPSSensor.setRunMode(true);
 	gSerialCommand.setRunMode(true);
 	gMotorDrive.setRunMode(true);
-	gSensorLoggingState.setRunMode(true);
+	gUnitedLoggingState.setRunMode(true);
 	gServo.setRunMode(true);
-	gAccelManager.setRunMode(true);
 
-	//‰Šú‰»
-	gServo.releasePara();
-	gServo.centerDirect();
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	gServo.wrap(0.0);
 	gGPSSensor.clearSample();
 	mSubState = InitialRunWhile;
 	mDistanceToGoal = 999999;
@@ -68,8 +66,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		if (dt > NAVIGATING_INITIAL_RUN_WHILE_TIME) mSubState = Initial;
 		//gGPSSensor.clearSamples();
 		gMotorDrive.drive(100);
-		gServo.releasePara();
-		gServo.centerDirect();
+		gServo.wrap(0.0);
 		return;
 	}
 
@@ -93,8 +90,8 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		double dt_freeze = Time::dt(time, mFreezeTime);
 		if (dt_freeze > NAVIGATING_FREEZE_TIME)
 		{
-			if (gAccelManager.isTurnSide()) { mSubState = TurningSide;  FreezeFlag = true; break; }
-			if (gAccelManager.isTurnBack()) { mSubState = TurningBack; FreezeFlag = true; break; }
+			if (gNineAxisSensor.isTurnSide()) { mSubState = TurningSide;  FreezeFlag = true; break; }
+			if (gNineAxisSensor.isTurnBack()) { mSubState = TurningBack; FreezeFlag = true; break; }
 			if (gGPSSensor.isStuckGPS()) { mSubState = Stucking; FreezeFlag = true; break; }
 
 		}
@@ -247,16 +244,18 @@ bool NavigatingState::onCommand(const std::vector<std::string>& args)
 void NavigatingState::onClean()
 {
 	gMotorDrive.drive(0);
-	gServo.holdPara();
-	gServo.centerDirect();
+	gServo.wrap(0.0);
+	gServo.turn(0.0);
+	gServo.free();
 	Debug::print(LOG_SUMMARY, "[Navigating State] Finished\r\n");
 }
 void NavigatingState::onCheckGoalInfo()
 {
 	Debug::print(LOG_SUMMARY, "NAVIGATING : Please set goal!\r\n");
 	gMotorDrive.drive(0);
-	gServo.holdPara();
-	gServo.centerDirect();
+	gServo.wrap(0.0);
+	gServo.turn(0.0);
+	gServo.free();
 	nextState();
 	return;
 }
@@ -279,11 +278,11 @@ void NavigatingState::navigationFarMode()
 	VECTOR3 currentPos;
 	gGPSSensor.get(currentPos, false);
 
-	goalAngle = VECTOR3::calcAngleXY(currentPos, mGoalPos);//ƒS[ƒ‹‚Ì•ûŒü
+	goalAngle = VECTOR3::calcAngleXY(currentPos, mGoalPos);//ï¿½Sï¿½[ï¿½ï¿½ï¿½Ì•ï¿½ï¿½ï¿½
 	gGPSSensor.getDirectionAngle(roverAngle);
 
 	double deltaAngle = 0;
-	deltaAngle = gAccelManager.normalize(roverAngle - goalAngle);//ŠÔ‚ÌŠp“x
+	deltaAngle = gAccelManager.normalize(roverAngle - goalAngle);//ï¿½Ô‚ÌŠpï¿½x
 	auto max_angle = NAVIGATING_MAX_DELTA_ANGLE;
 	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
 
@@ -298,7 +297,7 @@ void NavigatingState::navigationFarMode()
 	Debug::print(LOG_SUMMARY, "current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }
 
-//Ÿ‚Ìó‘Ô‚ÉˆÚs
+//ï¿½ï¿½ï¿½Ìï¿½Ô‚ÉˆÚs
 void NavigatingState::nextState()
 {
 	Debug::print(LOG_SUMMARY, "Navigating Finised!\r\n");
