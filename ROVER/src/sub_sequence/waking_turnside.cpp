@@ -49,7 +49,7 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 
         gMotorDrive.drive(100);
 		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())
-		if ( Time::dt(time, mCheckTime) > 10 || !gNineAxisSensor.isTurnSide())
+		if ( Time::dt(time, mCheckTime) > 15 || !gNineAxisSensor.isTurnSide())
 		{
             gServo.wrap(0);
             gMotorDrive.drive(0);

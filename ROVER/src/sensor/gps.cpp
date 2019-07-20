@@ -267,6 +267,7 @@ bool GPSSensor::isStuckGPS()
 {
 	VECTOR3 ave_pos;
 	if (!getAvePos(ave_pos)) return false;
+	if(mSatelites == 0) return false;
 
 	double distance = VECTOR3::calcDistanceXY(mLastPos.front(), ave_pos);
 	return distance < GPS_STUCK_THRESHOLD ? true : false;
@@ -277,6 +278,8 @@ bool GPSSensor::isStuckGPS(double &distance)
 {
 	VECTOR3 ave_pos;
 	if (!getAvePos(ave_pos)) return false;
+	if(mSatelites == 0) return false;
+
 	distance = VECTOR3::calcDistanceXY(mLastPos.front(), ave_pos);
 	Debug::print(LOG_SUMMARY, "isStuck: %f \r\n",distance);
 	return distance < GPS_STUCK_THRESHOLD ? true : false;
@@ -323,17 +326,7 @@ void GPSSensor::showState()
 	Debug::print(LOG_SUMMARY, "Stuck distance: %f threshold: %f\r\n", distance, GPS_STUCK_THRESHOLD);
 	Debug::print(LOG_SUMMARY, "Remove Error function: %s \r\n", mRemoveErrorFlag ? "true" : "false");
 }
-bool GPSSensor::isAlive()
-{
-	Debug::print(LOG_SUMMARY, "\nchecking GPS Sensor\n");
-	if (gps_rec.stream(WATCH_ENABLE | WATCH_JSON) == NULL)
-	{
-		Debug::print(LOG_SUMMARY, "Failed to setup GPS Sensor\r\n");
-		return false;
-	}
-	showState();
-	return true;
-}
+
 GPSSensor::GPSSensor() : mFileHandle(-1), mPos(), mSatelites(0), mIsNewData(false), gps_rec("localhost", DEFAULT_GPSD_PORT)
 {
 	setName("gps");

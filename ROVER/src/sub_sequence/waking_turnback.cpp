@@ -84,28 +84,11 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		if (gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "TurnBack Detected : Rotation!\r\n");
-            gMotorDrive.drive(-100);
-			mLastUpdateTime = time;
-			mCurStep = STEP_DEACCELERATE;
-		}
-		break;
-
-	case STEP_DEACCELERATE:	//�������茸������
-		dt = Time::dt(time, mLastUpdateTime);
-		if (dt > DEACCELERATE_DURATION)
-		{
-			Debug::print(LOG_SUMMARY, "Waking Deaccelerate finished!\r\n");
+            gServo.wrap(1.0);
+            gMotorDrive.drive(100);
 			mLastUpdateTime = time;
 			mCurStep = STEP_VERIFY;
-			gMotorDrive.drive(0);
 		}
-		else
-		{
-            Debug::print(LOG_SUMMARY, "Moving Forward!");
-            gMotorDrive.drive(100);
-			//int tmp_power = std::max((int)((1 - dt / DEACCELERATE_DURTION) * (mStartPower / 2/*2�Ŋ���*/)), 0);
-			//gMotorDrive.drive(tmp_power);
-	    }	
 		break;
 
 	case STEP_VERIFY:
@@ -150,7 +133,7 @@ bool WakingFromTurnBack::onCommand(const std::vector<std::string>& args)
 
 void WakingFromTurnBack::onClean()
 {
-	gServo.holdPara();
+	gServo.wrap(0.0);
 	gMotorDrive.drive(0);
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Debug::print(LOG_SUMMARY, "[WakingTurnBack] Finished\r\n");

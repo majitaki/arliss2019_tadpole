@@ -14,7 +14,7 @@
 #include "../rover_util/logging.h"
 #include "separating_sequence.h"
 #include "separating_sequence_constant.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
 #include "../actuator/servo.h"

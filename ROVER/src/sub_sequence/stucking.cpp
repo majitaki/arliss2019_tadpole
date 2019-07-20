@@ -6,7 +6,7 @@
 #include "../actuator/motor.h"
 #include "../actuator/motor_constant.h"
 #include "../constants.h"
-#include "../manager/accel_manager.h"
+//#include "../manager/accel_manager.h"
 #include "../actuator/servo.h"
 #include "stucking.h"
 #include "stucking_constant.h"
@@ -143,8 +143,10 @@ void Stucking::onUpdate(const timespec & time)
 
 		break;
 	case IncWorm_Shrink:
-		gServo.holdPara();
-		gServo.centerDirect();
+		//gServo.holdPara();
+		gServo.turn(0.0);
+		gServo.wrap(1.0);
+		//gServo.centerDirect();
 		if (mInchWormLoopCount > STUCKING_INCHWORM_LOOP_COUNT)
 		{
 			mSubState = IncWorm_Checking;
@@ -160,8 +162,10 @@ void Stucking::onUpdate(const timespec & time)
 		mCheckTime = time;
 		break;
 	case IncWorm_Extend:
-		gServo.releasePara();
-		gServo.centerDirect();
+		gServo.turn(0.0);
+		gServo.wrap(-1.0);
+		//gServo.releasePara();
+		//gServo.centerDirect();
 		dt = Time::dt(time, mCheckTime);
 		if (dt < STUCKING_INCHWORM_EXTEND_TIME) break;
 		Debug::print(LOG_SUMMARY, "[Stucking] IncWorm Extend Finish\r\n");
@@ -191,9 +195,11 @@ void Stucking::onUpdate(const timespec & time)
 	case Back:
 		dt = Time::dt(time, mCheckTime);
 		Debug::print(LOG_SUMMARY, "[Stucking] Back %1.1f s/ %1.1f s\r\n", dt, STUCKING_BACK_TIME);
+		gServo.turn(0.0);
+		gServo.wrap(0.0);
 		gMotorDrive.drive(-100);
-		gServo.releasePara();
-		gServo.centerDirect();
+		//gServo.releasePara();
+		//gServo.centerDirect();
 
 		if (dt > STUCKING_BACK_TIME)
 		{
@@ -229,9 +235,17 @@ void Stucking::onUpdate(const timespec & time)
 	{
 		Debug::print(LOG_SUMMARY, "[Stucking] Avoid_Stucking \r\n");
 		mCheckTime = time;
-		gMotorDrive.drive(80);
-		if (rand() % 2 == 0) gServo.leftDirect();
-		else gServo.rightDirect();
+		gMotorDrive.drive(100);
+		if (rand() % 2 == 0){
+            //gServo.leftDirect();
+            gServo.wrap(0.0);
+            gServo.turn(-1.0);
+        }
+		else{
+            gServo.wrap(0.0);
+            gServo.turn(1.0);
+        }
+		//else gServo.rightDirect();
 		mSubState = Avoid_Stucking_Checking;
 		break;
 	}
@@ -249,8 +263,10 @@ void Stucking::onUpdate(const timespec & time)
 	}
 	case Final:
 		gMotorDrive.drive(0);
-		gServo.holdPara();
-		gServo.centerDirect();
+        gServo.wrap(0.0);
+        gServo.turn(0.0);
+		//gServo.holdPara();
+		//gServo.centerDirect();
 		//dt = Time::dt(time, mCheckTime);
 		//if (dt < STUCKING_FINAL_INTERVAL_TIME) break;
 		Debug::print(LOG_SUMMARY, "[Stucking] Give up\r\n");

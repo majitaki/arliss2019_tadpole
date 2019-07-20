@@ -518,7 +518,7 @@ bool RTIMUMPU9250::IMURead()
     count = ((unsigned int)fifoCount[0] << 8) + fifoCount[1];
 
     if (count == 512) {
-        HAL_INFO("MPU-9250 fifo has overflowed\n");
+        //HAL_INFO("MPU-9250 fifo has overflowed\n");
         resetFifo();
         m_imuData.timestamp += m_sampleInterval * (512 / MPU9250_FIFO_CHUNK_SIZE + 1); // try to fix timestamp
         return false;

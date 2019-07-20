@@ -2,15 +2,7 @@ start testing
 //start arliss
 detecting setmode ON
 cdetecting setmode ON
-//���̗�
-//navigating 40.87884 -119.11606
 //true goal
-navigating 40.880068 -119.121620
-//�T���W�I���� �S�_�[����
-//�\��S�[��
-//navigating 40.14240 139.98732
-//navigating 40.21624 140.01434
-//�x�m������ �J�����Ƃ�
 //navigating 35.659329 139.541576
 
 motor r 100 100 100

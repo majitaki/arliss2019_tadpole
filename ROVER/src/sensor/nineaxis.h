@@ -28,6 +28,7 @@ public:
 	bool isTurnSide() const;
 	bool isTurnBack() const;
     int whichSide() const;
+	double normalizeAngle(double pos);
 	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 	NineAxisSensor();
 	~NineAxisSensor();

@@ -153,11 +153,17 @@ int NineAxisSensor::whichSide() const{
         return 1;
 }
 
- bool NineAxisSensor::isTurnBack() const{
+bool NineAxisSensor::isTurnBack() const{
 	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD)
 		return true;
 	return false;
 }
+double NineAxisSensor::normalizeAngle(double pos)
+{
+	while (pos >= 180 || pos < -180)pos += (pos > 0) ? -360 : 360;
+	return pos;
+}
+
 NineAxisSensor::NineAxisSensor() : mLastUpdateTime(), mIMUData(), imu(), isShowMode(false)
 {
 	setName("nineaxis");

@@ -5,27 +5,26 @@
 #include <list>
 #include <libgpsmm.h>
 
-//Navigatron v2‚©‚çƒf[ƒ^‚ğæ“¾‚·‚éƒNƒ‰ƒX
 class GPSSensor : public TaskBase
 {
 private:
-	struct timespec mLastUpdateTime;//‘O‰ñ‚Ìƒ`ƒFƒbƒN
+	struct timespec mLastUpdateTime;//ï¿½Oï¿½ï¿½Ìƒ`ï¿½Fï¿½bï¿½Nï¿½ï¿½ï¿½ï¿½
 	struct timespec mLastGetNewDataTime;
 	struct timespec mLastGetRemoveTime;
-	int mFileHandle;//winringPi i2c@‚Ìƒtƒ@ƒCƒ‹ƒnƒ“ƒhƒ‰
-	VECTOR3 mPos;//À•W(Œo“xAˆÜ“xA‚“x)
+	int mFileHandle;//winringPi i2cï¿½@ï¿½Ìƒtï¿½@ï¿½Cï¿½ï¿½ï¿½nï¿½ï¿½ï¿½hï¿½ï¿½
+	VECTOR3 mPos;//ï¿½ï¿½ï¿½W(ï¿½oï¿½xï¿½Aï¿½Ü“xï¿½Aï¿½ï¿½ï¿½x)
 	VECTOR3 mAveragePos;
-	int mSatelites;//•â‘«‚µ‚½‰q¯‚Ì”
+	int mSatelites;//ï¿½â‘«ï¿½ï¿½ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½Ìï¿½
 	int mGpsTime;
 	float mGpsSpeed;
 	float mGpsCourse;
-	bool mIsNewData;//V‚µ‚¢À•Wƒf[ƒ^‚ª‚ ‚ê‚Î^
-	bool mIsLogger;//^‚È‚ç1•b‚²‚Æ‚ÉgpsƒRƒ}ƒ“ƒh‚ğÀs
+	bool mIsNewData;//ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Wï¿½fï¿½[ï¿½^ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î^
+	bool mIsLogger;//ï¿½^ï¿½È‚ï¿½1ï¿½bï¿½ï¿½ï¿½Æ‚ï¿½gpsï¿½Rï¿½}ï¿½ï¿½ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½s
 	bool mErrorFlag;
 	gpsmm gps_rec;
 	struct gps_data_t *newdata;
 	std::list<VECTOR3> mLastPos;
-	void showState();//•â‘«‚µ‚½‰q¯”‚ÆÀ•W‚ğ•\¦
+	void showState();//ï¿½â‘«ï¿½ï¿½ï¿½ï¿½ï¿½qï¿½ï¿½ï¿½ï¿½ï¿½Æï¿½ï¿½Wï¿½ï¿½\ï¿½ï¿½
 	bool mRemoveErrorFlag;
 protected:
 	virtual bool onInit(const struct timespec& time);
@@ -34,11 +33,9 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 
 public:
-	//Œ»İ‚ÌÀ•W‚ğæ“¾‚·‚é(false‚ğ•Ô‚µ‚½ê‡‚ÍêŠ‚ª•s–¾)
-	//disableNewFlag‚ğfalse‚É‚·‚é‚ÆÀ•W‚ªV‚µ‚¢‚Æ‚¢‚¤î•ñ‚ğíœ
 	bool get(VECTOR3& pos, bool disableNewFlag = false);
 
-	//‘O‰ñ‚ÌÀ•Wæ“¾ˆÈ~‚Éƒf[ƒ^‚ªXV‚³‚ê‚½ê‡‚Í^
+	//ï¿½Oï¿½ï¿½Ìï¿½ï¿½Wï¿½æ“¾ï¿½È~ï¿½Éƒfï¿½[ï¿½^ï¿½ï¿½ï¿½Xï¿½Vï¿½ï¿½ï¿½ê‚½ï¿½ê‡ï¿½Í^
 	bool isNewPos() const;
 	int getTime() const;
 	double getPosx() const;
@@ -54,7 +51,6 @@ public:
 	void clearSamples();
 	bool isStuckGPS();
 	bool isStuckGPS(double& distance);
-	bool isAlive();
 
 	GPSSensor();
 	~GPSSensor();

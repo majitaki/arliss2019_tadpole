@@ -9,12 +9,13 @@
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
 #include "../sensor/gps.h"
+#include "../sensor/nineaxis.h"
 #include "../actuator/servo.h"
 #include "navigating_sequence_constant.h"
 #include "../sub_sequence/waking_turnside.h"
 #include "../sub_sequence/waking_turnback.h"
 #include "../sub_sequence/stucking.h"
-#include "../sub_sequence/near_navigating.h"
+//#include "../sub_sequence/near_navigating.h"
 
 
 NavigatingState gNavigatingState;
@@ -27,7 +28,6 @@ bool NavigatingState::onInit(const struct timespec& time)
 	Time::showNowTime();
 
 
-	//�K�v�ȃ^�X�N���g�p�ł���悤�ɂ���
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
@@ -37,7 +37,6 @@ bool NavigatingState::onInit(const struct timespec& time)
 	gUnitedLoggingState.setRunMode(true);
 	gServo.setRunMode(true);
 
-	//������
 	gServo.wrap(0.0);
 	gGPSSensor.clearSample();
 	mSubState = InitialRunWhile;
@@ -73,7 +72,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	if (gWakingFromTurnSide.isActive())return;
 	if (gWakingFromTurnBack.isActive())return;
 	if (gStucking.isActive())return;
-	if (gNearNavigating.isActive())return;
+	//if (gNearNavigating.isActive())return;
 
 	switch (mSubState)
 	{
@@ -165,7 +164,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 
 		Debug::print(LOG_SUMMARY, "[Navi]NearGoal %d / %d\r\n", mNearNaviCount++, NAVIGATING_NEAR_MODE_LIMIT);
 		//navigationFarMode();
-		gNearNavigating.setRunMode(true);
+		//gNearNavigating.setRunMode(true);
 		mSubState = Initial;
 		break;
 	case CheckGoal:
@@ -181,7 +180,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		break;
 	case FarGoal:
 		gMotorDrive.drive(0);
-		gServo.holdPara();
+		gServo.wrap(0.0);
 		Debug::print(LOG_SUMMARY, "[Navi]Far Mode Goal\r\n");
 		Debug::print(LOG_SUMMARY, "Navigating Finish Point:(%f %f)\r\n", gGPSSensor.getPosx(), gGPSSensor.getPosy());
 		Time::showNowTime();
@@ -282,7 +281,7 @@ void NavigatingState::navigationFarMode()
 	gGPSSensor.getDirectionAngle(roverAngle);
 
 	double deltaAngle = 0;
-	deltaAngle = gAccelManager.normalize(roverAngle - goalAngle);//�Ԃ̊p�x
+	deltaAngle = gNineAxisSensor.normalizeAngle(roverAngle - goalAngle);//�Ԃ̊p�x
 	auto max_angle = NAVIGATING_MAX_DELTA_ANGLE;
 	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
 
@@ -291,9 +290,10 @@ void NavigatingState::navigationFarMode()
 	Debug::print(LOG_SUMMARY, "Distance: %f \r\n", mDistanceToGoal);
 	Debug::print(LOG_SUMMARY, "Goal Angle: %f Rover Angle: %f Delta Angle: %f(%s)\r\n", goalAngle, roverAngle, deltaAngle, deltaAngle > 0 ? "Left" : "Right");
 
-	//PID pid = PID(NAVIGATING_UPDATE_INTERVAL_TIME, max_angle, -max_angle, 1, 0, 0);
 	double inc = mFarModePID.calculate(0, deltaAngle) / -max_angle;
-	gServo.DirectServo(inc);
+	inc = inc > 1.0 ? 1.0 : inc;
+	inc = inc < -1.0 ? -1.0 : inc;
+	gServo.turn(inc);
 	Debug::print(LOG_SUMMARY, "current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }
 
