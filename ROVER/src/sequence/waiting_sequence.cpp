@@ -30,10 +30,10 @@ bool WaitingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//Œ»İ‚Ì‚ğ•Û‘¶
+	//ï¿½ï¿½ï¿½İ‚Ìï¿½ï¿½ï¿½ï¿½ï¿½Û‘ï¿½
 	mStartTime = time;
 
-	//•K—v‚Èƒ^ƒXƒN‚ğg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	//ï¿½Kï¿½vï¿½Èƒ^ï¿½Xï¿½Nï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gLightSensor.setRunMode(true);
@@ -48,13 +48,14 @@ bool WaitingState::onInit(const struct timespec& time)
 	//gBuzzer.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 
-	//‰Šú‰»
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	mLastUpdateTime = mWaitingStartTime = time;
 	mContinuousLightCount = 0;
 	mLightCountSuccessFlag = false;
 	mMaxAltitude = 0;
 
-	//ƒT[ƒ{ˆÊ’u‰Šú‰»
+	gServo.waitingHoldPara();
+	//ï¿½Tï¿½[ï¿½{ï¿½Ê’uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//gServo.holdPara();
 	//gServo.centerDirect();
 
@@ -62,7 +63,7 @@ bool WaitingState::onInit(const struct timespec& time)
 	//if (mNavigatingFlag)
 	//{
 	//	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	//	system("sudo ip l set wlan0 down");//–³ü‚ğon -> off‚É
+	//	system("sudo ip l set wlan0 down");//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½on -> offï¿½ï¿½
 	//}
 
 	return true;
@@ -122,7 +123,7 @@ waiting wifistop        : wifi stop\r\n\
 		if (args[1].compare("wifistop") == 0)
 		{
 			Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-			system("sudo ip l set wlan0 down");//–³ü‚ğon -> off‚É
+			system("sudo ip l set wlan0 down");//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½on -> offï¿½ï¿½
 			return true;
 		}
 	}
@@ -133,17 +134,17 @@ waiting wifistop        : wifi stop\r\n\
 void WaitingState::onClean()
 {
 	Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-	system("sudo ip l set wlan0 up");//–³ü‚ğon -> off‚É
+	system("sudo ip l set wlan0 up");//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½on -> offï¿½ï¿½
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
 }
 
 void WaitingState::CheckLightCount(const timespec & time)
 {
-	//ŒõƒZƒ“ƒT[‚ª”½‰‚·‚éó‘Ô‚ªˆê’èŠÔŒp‘±‚µ‚½‚çƒ[ƒo[‚Í•úoó‘Ô‚Æ—\‘ª
+	//ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Tï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô‚ï¿½ï¿½ï¿½èï¿½ÔŒpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½çƒï¿½[ï¿½oï¿½[ï¿½Í•ï¿½ï¿½oï¿½ï¿½Ô‚Æ—\ï¿½ï¿½
 
 	if (mLightCountSuccessFlag)return;
 
-	//ƒWƒƒƒCƒƒJƒEƒ“ƒg‰Šúó‘Ô
+	//ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (mContinuousLightCount == 0)
 	{
 		mStartLightCheckTime = time;
@@ -155,7 +156,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 
 		bool light_react = gLightSensor.get();
 
-		//ƒWƒƒƒCƒƒJƒEƒ“ƒgXV¬Œ÷(è‡’lˆÈ‰º)
+		//ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½Xï¿½Vï¿½ï¿½ï¿½ï¿½(è‡’lï¿½È‰ï¿½)
 		if (light_react)
 		{
 			int diff_time = Time::dt(time, mStartLightCheckTime);
@@ -164,7 +165,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 
 			//gBuzzer.start(10, 10/(LIGHT_COUNT_TIME - diff_time));
 
-			//ƒWƒƒƒCƒƒJƒEƒ“ƒgŒp‘±XV¬Œ÷
+			//ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½pï¿½ï¿½ï¿½Xï¿½Vï¿½ï¿½ï¿½ï¿½
 
 			if (diff_time > LIGHT_COUNT_TIME)
 			{
@@ -174,9 +175,9 @@ void WaitingState::CheckLightCount(const timespec & time)
 				//gBuzzer.start(70, 1);
 				return;
 			}
-			//LED§Œä
+			//LEDï¿½ï¿½ï¿½ï¿½
 			//gLED.brink(0.2);
-			//ƒuƒU[
+			//ï¿½uï¿½Uï¿½[
 			//gBuzzer.start(25, 2);
 
 			mContinuousLightCount++;
@@ -184,7 +185,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 			return;
 
 		}
-		//ŒõƒZƒ“ƒT[ƒJƒEƒ“ƒgXV¸”s‚µ‚½‚½‚ßCŒõƒZƒ“ƒT[ƒJƒEƒ“ƒg‚ğƒŠƒZƒbƒg
+		//ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Tï¿½[ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½Xï¿½Vï¿½ï¿½ï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßCï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Tï¿½[ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½bï¿½g
 		else
 		{
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Failed.\r\n");
@@ -200,10 +201,10 @@ void WaitingState::CheckLightCount(const timespec & time)
 void WaitingState::nextState()
 {
 	//gLED.clearLED();
-	//‚±‚Ìó‘Ô‚ğI—¹
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ï¿½ï¿½Iï¿½ï¿½
 	setRunMode(false);
-	//Ÿ‚Ìó‘Ô‚ğİ’è
-	//ƒiƒrƒQ[ƒVƒ‡ƒ“’†‚Å‚È‚¯‚ê‚Îtesting‚É–ß‚é
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ï¿½İ’ï¿½
+	//ï¿½iï¿½rï¿½Qï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚È‚ï¿½ï¿½ï¿½ï¿½testingï¿½É–ß‚ï¿½
 	if (!mNavigatingFlag)
 	{
 		gTestingState.setRunMode(true);

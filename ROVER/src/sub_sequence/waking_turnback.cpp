@@ -74,7 +74,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 
 		double dt;
 	case STEP_START:
-		if (Time::dt(time, mLastUpdateTime) > 0.5)//���莞�ԉ��]�����m�����Ȃ��ꍇ�����]�s�\�Ɣ��f
+		if (Time::dt(time, mLastUpdateTime) > 5)//���莞�ԉ��]�����m�����Ȃ��ꍇ�����]�s�\�Ɣ��f
 		{
 			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to spin\r\n");
 			mLastUpdateTime = time;
@@ -83,7 +83,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		}
 		if (gNineAxisSensor.isTurnBack())
 		{
-			Debug::print(LOG_SUMMARY, "Waking Detected Rotation!\r\n");
+			Debug::print(LOG_SUMMARY, "TurnBack Detected : Rotation!\r\n");
             gMotorDrive.drive(-100);
 			mLastUpdateTime = time;
 			mCurStep = STEP_DEACCELERATE;
@@ -101,10 +101,11 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		}
 		else
 		{
+            Debug::print(LOG_SUMMARY, "Moving Forward!");
             gMotorDrive.drive(100);
 			//int tmp_power = std::max((int)((1 - dt / DEACCELERATE_DURTION) * (mStartPower / 2/*2�Ŋ���*/)), 0);
 			//gMotorDrive.drive(tmp_power);
-		}
+	    }	
 		break;
 
 	case STEP_VERIFY:

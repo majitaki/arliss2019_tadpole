@@ -159,27 +159,56 @@ servo getid (name)             			: \r\n\
 }
 
 void Servo::wrap(double range){
-	if(range < -1 || range > 1){
-		Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
-		return;
-	}
+	wrap(NECK_NAME, range);
+	move(DIRECT_ID, DIRECT_CENTER);
+	wrap(WAIST_NAME, range);
+	wrap(STABI_NAME, range);
+
+
+	// if(range < -1 || range > 1){
+	// 	Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
+	// 	return;
+	// }
+
+	// if(range <= 0){
+	// 	move(NECK_ID, translateToRawValue(range, NECK_OUTER, NECK_CENTER, -1));
+	// 	move(DIRECT_ID, DIRECT_CENTER);
+	// 	move(WAIST_ID, translateToRawValue(range, WAIST_OUTER, WAIST_CENTER, -1));
+	// 	move(STABI_ID, translateToRawValue(range, STABI_OUTER, STABI_CENTER, -1));
+	// 	return;
+	// }
+	
+	// if(range > 0){
+	// 	move(NECK_ID, translateToRawValue(range, NECK_INNER, NECK_CENTER, 1));
+	// 	move(DIRECT_ID, DIRECT_CENTER);
+	// 	move(WAIST_ID, translateToRawValue(range, WAIST_INNER, WAIST_CENTER, 1));
+	// 	move(STABI_ID, translateToRawValue(range, STABI_INNER, STABI_CENTER, 1));
+	// 	return;
+	// }	
+}
+
+void Servo::wrap(std::string servo_name, double range){
+	 if(range < -1 || range > 1){
+	 	Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
+	 	return;
+	 }
+
+	int servo_id = getServoID(servo_name);
+	int outer_value = getServoOuterValue(servo_name);
+	int inner_value = getServoInnerValue(servo_name);
+	int center_value = getServoCenterValue(servo_name);
 
 	if(range <= 0){
-		move(NECK_ID, translateToRawValue(range, NECK_OUTER, NECK_CENTER, -1));
-		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, translateToRawValue(range, WAIST_OUTER, WAIST_CENTER, -1));
-		move(STABI_ID, translateToRawValue(range, STABI_OUTER, STABI_CENTER, -1));
-		return;
+	 	move(servo_id, translateToRawValue(range, outer_value, center_value, -1));
+	 	return;
 	}
 	
 	if(range > 0){
-		move(NECK_ID, translateToRawValue(range, NECK_INNER, NECK_CENTER, 1));
-		move(DIRECT_ID, DIRECT_CENTER);
-		move(WAIST_ID, translateToRawValue(range, WAIST_INNER, WAIST_CENTER, 1));
-		move(STABI_ID, translateToRawValue(range, STABI_INNER, STABI_CENTER, 1));
-		return;
+	 	move(servo_id, translateToRawValue(range, inner_value, center_value, 1));
+	 	return;
 	}	
 }
+
 void Servo::turn(double range){
 	if(range < -1 || range > 1){
 		Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
@@ -215,15 +244,21 @@ void Servo::registRangeData(int id, int raw_value){
 	}
 }
 
+void Servo::waitingHoldPara(){
+	wrap(1.0);
+	turn(-1.0);
+}
 void Servo::holdPara(){
-   turn(0.0); 
+	wrap(1.0);
+	turn(0.0); 
 }
 void Servo::releasePara(){
-   turn(1.0); 
-   delay(1000);
-   move(WAIST_ID, 9000);
-   delay(1000);
-   move(WAIST_ID, 5000);
+	wrap(1.0);
+    turn(1.0); 
+   //delay(1000);
+   //move(WAIST_ID, 9000);
+   //delay(1000);
+   //move(WAIST_ID, 5000);
 }
 
 void Servo::move(int id, int raw_value){
@@ -277,6 +312,39 @@ int Servo::getServoID(std::string name){
 		return WAIST_ID;
 	}else if(name == STABI_NAME){
 		return STABI_ID;
+	}
+	return -1;
+}
+
+int Servo::getServoOuterValue(std::string name){
+	if(name == NECK_NAME){
+		return NECK_OUTER;
+	}else if(name == WAIST_NAME){
+		return WAIST_OUTER;
+	}else if(name == STABI_NAME){
+		return STABI_OUTER;
+	}
+	return -1;
+}
+
+int Servo::getServoInnerValue(std::string name){
+	if(name == NECK_NAME){
+		return NECK_INNER;
+	}else if(name == WAIST_NAME){
+		return WAIST_INNER;
+	}else if(name == STABI_NAME){
+		return STABI_INNER;
+	}
+	return -1;
+}
+
+int Servo::getServoCenterValue(std::string name){
+	if(name == NECK_NAME){
+		return NECK_CENTER;
+	}else if(name == WAIST_NAME){
+		return WAIST_CENTER;
+	}else if(name == STABI_NAME){
+		return STABI_CENTER;
 	}
 	return -1;
 }

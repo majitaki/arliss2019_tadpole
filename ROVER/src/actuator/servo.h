@@ -30,15 +30,20 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 public:
 	void wrap(double range);	
+	void wrap(std::string servo_name, double range);
 	void turn(double range);	
 	void move(int id, int raw_value);	
 	void move(std::string servo_name, int raw_value);	
     void holdPara();
+	void waitingHoldPara();
     void releasePara();
 	void free(int id);	
 	void free(std::string servo_name);	
 	void free();	
 	int getServoID(std::string name);
+	int getServoOuterValue(std::string name);
+	int getServoInnerValue(std::string name);
+	int getServoCenterValue(std::string name);
 	std::string getServoName(int id);
 	void showRangeData();
 	Servo();

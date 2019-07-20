@@ -44,7 +44,7 @@ bool SeparatingState::onInit(const struct timespec& time)
 	gMovementLoggingState.setRunMode(true);
 
 	//������
-	gServo.holdPara();
+	gServo.waitingHoldPara();
 	//gServo.centerDirect();
 
 	mLastUpdateTime = time;
@@ -98,7 +98,8 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		{
 			//����ԂɑJ��
             gServo.holdPara();
-			gServo.releasePara();
+            gServo.wrap(-1.0);
+			//gServo.releasePara();
 			//gServo.centerDirect();
 			mLastUpdateTime = time;
 			//gWakingState.setRunMode(true);

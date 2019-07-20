@@ -36,6 +36,7 @@ alias di distance
 alias navi start navigating
 alias wake start waking
 alias sepa start separating
+alias wait start waiting 
 alias setgoal navigating here
 alias near start near_navigating
 alias stuck start stucking
