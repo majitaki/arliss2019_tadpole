@@ -12,15 +12,16 @@
 #include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "../manager/accel_manager.h"
+#include "../sensor/nineaxis.h"
+//#include "../manager/accel_manager.h"
 #include "../sensor/pressure.h"
 #include "../sensor/gps.h"
 #include "./falling_sequence.h"
 #include "./separating_sequence.h"
 #include "testing_sequence.h"
 #include "../actuator/servo.h"
-#include "../noisy/led.h"
-#include "../noisy/buzzer.h"
+//#include "../noisy/led.h"
+//#include "../noisy/buzzer.h"
 
 FallingState gFallingState;
 
@@ -31,35 +32,35 @@ bool FallingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//•K—v‚Èƒ^ƒXƒN‚ğg—p‚Å‚«‚é‚æ‚¤‚É‚·‚é
+	//ï¿½Kï¿½vï¿½Èƒ^ï¿½Xï¿½Nï¿½ï¿½ï¿½gï¿½pï¿½Å‚ï¿½ï¿½ï¿½æ‚¤ï¿½É‚ï¿½ï¿½ï¿½
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gGPSSensor.setRunMode(true);
 	gSerialCommand.setRunMode(true);
+	gNineAxisSensor.setRunMode(true);
 	gMotorDrive.setRunMode(true);
-	gSensorLoggingState.setRunMode(true);
+	gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
 	gServo.setRunMode(true);
-	gAccelManager.setRunMode(true);
-	gLED.setRunMode(true);
-	gLED.setColor(255, 255, 0);
-	gBuzzer.setRunMode(true);
+	//gAccelManager.setRunMode(true);
+	//gLED.setRunMode(true);
+	//gLED.setColor(255, 255, 0);
+	//gBuzzer.setRunMode(true);
 
-	//‰Šú‰»
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	mLastUpdateTime = mFallingStartTime = time;
 	mLastPressure = gPressureSensor.getPressure();
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;
 	mGyroCountSuccessFlag = mPressureCountSuccessFlag = false;
 
-	//ƒT[ƒ{ˆÊ’u‰Šú‰»
-	gServo.holdPara();
-	gServo.centerDirect();
+	gServo.waitingHoldPara();
 
 //	//	if (mNavigatingFlag)
 //	//	{
 //	Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-//	system("sudo ip l set wlan0 up");//–³ü‚ğon -> off‚É
+//	system("sudo ip l set wlan0 up");//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½on -> offï¿½ï¿½
 ////	}
 	return true;
 }
@@ -75,7 +76,6 @@ void FallingState::onUpdate(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "[Falling State] Duration %f(s) / Sub %d(s) / Abort %d(s)\r\n", Time::dt(time, mFallingStartTime), FALLING_SUBGOAL_TIME, FALLING_ABORT_TIME);
 
 
-	//ƒWƒƒƒCƒƒJƒEƒ“ƒgC‘å‹Cˆ³ƒJƒEƒ“ƒg¬Œ÷‚µ‚½‚çŸ‚Ìó‘Ô
 	if (mGyroCountSuccessFlag && mPressureCountSuccessFlag)
 	{
 		nextState();
@@ -91,7 +91,6 @@ void FallingState::onUpdate(const struct timespec& time)
 		}
 	}
 
-	//ˆê’èŠÔ‚Å‹­§“I‚ÉŸ‚Ìó‘Ô
 	if (Time::dt(time, mFallingStartTime) > FALLING_ABORT_TIME)
 	{
 		Debug::print(LOG_SUMMARY, "Falling Timeout\r\n");
@@ -107,11 +106,8 @@ void FallingState::onClean()
 
 void FallingState::CheckGyroCount(const struct timespec& time)
 {
-	//ƒWƒƒƒCƒ‚Ì’l‚ªè‡’lˆÈ‰º‚Ìó‘Ô‚ªˆê’èŠÔŒp‘±‚µ‚½‚çƒ[ƒo[‚Í’…’nó‘Ô‚Æ—\‘ª
-
 	if (mGyroCountSuccessFlag)return;
 
-	//ƒWƒƒƒCƒƒJƒEƒ“ƒg‰Šúó‘Ô
 	if (mCoutinuousGyroCount == 0)
 	{
 		mStartGyroCheckTime = time;
@@ -120,40 +116,36 @@ void FallingState::CheckGyroCount(const struct timespec& time)
 	}
 	else
 	{
-		float g_x = gAccelManager.getGx();
-		float g_y = gAccelManager.getGy();
-		float g_z = gAccelManager.getGz();
-		float mean_square_gyro = sqrt(pow(g_x, 2.0) + pow(g_y, 2.0) + pow(g_z, 2.0));
+		float ax = gNineAxisSensor.getGyro().x();
+        float ay = gNineAxisSensor.getGyro().y();
+        float az = gNineAxisSensor.getGyro().z();
+        float l2_accel = std::sqrt(pow(ax, 2) + std::pow(ay, 2) + std::pow(az, 2));
 
-		//ƒWƒƒƒCƒƒJƒEƒ“ƒgXV¬Œ÷(è‡’lˆÈ‰º)
-		if (mean_square_gyro < GYRO_THRESHOLD)
+		if (l2_accel < GYRO_THRESHOLD)
 		{
 			int diff_time = Time::dt(time, mStartGyroCheckTime);
 
-			//LED§Œä
-			if (diff_time > 2) gLED.brink(0.2);
-
-			//ƒWƒƒƒCƒƒJƒEƒ“ƒgŒp‘±XV¬Œ÷
+			//LEDï¿½ï¿½ï¿½ï¿½
+			//if (diff_time > 2) gLED.brink(0.2);
 
 			if (diff_time > GYRO_COUNT_TIME)
 			{
-				Debug::print(LOG_SUMMARY, "Gyro Check Success.  (Gyro Diff: %f < %f)\r\n", mean_square_gyro, GYRO_THRESHOLD);
+				Debug::print(LOG_SUMMARY, "Gyro Check Success.  (Gyro Diff: %f < %f)\r\n", l2_accel, GYRO_THRESHOLD);
 				mGyroCountSuccessFlag = true;
 				mCoutinuousGyroCount = 0;
 				return;
 			}
 			mCoutinuousGyroCount++;
-			Debug::print(LOG_SUMMARY, "Gyro Check Update %d(s) / %d(s)  (Gyro Diff: %f < %f)\r\n", diff_time, GYRO_COUNT_TIME, mean_square_gyro, GYRO_THRESHOLD);
+			Debug::print(LOG_SUMMARY, "Gyro Check Update %d(s) / %d(s)  (Gyro Diff: %f < %f)\r\n", diff_time, GYRO_COUNT_TIME, l2_accel, GYRO_THRESHOLD);
 			return;
 
 		}
-		//ƒWƒƒƒCƒƒJƒEƒ“ƒgXV¸”s‚µ‚½‚½‚ßCƒWƒƒƒCƒƒJƒEƒ“ƒg‚ğƒŠƒZƒbƒg
 		else
 		{
-			Debug::print(LOG_SUMMARY, "Gyro Check Failed.  (Gyro Diff: %f > %f)\r\n", mean_square_gyro, GYRO_THRESHOLD);
+			Debug::print(LOG_SUMMARY, "Gyro Check Failed.  (Gyro Diff: %f > %f)\r\n", l2_accel, GYRO_THRESHOLD);
 			mCoutinuousGyroCount = 0;
-			gLED.stopBrink();
-			gLED.setColor(255, 255, 0);
+			//gLED.stopBrink();
+			//gLED.setColor(255, 255, 0);
 			return;
 		}
 	}
@@ -161,11 +153,8 @@ void FallingState::CheckGyroCount(const struct timespec& time)
 
 void FallingState::CheckPressureCount(const timespec & time)
 {
-	//‘å‹Cˆ³‚Ì·•ª‚ªè‡’lˆÈ‰º‚Ìó‘Ô‚ªˆê’èŠÔŒp‘±‚µ‚½‚çƒ[ƒo[‚Í’…’nó‘Ô‚Æ—\‘ª
-
 	if (mPressureCountSuccessFlag)return;
 
-	//‘å‹Cˆ³ƒJƒEƒ“ƒg‰Šúó‘Ô
 	if (mContinuousPressureCount == 0)
 	{
 		mStartPressureCheckTime = time;
@@ -175,33 +164,28 @@ void FallingState::CheckPressureCount(const timespec & time)
 	}
 	else
 	{
-		//‘å‹Cˆ³‚Ì·•ª
 		float new_pressure = gPressureSensor.getPressure();
 		float diff_pressure = abs(new_pressure - mLastPressure);
 		mLastPressure = new_pressure;
 
-		//‘å‹Cˆ³XV¬Œ÷
 		if (diff_pressure < PRESSURE_THRESHOLD)
 		{
 			int diff_time = Time::dt(time, mStartPressureCheckTime);
 
-			//‘å‹Cˆ³ƒJƒEƒ“ƒgŒp‘±XV¬Œ÷
 			if (diff_time > PRESSURE_COUNT_TIME)
 			{
-				gBuzzer.start(70, 1);
+				//gBuzzer.start(70, 1);
 				mPressureCountSuccessFlag = true;
 				Debug::print(LOG_SUMMARY, "Pressure Check Success\r\n");
 				mContinuousPressureCount = 0;
 				return;
 			}
-			//ƒuƒU[§Œä
-			gBuzzer.start(25, 2);
+			//gBuzzer.start(25, 2);
 
 			mContinuousPressureCount++;
 			Debug::print(LOG_SUMMARY, "Pressure Check Update %d(s) / %d(s) (Pressure Diff: %f < %f)\r\n", diff_time, PRESSURE_COUNT_TIME, diff_pressure, PRESSURE_THRESHOLD);
 			return;
 		}
-		//‘å‹Cˆ³ƒJƒEƒ“ƒgXV¸”s
 		else
 		{
 			Debug::print(LOG_SUMMARY, "Pressure Check Failed.  (Pressure Diff: %f > %f)\r\n", diff_pressure, PRESSURE_THRESHOLD);
@@ -213,18 +197,16 @@ void FallingState::CheckPressureCount(const timespec & time)
 
 void FallingState::nextState()
 {
-	gLED.clearLED();
-	//‚±‚Ìó‘Ô‚ğI—¹
+	//gLED.clearLED();
 	setRunMode(false);
 
-	//Ÿ‚Ìó‘Ô‚ğİ’è
-	//ƒiƒrƒQ[ƒVƒ‡ƒ“’†‚Å‚È‚¯‚ê‚Îtesting‚É–ß‚é
 	if (!mNavigatingFlag)
 	{
 		gTestingState.setRunMode(true);
 	}
 	else
 	{
+		gServo.waitingHoldPara();
 		gSeparatingState.setRunMode(true);
 		gSeparatingState.SetNavigatingFlag(true);
 	}

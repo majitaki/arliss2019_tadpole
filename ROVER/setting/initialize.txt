@@ -4,6 +4,11 @@ detecting setmode ON
 cdetecting setmode ON
 //true goal
 //navigating 35.659329 139.541576
+//navigating 35.658147, 139.540750
+//navigating 35.659365 139.541645
+//navigating 35.660337 139.542973
+//navigating 35.6602901 139.5428091
+navigating 35.660343 139.542720
 
 motor r 100 100 100
 

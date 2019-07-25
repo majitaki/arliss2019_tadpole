@@ -56,11 +56,11 @@ bool WaitingState::onInit(const struct timespec& time)
 	//gServo.centerDirect();
 
 	////wifi stop
-	if (mNavigatingFlag)
-	{
-		Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-		system("sudo ip l set wlan0 down");//������on -> off��
-	}
+	// if (mNavigatingFlag)
+	// {
+	// 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
+	// 	system("sudo ip l set wlan0 down");//������on -> off��
+	// }
 
 	return true;
 }
@@ -129,8 +129,8 @@ waiting wifistop        : wifi stop\r\n\
 }
 void WaitingState::onClean()
 {
-	Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-	system("sudo ip l set wlan0 up");//������on -> off��
+	//Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
+	//system("sudo ip l set wlan0 up");//������on -> off��
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
 }
 
@@ -207,8 +207,9 @@ void WaitingState::nextState()
 	}
 	else
 	{
-		//gFallingState.setRunMode(true);
-		//gFallingState.SetNavigatingFlag(true);
+		gServo.waitingHoldPara();
+		gFallingState.setRunMode(true);
+		gFallingState.SetNavigatingFlag(true);
 	}
 }
 void WaitingState::SetNavigatingFlag(bool flag)

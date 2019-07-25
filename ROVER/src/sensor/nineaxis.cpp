@@ -126,16 +126,16 @@ void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableComp
 	//Debug::print(LOG_PRINT, "\r\n");
 }
 
-RTVector3 NineAxisSensor::getAccel() const{
+RTVector3 NineAxisSensor::getAccel() {
 	return mIMUData.accel;
 }
-RTVector3 NineAxisSensor::getGyro() const{
+RTVector3 NineAxisSensor::getGyro() {
 	return mIMUData.gyro;
 }
-RTVector3 NineAxisSensor::getMagnet() const{
+RTVector3 NineAxisSensor::getMagnet() {
 	return mIMUData.compass;
 }
-RTVector3 NineAxisSensor::getFusionPose() const{
+RTVector3 NineAxisSensor::getFusionPose() {
 	return mIMUData.fusionPose;
 }
 bool NineAxisSensor::isTurnSide() const{

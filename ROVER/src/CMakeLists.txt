@@ -33,14 +33,15 @@ set(rover_src
 	sequence/testing_sequence.cpp
 	sequence/separating_sequence.cpp
 	sequence/waiting_sequence.cpp
-	#sequence/falling_sequence.cpp
+	sequence/falling_sequence.cpp
 	sequence/navigating_sequence.cpp
     #sequence/closing_sequence.cpp
-	#sequence/arliss_sequence.cpp
+	sequence/arliss_sequence.cpp
     sub_sequence/waking_turnside.cpp
     sub_sequence/waking_turnback.cpp
     sub_sequence/stucking.cpp
 	#sub_sequence/near_navigating.cpp
+    sub_sequence/digging.cpp
 	main.cpp	
 )
 

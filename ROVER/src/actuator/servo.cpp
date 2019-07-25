@@ -24,10 +24,10 @@
 Servo gServo;
 bool Servo::onInit(const struct timespec& time)
 {
-    if(wiringPiSetupGpio() == -1) {
-		Debug::print(LOG_SUMMARY, "cannot setup wiringpi\r\n");
-        return false;
-    }
+    // if(wiringPiSetupGpio() == -1) {
+	// 	Debug::print(LOG_SUMMARY, "cannot setup wiringpi\r\n");
+    //     return false;
+    // }
     pinMode(ENIN_ID, OUTPUT);
 
 	/* シリアルポートオープン */
@@ -163,28 +163,12 @@ void Servo::wrap(double range){
 	move(DIRECT_ID, DIRECT_CENTER);
 	wrap(WAIST_NAME, range);
 	wrap(STABI_NAME, range);
+}
 
-
-	// if(range < -1 || range > 1){
-	// 	Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
-	// 	return;
-	// }
-
-	// if(range <= 0){
-	// 	move(NECK_ID, translateToRawValue(range, NECK_OUTER, NECK_CENTER, -1));
-	// 	move(DIRECT_ID, DIRECT_CENTER);
-	// 	move(WAIST_ID, translateToRawValue(range, WAIST_OUTER, WAIST_CENTER, -1));
-	// 	move(STABI_ID, translateToRawValue(range, STABI_OUTER, STABI_CENTER, -1));
-	// 	return;
-	// }
-	
-	// if(range > 0){
-	// 	move(NECK_ID, translateToRawValue(range, NECK_INNER, NECK_CENTER, 1));
-	// 	move(DIRECT_ID, DIRECT_CENTER);
-	// 	move(WAIST_ID, translateToRawValue(range, WAIST_INNER, WAIST_CENTER, 1));
-	// 	move(STABI_ID, translateToRawValue(range, STABI_INNER, STABI_CENTER, 1));
-	// 	return;
-	// }	
+void Servo::wrapWithoutDirect(double range){
+	wrap(NECK_NAME, range);
+	wrap(WAIST_NAME, range);
+	wrap(STABI_NAME, range);
 }
 
 void Servo::wrap(std::string servo_name, double range){

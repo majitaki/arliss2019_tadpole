@@ -2,7 +2,8 @@
 #include <string.h>
 
 const static double SERVO_UPDATE_INTERVAL_TIME = 1.0; //second
-const static int ENIN_ID = 25;
+//const static int ENIN_ID = 5;
+const static int ENIN_ID = 21;
 //basic
 const static int MAX_RAW_VALUE = 11500;
 const static int CENTER_RAW_VALUE = 7500;
@@ -24,7 +25,7 @@ const static int DIRECT_LEFT = 9500;
 const static int WAIST_ID = 2;
 const static std::string WAIST_NAME = "waist";
 const static int WAIST_INNER = 5000;
-const static int WAIST_CENTER = 7500;
+const static int WAIST_CENTER = 8000;
 const static int WAIST_OUTER = 9500;
 //stabi
 const static int STABI_ID = 1;

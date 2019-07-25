@@ -27,7 +27,6 @@ GPSSensor gGPSSensor;
 
 bool GPSSensor::onInit(const struct timespec& time)
 {
-	return true;
 	mLastUpdateTime = time;
 	mLastGetNewDataTime = time;
 	mLastGetRemoveTime = time;
@@ -51,9 +50,9 @@ void GPSSensor::onClean()
 }
 void GPSSensor::onUpdate(const struct timespec& time)
 {
-	return;
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < GPS_UPDATE_INTERVAL_TIME)return;
+
 	mLastUpdateTime = time;
 	mIsNewData = false;
 

@@ -30,6 +30,7 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 public:
 	void wrap(double range);	
+	void wrapWithoutDirect(double range);
 	void wrap(std::string servo_name, double range);
 	void turn(double range);	
 	void move(int id, int raw_value);	

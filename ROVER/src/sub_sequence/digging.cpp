@@ -11,6 +11,8 @@
 #include "../sensor/gps.h"
 #include "../actuator/servo.h"
 //#include "../actuator/servo_constant.h"
+#include "digging.h"
+#include "digging_constant.h"
 
 Digging gDigging;
 bool Digging::onInit(const timespec & time)
@@ -21,128 +23,58 @@ bool Digging::onInit(const timespec & time)
 	Time::showNowTime();
 
 	//initialize
-	mCurStep = STEP_CHECK_LIE;
-	gMotorDrive.setRunMode(true);
+	mCurStep = IncWorm;
 	gServo.setRunMode(true);
+    gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
 	return true;
 }
 
 void Digging::onUpdate(const timespec & time)
 {
+    double dt = Time::dt(time, mLastUpdateTime);
+    if (dt < DIGGING_UPDATE_INTERVAL_TIME)return;
+	mLastUpdateTime = time;
+    gMotorDrive.drive(0);
+
+
 	switch (mCurStep)
 	{
-	case CHECK_STATUS:
-		if (gNineAxisSensor.isTurnSide() || gNineAxisSensor.isTurnBack())
+	case IncWorm:
+		Debug::print(LOG_SUMMARY, "[Digging] Digging Start\r\n");
+
+		mInchWormLoopCount = 0;
+		mCurStep = IncWorm_Shrink;
+		mCheckTime = time;
+
+		break;
+	case IncWorm_Shrink:
+		//gServo.holdPara();
+		gServo.turn(0.0);
+		gServo.wrap(1.0);
+		//gServo.centerDirect();
+		if (mInchWormLoopCount > DIGGING_INCHWORM_LOOP_COUNT)
 		{
             setRunMode(false);
-			return;
+            Debug::print(LOG_SUMMARY, "[Digging] Finished !\r\n");
+			break;
 		}
-        else
-        {
-            mLastUpdateTime = time;
-            Debug::print(LOG_SUMMARY, "digging!");
-            mCurStep = DIG;
-        }
-    case DIG_OPEN:
-        if(mCurDigCount<DIGGIG_COUNT)
-        {
-            Debug::print(LOG_SUMMARY,"[%d/%d] Digging Count",mCurDigCount,DIGGING_COUNT);
-            gServo.move(STABI_ID,STABI_OUTER);
-            mCurStep = DIG_CLOSE;
-        }
-        else
-        {
-            mLastUpdateTime = time;
-            mCurStep = CHECK_STATUS;
-        }
-        break;
-	case DIG_CLOSE:
-        gServo.move(STABI_ID,STABI_INNER);
-        mCurDigCount++;
-        mCurStep = DIG_OPEN;1
+		dt = Time::dt(time, mCheckTime);
+		if (dt < DIGGING_INCHWORM_SHRINK_TIME) break;
+
+		Debug::print(LOG_SUMMARY, "[Digging] IncWorm Loop Count %d / %d\r\n", mInchWormLoopCount++, DIGGING_INCHWORM_LOOP_COUNT);
+		mCurStep = IncWorm_Extend;
+		mCheckTime = time;
 		break;
-	case :
-		if (Time::dt(time, mLastUpdateTime) > 2)
-		{
-			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to land\r\n");
-			setRunMode(false);
-			gMotorDrive.drive(0);
-		}
-		if (!gAccelManager.isTurnBack())
-		{
-			Debug::print(LOG_SUMMARY, "Waking Landed!\r\n");
-			mLastUpdateTime = time;
-			mCurStep = STEP_VERIFY;
-			gMotorDrive.drive(0);
-		}
-		break;
-
-		double dt;
-	case STEP_START:
-		if (Time::dt(time, mLastUpdateTime) > 0.5)//���莞�ԉ��]�����m�����Ȃ��ꍇ�����]�s�\�Ɣ��f
-		{
-			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to spin\r\n");
-			mLastUpdateTime = time;
-			mCurStep = STEP_VERIFY;
-			gMotorDrive.drive(0);
-		}
-		if (gAccelManager.isTurnBack())
-		{
-			Debug::print(LOG_SUMMARY, "Waking Detected Rotation!\r\n");
-			mLastUpdateTime = time;
-			mCurStep = STEP_DEACCELERATE;
-		}
-		break;
-
-	case STEP_DEACCELERATE:	//�������茸������
-		dt = Time::dt(time, mLastUpdateTime);
-		if (dt > mDeaccelerateDuration)
-		{
-			Debug::print(LOG_SUMMARY, "Waking Deaccelerate finished!\r\n");
-			mLastUpdateTime = time;
-			mCurStep = STEP_VERIFY;
-			gMotorDrive.drive(0);
-		}
-		else
-		{
-			int tmp_power = std::max((int)((1 - dt / mDeaccelerateDuration) * (mStartPower / 2/*2�Ŋ���*/)), 0);
-			gMotorDrive.drive(tmp_power);
-		}
-		break;
-
-	case STEP_VERIFY:
-		if (Time::dt(time, mLastUpdateTime) <= 2.5)
-		{
-			return;
-		}
-
-		if (!gAccelManager.isTurnBack())
-		{
-			gServo.releasePara();
-			Debug::print(LOG_SUMMARY, "Waking Successed!\r\n");
-			setRunMode(false);
-			return;
-		}
-		else
-		{
-			mLastUpdateTime = time;
-			//mCurStep = STEP_START;
-			mCurStep = STEP_VERIFY;
-			power = std::min((unsigned int)100, mStartPower + ((mWakeRetryCount + 1) * 5));	//���s�񐔂��ƂɃ��[�^�o�͂��グ��
-																							//gMotorDrive.drive(power);
-			gMotorDrive.drive(power, power, 0);
-
-			if (++mWakeRetryCount > WAKING_TURN_BACK_RETRY_COUNT)
-			{
-				Debug::print(LOG_SUMMARY, "Waking Failed!\r\n");
-				setRunMode(false);
-				return;
-			}
-
-			gServo.holdPara();
-			Debug::print(LOG_SUMMARY, "Waking will be retried (%d / %d) by power %f\r\n", mWakeRetryCount, WAKING_TURN_BACK_RETRY_COUNT, power);
-		}
+	case IncWorm_Extend:
+		gServo.turn(0.0);
+		gServo.wrap(-1.0);
+		//gServo.releasePara();
+		//gServo.centerDirect();
+		dt = Time::dt(time, mCheckTime);
+		if (dt < DIGGING_INCHWORM_EXTEND_TIME) break;
+		mCurStep = IncWorm_Shrink;
+		mCheckTime = time;
 		break;
 	}
 }
@@ -154,13 +86,12 @@ bool Digging::onCommand(const std::vector<std::string>& args)
 
 void Digging::onClean()
 {
-	gMotorDrive.drive(0);
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Debug::print(LOG_SUMMARY, "[Digging] Finished\r\n");
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 }
 
-Digging::WakingFromTurnBack()
+Digging::Digging()
 {
 	setName("digging");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);

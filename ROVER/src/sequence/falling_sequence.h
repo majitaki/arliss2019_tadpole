@@ -9,10 +9,10 @@ const static unsigned int FALLING_SUBGOAL_TIME = 900;
 const static unsigned int FALLING_ABORT_TIME = 1200;
 
 //gyro
-const static int GYRO_COUNT_TIME = 10; //ƒWƒƒƒCƒƒJƒEƒ“ƒg‚ÌŒp‘±ŠÔ(•b)
-const static float GYRO_THRESHOLD = 15;
+const static int GYRO_COUNT_TIME = 10; //ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ÌŒpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½b)
+const static float GYRO_THRESHOLD = 1;
 //pressure
-const static int PRESSURE_COUNT_TIME = 10; //‘å‹Cˆ³ƒJƒEƒ“ƒg‚ÌŒp‘±ŠÔ(•b)
+const static int PRESSURE_COUNT_TIME = 10; //ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ÌŒpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½b)
 const static double PRESSURE_THRESHOLD = 0.8;
 
 class FallingState : public TaskBase
@@ -22,25 +22,25 @@ private:
 	bool mPressureCountSuccessFlag;
 
 	struct timespec mLastUpdateTime;
-	struct timespec mFallingStartTime;//ó‘ÔŠJn
+	struct timespec mFallingStartTime;//ï¿½ï¿½ÔŠJï¿½nï¿½ï¿½ï¿½ï¿½
 	struct timespec mStartGyroCheckTime;
 	struct timespec mStartPressureCheckTime;
 
-	float mLastPressure;//‘O‰ñ‚Ì‹Cˆ³
+	float mLastPressure;//ï¿½Oï¿½ï¿½Ì‹Cï¿½ï¿½
 
-	unsigned int mContinuousPressureCount;//‹Cˆ³‚ªè‡’lˆÈ‰º‚Ìó‘Ô‚ª‘±‚¢‚½‰ñ”
-	unsigned int mCoutinuousGyroCount;//Šp‘¬“x‚ªè‡’lˆÈ‰º‚Ìó‘Ô‚ª‘±‚¢‚½‰ñ”
+	unsigned int mContinuousPressureCount;//ï¿½Cï¿½ï¿½ï¿½ï¿½è‡’lï¿½È‰ï¿½ï¿½Ìï¿½Ô‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	unsigned int mCoutinuousGyroCount;//ï¿½pï¿½ï¿½ï¿½xï¿½ï¿½è‡’lï¿½È‰ï¿½ï¿½Ìï¿½Ô‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	void CheckGyroCount(const struct timespec& time);
 	void CheckPressureCount(const struct timespec& time);
 
-	bool mNavigatingFlag; //ƒiƒrƒQ[ƒVƒ‡ƒ“‚Ì’†‚ÅÀs‚³‚ê‚Ä‚¢‚é‚©D
+	bool mNavigatingFlag; //ï¿½iï¿½rï¿½Qï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Ì’ï¿½ï¿½Åï¿½ï¿½sï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚©ï¿½D
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
 	virtual void onClean();
 
-	//Ÿ‚Ìó‘Ô‚ÉˆÚs
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ÉˆÚs
 	void nextState();
 public:
 	void SetNavigatingFlag(bool flag);

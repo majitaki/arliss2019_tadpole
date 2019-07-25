@@ -9,7 +9,7 @@
 class NavigatingState : public TaskBase
 {
 private:
-	enum SubState { InitialRunWhile, Initial, TurningSide, TurningBack, Stucking, CheckGoalInfo, EstimateDistanceToGoal, CheckDistance, NearGoalNavi, FarGoalNavi, CheckGoal, FarGoal };
+	enum SubState { InitialRunWhile, Initial, TurningSide, TurningBack, Stucking, Digging, CheckGoalInfo, EstimateDistanceToGoal, CheckDistance, NearGoalNavi, FarGoalNavi, CheckGoal, FarGoal };
 	enum SubState mSubState;
 
 	struct timespec mLastUpdateTime;
@@ -25,14 +25,17 @@ private:
 	VECTOR3 mGoalPos;
 	bool mIsGoalPos;
 	double mDistanceToGoal;
+    double mMidDistanceToGoal;
 	int mSamples;
 	double mPrevPIDValue;
 	int mCheckStuckCount;
 	int mNearNaviCount;
 
+    bool enableMiddleMode;
 	bool mNavigatingFlag; //ナビゲーションの中で実行されているか．
 	void onCheckGoalInfo();
 	void onEstDistance();
+    double onEstMidDistance();
 	void navigationFarMode();
 protected:
 	virtual bool onInit(const struct timespec& time);

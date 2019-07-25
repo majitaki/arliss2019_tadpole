@@ -84,7 +84,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		if (gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "TurnBack Detected : Rotation!\r\n");
-            gServo.wrap(1.0);
+            gServo.holdPara();
             gMotorDrive.drive(100);
 			mLastUpdateTime = time;
 			mCurStep = STEP_VERIFY;

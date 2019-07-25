@@ -70,6 +70,8 @@ void Motor::update(double elapsedSeconds)
 		//三項演算子を用いて計算目標ターゲットが前にあるなら前進するように、またその逆も
 		softPwmWrite(ForwardPin, curFrameTarget > 0 ? fabs(curFrameTarget) : 0);
 		softPwmWrite(ReversePin, curFrameTarget > 0 ? 0 : fabs(curFrameTarget));
+		digitalWrite(ForwardPin, curFrameTarget > 0 ? 1 : 0);
+		digitalWrite(ReversePin, curFrameTarget > 0 ? 0 : 1);
 		mCurPower = curFrameTarget;
 	}
 }

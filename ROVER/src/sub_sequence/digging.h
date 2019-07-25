@@ -5,17 +5,18 @@
 #include "../rover_util/utils.h"
 
 
-class WakingFromTurnSide : public TaskBase
+class Digging : public TaskBase
 {
 private:
-	enum SubState{CHECK_STATUS, DIG_OPEN, DIG_CLOSE};
-	enum SubState mSubState;
 	struct timespec mLastUpdateTime;
+	enum SubState { IncWorm, IncWorm_Shrink, IncWorm_Extend, IncWorm_Checking};
+	enum SubState mCurStep;
 	struct timespec mCheckTime;
-	double mCurrentPower;
-	double mSpeedupPeriod;
-	int mWakeRetryCount;
-	PID mWakePID;
+	int mStuckRetryCount;
+	int mRandomCount;
+	int mInchWormCount;
+	int mInchWormLoopCount;
+	int mCheckStuckCount;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -23,8 +24,8 @@ protected:
 	virtual void onClean();
 
 public:
-	WakingFromTurnSide();
-	~WakingFromTurnSide();
+	Digging();
+	~Digging();
 };
 
-extern WakingFromTurnSide gWakingFromTurnSide;
+extern Digging gDigging;

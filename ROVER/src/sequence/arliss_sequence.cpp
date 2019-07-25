@@ -27,11 +27,12 @@ bool ArlissState::onInit(const timespec & time)
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 
-	//������
 	gWaitingState.SetNavigatingFlag(true);
 	gFallingState.SetNavigatingFlag(true);
 	gSeparatingState.SetNavigatingFlag(true);
 	gNavigatingState.SetNavigatingFlag(true);
+	gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
 	
 	nextState();
 	return true;

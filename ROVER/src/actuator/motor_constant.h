@@ -3,8 +3,8 @@
 const static double MOTOR_DRIVE_UPDATE_INTERVAL_TIME = 0.01; //second
 const static double MOTOR_DRIVE_PID_UPDATE_INTERVAL_TIME = 0.2; //second
 //モーターピン
-const static int PIN_PWM_A1 = 22;//モータPWM Right
-const static int PIN_PWM_A2 = 21;//モータ反転ピン Right          
+const static int PIN_PWM_A1 = 24;//モータPWM Right
+const static int PIN_PWM_A2 = 23;//モータ反転ピン Right          
 const static int PIN_PWM_B1 = 6;
 const static int PIN_PWM_B2 = 5;
 //const static int PIN_PWM_C1 = 25;

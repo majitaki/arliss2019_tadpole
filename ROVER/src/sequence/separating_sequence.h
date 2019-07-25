@@ -10,7 +10,9 @@ private:
 	struct timespec mLastUpdateTime;
 	bool mCurServoState;			
 	unsigned int mServoCount;		
-	enum STEP { STEP_STABI_OPEN = 0, STEP_WAIT_STABI_OPEN, STEP_SEPARATE, CHECK_STAND, FAIL_STAND, STEP_PRE_PARA_JUDGE, STEP_PARA_JUDGE, STEP_PARA_DODGE, STEP_GO_FORWARD };
+    unsigned int mServoOpenCount;
+    unsigned int mServoGetDistanceCount;
+	enum STEP { STEP_STABI_OPEN = 0, STEP_WAIT_STABI_OPEN, STEP_SEPARATE, CHECK_STAND, FAIL_STAND, STEP_PRE_PARA_JUDGE, STEP_PARA_JUDGE, STEP_PARA_DODGE, STEP_GO_FORWARD,STEP_SEPARATE_OPEN,STEP_GET_DISTANCE };
 	enum STEP mCurStep;
 	bool mNavigatingFlag; 
 protected:

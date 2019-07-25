@@ -21,10 +21,10 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 	virtual void onUpdate(const struct timespec& time);
 public:
-	RTVector3 getAccel() const;
-	RTVector3 getGyro() const;
-	RTVector3 getMagnet() const;
-	RTVector3 getFusionPose() const;
+	RTVector3 getAccel() ;
+	RTVector3 getGyro() ;
+	RTVector3 getMagnet() ;
+	RTVector3 getFusionPose() ;
 	bool isTurnSide() const;
 	bool isTurnBack() const;
     int whichSide() const;
