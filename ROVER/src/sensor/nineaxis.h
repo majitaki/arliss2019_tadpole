@@ -8,6 +8,12 @@
 #include "../rover_util/utils.h"
 #include <RTIMULib.h>
 
+enum TurnSideDirection {
+	Left,
+	Right,
+	Center
+};
+
 class NineAxisSensor : public TaskBase
 {
 private:
@@ -27,7 +33,8 @@ public:
 	RTVector3 getFusionPose() ;
 	bool isTurnSide() const;
 	bool isTurnBack() const;
-    int whichSide() const;
+    TurnSideDirection getTurnSideDirection() const;
+    //TurnBackDirection getTurnBackDirection() const;
 	double normalizeAngle(double pos);
 	void showData(bool enableAccel, bool enableGyro, bool enableCompass, bool enableFusionPoss);
 	NineAxisSensor();

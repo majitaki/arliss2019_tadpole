@@ -73,11 +73,11 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 	switch (args.size())
 	{
 	case 1:
-		showRangeData();
+		showValueData();
 		Debug::print(LOG_PRINT,
 			"\r\n\
 servo wrap (range[-1.0,1.0])            : -1 is outer, 1 is inner, 0 is run style \r\n\
-servo turn (range[-1.0,1.0])            : -1 is left, 1 is right \r\n\
+servo turn (range[-1.0,1.0])            : -1 is left, 1 is right, 0 is center\r\n\
 servo (id, raw_value[3500,11500])       : \r\n\
 servo (name, raw_value[3500-11500])		: \r\n\
 servo free                  			: \r\n\
@@ -160,16 +160,16 @@ servo getid (name)             			: \r\n\
 
 void Servo::wrap(double range){
 	wrap(NECK_NAME, range);
-	move(DIRECT_ID, DIRECT_CENTER);
+	//move(DIRECT_ID, DIRECT_CENTER);
 	wrap(WAIST_NAME, range);
 	wrap(STABI_NAME, range);
 }
 
-void Servo::wrapWithoutDirect(double range){
-	wrap(NECK_NAME, range);
-	wrap(WAIST_NAME, range);
-	wrap(STABI_NAME, range);
-}
+// void Servo::wrapWithoutDirect(double range){
+// 	wrap(NECK_NAME, range);
+// 	wrap(WAIST_NAME, range);
+// 	wrap(STABI_NAME, range);
+// }
 
 void Servo::wrap(std::string servo_name, double range){
 	 if(range < -1 || range > 1){
@@ -216,7 +216,7 @@ int Servo::translateToRawValue(double range, int end_value, int center_value, do
 	return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
 }
 
-void Servo::registRangeData(int id, int raw_value){
+void Servo::registValueData(int id, int raw_value){
 	if(id == NECK_ID){
 		mServoRawData.neck = raw_value;
 	}else if(id == DIRECT_ID){
@@ -251,7 +251,7 @@ void Servo::move(int id, int raw_value){
 		return;
 	}
 
-	registRangeData(id, raw_value);
+	registValueData(id, raw_value);
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
 	serialPutchar(fd,0x80 | (id & 0x1f));
@@ -266,7 +266,7 @@ void Servo::move(std::string servo_name, int raw_value){
 }
 
 void Servo::free(int id){
-	registRangeData(id, 0);
+	registValueData(id, 0);
 
 	digitalWrite(ENIN_ID, 0);
 	digitalWrite(ENIN_ID, 1);
@@ -346,11 +346,11 @@ std::string Servo::getServoName(int id){
 	return "";
 }
 
-void Servo::showRangeData(){
-	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", NECK_NAME.c_str(), mServoRawData.neck, NECK_OUTER, NECK_INNER);
-	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
-	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mServoRawData.waist, WAIST_OUTER, WAIST_INNER);
-	Debug::print(LOG_PRINT, "%s range = %d [%d, %d]\r\n", STABI_NAME.c_str(), mServoRawData.stabi, STABI_OUTER, STABI_INNER);
+void Servo::showValueData(){
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", NECK_NAME.c_str(), mServoRawData.neck, NECK_OUTER, NECK_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mServoRawData.waist, WAIST_OUTER, WAIST_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", STABI_NAME.c_str(), mServoRawData.stabi, STABI_OUTER, STABI_INNER);
 }
 
 Servo::Servo(): mLastUpdateTime(), mServoRawData{0, 0, 0, 0}

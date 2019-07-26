@@ -17,8 +17,8 @@
 #include "./waiting_sequence.h"
 #include "./falling_sequence.h"
 #include "../actuator/servo.h"
-//#include "../noisy/led.h"
-//#include "../noisy/buzzer.h"
+#include "../noisy/led.h"
+#include "../noisy/buzzer.h"
 
 WaitingState gWaitingState;
 
@@ -32,7 +32,6 @@ bool WaitingState::onInit(const struct timespec& time)
 
 	mStartTime = time;
 
-	//�K�v�ȃ^�X�N���g�p�ł���悤�ɂ���
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gLightSensor.setRunMode(true);
@@ -41,9 +40,9 @@ bool WaitingState::onInit(const struct timespec& time)
 	gMovementLoggingState.setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
 	gServo.setRunMode(true);
-	//gLED.setRunMode(true);
-	//gLED.setColor(255, 0, 255);
-	//gBuzzer.setRunMode(true);
+	gLED.setRunMode(true);
+	gLED.setColor(255, 0, 255);
+	gBuzzer.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 
 	mLastUpdateTime = mWaitingStartTime = time;
@@ -51,16 +50,16 @@ bool WaitingState::onInit(const struct timespec& time)
 	mLightCountSuccessFlag = false;
 	mMaxAltitude = 0;
 
-	gServo.waitingHoldPara();
-	//gServo.holdPara();
-	//gServo.centerDirect();
+	//gServo.waitingHoldPara();
+	gServo.wrap(1.0);
+	gServo.turn(-1.0);
 
-	////wifi stop
-	// if (mNavigatingFlag)
-	// {
-	// 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	// 	system("sudo ip l set wlan0 down");//������on -> off��
-	// }
+	//wifi stop
+	 if (mNavigatingFlag)
+	 {
+	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
+	 	system("sudo ip l set wlan0 down");
+	 }
 
 	return true;
 }
@@ -129,18 +128,13 @@ waiting wifistop        : wifi stop\r\n\
 }
 void WaitingState::onClean()
 {
-	//Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-	//system("sudo ip l set wlan0 up");//������on -> off��
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
 }
 
 void WaitingState::CheckLightCount(const timespec & time)
 {
-	//���Z���T�[�����������Ԃ���莞�Ԍp�������烍�[�o�[�͕��o��ԂƗ\��
-
 	if (mLightCountSuccessFlag)return;
 
-	//�W���C���J�E���g�������
 	if (mContinuousLightCount == 0)
 	{
 		mStartLightCheckTime = time;
@@ -152,43 +146,36 @@ void WaitingState::CheckLightCount(const timespec & time)
 
 		bool light_react = gLightSensor.get();
 
-		//�W���C���J�E���g�X�V����(臒l�ȉ�)
 		if (light_react)
 		{
 			int diff_time = Time::dt(time, mStartLightCheckTime);
 
-
-
-			//gBuzzer.start(10, 10/(LIGHT_COUNT_TIME - diff_time));
-
-			//�W���C���J�E���g�p���X�V����
+			gBuzzer.start(10, 10/(LIGHT_COUNT_TIME - diff_time));
 
 			if (diff_time > LIGHT_COUNT_TIME)
 			{
 				Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Success.\r\n");
 				mLightCountSuccessFlag = true;
 				mContinuousLightCount = 0;
-				//gBuzzer.start(70, 1);
+				gBuzzer.start(70, 1);
 				return;
 			}
-			//LED����
-			//gLED.brink(0.2);
-			//�u�U�[
-			//gBuzzer.start(25, 2);
+
+			gLED.brink(0.2);
+			gBuzzer.start(25, 2);
 
 			mContinuousLightCount++;
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Update %d(s) / %d(s)\r\n", diff_time, GYRO_COUNT_TIME);
 			return;
 
 		}
-		//���Z���T�[�J�E���g�X�V���s�������߁C���Z���T�[�J�E���g�����Z�b�g
 		else
 		{
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Failed.\r\n");
 			mContinuousLightCount = 0;
-			//gBuzzer.start(50);
-			//gLED.stopBrink();
-			//gLED.setColor(255, 0, 255);
+			gBuzzer.start(50);
+			gLED.stopBrink();
+			gLED.setColor(255, 0, 255);
 			return;
 		}
 	}
@@ -197,10 +184,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 void WaitingState::nextState()
 {
 	//gLED.clearLED();
-	//���̏�Ԃ��I��
 	setRunMode(false);
-	//���̏�Ԃ�ݒ�
-	//�i�r�Q�[�V�������łȂ����testing�ɖ߂�
 	if (!mNavigatingFlag)
 	{
 		gTestingState.setRunMode(true);

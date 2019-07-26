@@ -11,7 +11,6 @@ protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual bool onCommand(const std::vector<std::string>& args);
 	virtual void onClean();
-	//Ÿ‚Ìó‘Ô‚ÉˆÚs
 	void nextState();
 public:
 	ArlissState();

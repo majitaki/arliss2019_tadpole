@@ -11,6 +11,7 @@
 #include "../rover_util/serial_command.h"
 #include "../rover_util/logging.h"
 #include "closing_sequence.h"
+#include "closing_sequence_constant.h"
 #include "./navigating_sequence.h"
 #include "../sensor/distance.h"
 #include "../sensor/nineaxis.h"
@@ -115,8 +116,12 @@ void ClosingState::onUpdate(const struct timespec& time)
 			{
 				mState = Approach;
 			}
-			mDirection *= -1;
-			gServo.turn(mDirection);
+            if(Time::dt(time, mSnakyLastUpdateTime) > SNAKY_UPDATE_INTERVAL_TIME)
+            {
+                mSnakyLastUpdateTime = time ;
+                mDirection *= -1;
+                gServo.turn(mDirection);
+            }
 			gMotorDrive.drive(80);	
 			break;
 		case Approach:

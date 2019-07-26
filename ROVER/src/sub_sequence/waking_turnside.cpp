@@ -42,14 +42,14 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Rolling\r\n");
         gServo.wrap(1);
         //right
-        if(gNineAxisSensor.whichSide()==1)
+        if(gNineAxisSensor.getTurnSideDirection() == Right)
             gServo.move(DIRECT_ID,8000);
-        else if(gNineAxisSensor.whichSide()==-1)
+        else if(gNineAxisSensor.getTurnSideDirection() == Left)
             gServo.move(DIRECT_ID,6000);
 
         gMotorDrive.drive(100);
 		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())
-		if ( Time::dt(time, mCheckTime) > 15 || !gNineAxisSensor.isTurnSide())
+		if ( Time::dt(time, mCheckTime) > 10 || !gNineAxisSensor.isTurnSide())
 		{
             gServo.wrap(0);
             gMotorDrive.drive(0);

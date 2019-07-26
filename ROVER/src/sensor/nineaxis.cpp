@@ -144,13 +144,29 @@ bool NineAxisSensor::isTurnSide() const{
 	return false;
 }
 
-int NineAxisSensor::whichSide() const{
-    if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
-        // left
-        return -1;
-    else
-        //right
-        return 1;
+//int NineAxisSensor::whichSide() const{
+TurnSideDirection NineAxisSensor::getTurnSideDirection() const{
+	if(abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE) > TURNSIDE_DEGREE_THRESHOLD){
+		if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
+			// left
+			//return -1;
+			return Left;
+		else
+			//right
+			return Right;
+			//return 1;
+	}else{
+		return Center;
+	}
+
+    // if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
+    //     // left
+    //     //return -1;
+    //     return TurnSideDirection.Left;
+    // else
+    //     //right
+    //     return TurnSideDirection.Right;
+    //     //return 1;
 }
 
 bool NineAxisSensor::isTurnBack() const{

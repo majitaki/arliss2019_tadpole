@@ -149,7 +149,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		if (mDistanceToGoal < 0)
 		{
 			gMotorDrive.drive(100);
-			gServo.wrapWithoutDirect(0.0);
+			gServo.wrap(0.0);
 			mSubState = Initial;
 			Debug::print(LOG_SUMMARY, "[Navi]No GPS\r\n");
 			break;
@@ -174,7 +174,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		break;
 	case FarGoalNavi:
 		gMotorDrive.drive(100);
-		gServo.wrapWithoutDirect(0.0);
+		gServo.wrap(0.0);
 		//gServo.releasePara();
 
 		Debug::print(LOG_SUMMARY, "[Navi]FarGoal\r\n");

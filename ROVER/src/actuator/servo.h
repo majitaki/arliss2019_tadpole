@@ -22,7 +22,7 @@ private:
 	struct timespec mLastUpdateTime;
 	double translateToRange(int raw_value, int end_value, int center_value, double end_range);
 	int translateToRawValue(double range, int end_value, int center_value, double end_range);
-	void registRangeData(int id, int raw_value);
+	void registValueData(int id, int raw_value);
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -30,7 +30,7 @@ protected:
 	virtual bool onCommand(const std::vector<std::string>& args);
 public:
 	void wrap(double range);	
-	void wrapWithoutDirect(double range);
+	//void wrapWithoutDirect(double range);
 	void wrap(std::string servo_name, double range);
 	void turn(double range);	
 	void move(int id, int raw_value);	
@@ -46,7 +46,7 @@ public:
 	int getServoInnerValue(std::string name);
 	int getServoCenterValue(std::string name);
 	std::string getServoName(int id);
-	void showRangeData();
+	void showValueData();
 	Servo();
 	~Servo();
 };

@@ -28,8 +28,8 @@ set(rover_src
 	sensor/nineaxis.cpp 
 	sensor/pressure.cpp 
     sensor/distance.cpp
-    #noisy/buzzer.cpp
-    #noisy/led.cpp
+    noisy/buzzer.cpp
+    noisy/led.cpp
 	sequence/testing_sequence.cpp
 	sequence/separating_sequence.cpp
 	sequence/waiting_sequence.cpp
