@@ -15,6 +15,8 @@ private:
     unsigned int mServoGetDistanceCount;
 	enum STEP { STEP_STABI_OPEN = 0, STEP_WAIT_STABI_OPEN, STEP_SEPARATE, CHECK_STAND, FAIL_STAND, STEP_PRE_PARA_JUDGE, STEP_PARA_JUDGE, STEP_PARA_DODGE, STEP_GO_FORWARD,STEP_SEPARATE_OPEN, STEP_FIGHT_FOR_FREE, STEP_GET_DISTANCE };
 	enum STEP mCurStep;
+	enum MOTOR_STEP{STEP_MOTOR_RIGHT, STEP_MOTOR_STOP, STEP_MOTOR_LEFT};
+	enum MOTOR_STEP mCurMotorStep;
 	bool mNavigatingFlag; 
 protected:
 	virtual bool onInit(const struct timespec& time);

@@ -6,7 +6,7 @@ const static double SERVO_UPDATE_INTERVAL_TIME = 1.0; //second
 const static int ENIN_ID = 21;
 //basic
 const static int MAX_RAW_VALUE = 11500;
-const static int CENTER_RAW_VALUE = 7500;
+const static int CENTER_RAW_VALUE = 7600;
 const static int MIN_RAW_VALUE = 3500;
 
 //neck

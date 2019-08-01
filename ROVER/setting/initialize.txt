@@ -8,7 +8,7 @@ cdetecting setmode ON
 //navigating 35.659365 139.541645
 //navigating 35.660337 139.542973
 //navigating 35.6602901 139.5428091
-navigating 35.660343 139.542720
+navigating 35.64000 139.54497
 
 motor r 100 100 100
 
@@ -31,7 +31,8 @@ alias pr pressure
 alias di distance
 //sequence
 alias navi start navigating
-alias wake start waking
+alias wakeside start waking_turnside
+alias wakeback start waking_turnback
 alias sepa start separating
 alias wait start waiting 
 alias setgoal navigating here

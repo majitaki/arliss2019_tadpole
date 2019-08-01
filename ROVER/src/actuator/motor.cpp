@@ -57,14 +57,14 @@ void Motor::update(double elapsedSeconds)
 
 		//モータ出力変化量を制限
 		//最大モーター出力変化量が目標出力-現在の出力より大きければ
-		if (fabs(mTargetPower - mCurPower) > maxMotorPowerChange)
-		{
-			//モーターの目標出力を現在の出力に変更
-			curFrameTarget = mCurPower;
-			//現在の出力に最大出力変化量5を足すか引くかする
-			curFrameTarget += ((mTargetPower > mCurPower) ? maxMotorPowerChange : -maxMotorPowerChange);
-			//Debug::print(LOG_SUMMARY,"MOTOR power Limitation %f %f(%d) \r\n",mCurPower,curFrameTarget,mTargetPower);
-		}
+		// if (fabs(mTargetPower - mCurPower) > maxMotorPowerChange)
+		// {
+		// 	//モーターの目標出力を現在の出力に変更
+		// 	curFrameTarget = mCurPower;
+		// 	//現在の出力に最大出力変化量5を足すか引くかする
+		// 	curFrameTarget += ((mTargetPower > mCurPower) ? maxMotorPowerChange : -maxMotorPowerChange);
+		// 	//Debug::print(LOG_SUMMARY,"MOTOR power Limitation %f %f(%d) \r\n",mCurPower,curFrameTarget,mTargetPower);
+		// }
 
 		//新しいpowerをもとにpinの状態を設定する
 		//三項演算子を用いて計算目標ターゲットが前にあるなら前進するように、またその逆も

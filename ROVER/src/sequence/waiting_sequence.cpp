@@ -58,7 +58,7 @@ bool WaitingState::onInit(const struct timespec& time)
 	 if (mNavigatingFlag)
 	 {
 	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	 	system("sudo ip l set wlan0 down");
+	 	system("sudo ip link set wlan0 down");
 	 }
 
 	return true;
@@ -150,7 +150,6 @@ void WaitingState::CheckLightCount(const timespec & time)
 		{
 			int diff_time = Time::dt(time, mStartLightCheckTime);
 
-			gBuzzer.start(10, 10/(LIGHT_COUNT_TIME - diff_time));
 
 			if (diff_time > LIGHT_COUNT_TIME)
 			{
@@ -165,7 +164,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 			gBuzzer.start(25, 2);
 
 			mContinuousLightCount++;
-			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Update %d(s) / %d(s)\r\n", diff_time, GYRO_COUNT_TIME);
+			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Update %d(s) / %d(s)\r\n", diff_time, LIGHT_COUNT_TIME);
 			return;
 
 		}
@@ -183,7 +182,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 
 void WaitingState::nextState()
 {
-	//gLED.clearLED();
+	gLED.clearLED();
 	setRunMode(false);
 	if (!mNavigatingFlag)
 	{

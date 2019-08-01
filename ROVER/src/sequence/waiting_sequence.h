@@ -20,22 +20,22 @@ private:
 	bool mLightCountSuccessFlag;
 
 	struct timespec mLastUpdateTime;
-	struct timespec mWaitingStartTime;//ó‘ÔŠJn
+	struct timespec mWaitingStartTime;//ï¿½ï¿½ÔŠJï¿½nï¿½ï¿½ï¿½ï¿½
 	struct timespec mStartLightCheckTime;
 
-	unsigned int mContinuousLightCount;//ŒõƒZƒ“ƒT[‚Ì”½‰‚ª‘±‚¢‚½‰ñ”
+	unsigned int mContinuousLightCount;//ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½Tï¿½[ï¿½Ì”ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	void CheckLightCount(const struct timespec& time);
-	bool mNavigatingFlag; //ƒiƒrƒQ[ƒVƒ‡ƒ“‚Ì’†‚ÅÀs‚³‚ê‚Ä‚¢‚é‚©D
+	bool mNavigatingFlag; //ï¿½iï¿½rï¿½Qï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Ì’ï¿½ï¿½Åï¿½ï¿½sï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚©ï¿½D
 	double mMaxAltitude;
-	struct timespec mStartTime;//ó‘ÔŠJn
+	struct timespec mStartTime;//ï¿½ï¿½ÔŠJï¿½nï¿½ï¿½ï¿½ï¿½
 
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
 	virtual bool onCommand(const std::vector<std::string>& args);
 	virtual void onClean();
-	//Ÿ‚Ìó‘Ô‚ÉˆÚs
+	//ï¿½ï¿½ï¿½Ìï¿½Ô‚ÉˆÚs
 	void nextState();
 
 public:

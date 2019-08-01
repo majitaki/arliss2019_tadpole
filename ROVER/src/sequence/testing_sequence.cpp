@@ -39,20 +39,19 @@ bool TestingState::onInit(const struct timespec& time)
 	gDelayedExecutor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gGPSSensor.setRunMode(true);
-	//gAccelManager.setRunMode(true);
 	gMotorDrive.setRunMode(true);
 	gLightSensor.setRunMode(true);
 	gServo.setRunMode(true);
 	gSerialCommand.setRunMode(true);
-	//gSensorLoggingState.setRunMode(true);
 	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
-	//gBuzzer.setRunMode(true);
-	//gLED.setRunMode(true);
+	gBuzzer.setRunMode(true);
+	gLED.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
 	gServo.free();
 
+	gLED.clearLED();
 	std::function<void()> f = [&]()
 	{
 	};
@@ -172,6 +171,7 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 
 void TestingState::onClean()
 {
+	gLED.clearLED();
 	Debug::print(LOG_SUMMARY, "[Testing State] Finished\r\n");
 }
 TestingState::TestingState()

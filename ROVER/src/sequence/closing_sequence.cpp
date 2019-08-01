@@ -20,7 +20,7 @@
 #include "testing_sequence.h"
 #include "../sub_sequence/waking_turnside.h"
 #include "../sub_sequence/waking_turnback.h"
-#
+
 ClosingState gClosingState;
 
 
@@ -44,15 +44,26 @@ bool ClosingState::onInit(const struct timespec& time)
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
     gNineAxisSensor.setRunMode(true);
+	gPressureSensor.setRunMode(true);
+	gLightSensor.setRunMode(true);
+	gSerialCommand.setRunMode(true);
+    gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	gLED.setRunMode(true);
+	gBuzzer.setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	gGPSSensor.setRunMode(true);
 
 	return true;
 }
 
 void ClosingState::onUpdate(const struct timespec& time)
 {
-	if (Time::dt(time, mLastUpdateTime) < CLOSING_STATE_UPDATE_INTERVAL_TIME) return;
+	double dt = Time::dt(time, mLastUpdateTime);
+	if (dt < CLOSING_STATE_UPDATE_INTERVAL_TIME) return;
 	mLastUpdateTime = time;
-	double dt = Time::dt(time, mClosingStartTime);
+
 	mDistToGoal = gDistanceSensor.getDistance();
 	Debug::print(LOG_SUMMARY, "Goal Distance :%d\r\n",mDistToGoal);
     
@@ -96,7 +107,7 @@ void ClosingState::onUpdate(const struct timespec& time)
 		case Rotate:
 			Debug::print(LOG_SUMMARY, "Rotate State\r\n");
 			//if goal position detected
-			if(mDistToGoal!=8191)
+			if(mDistToGoal != 8191)
 			{
 				gMotorDrive.drive(0);
 				mState = Approach;

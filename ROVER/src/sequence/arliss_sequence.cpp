@@ -34,6 +34,7 @@ bool ArlissState::onInit(const timespec & time)
 	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
 	
+	//gLED.setColor(255, 100, 100);
 	nextState();
 	return true;
 }

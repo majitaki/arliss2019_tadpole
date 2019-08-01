@@ -20,8 +20,8 @@
 #include "./separating_sequence.h"
 #include "testing_sequence.h"
 #include "../actuator/servo.h"
-//#include "../noisy/led.h"
-//#include "../noisy/buzzer.h"
+#include "../noisy/led.h"
+#include "../noisy/buzzer.h"
 
 FallingState gFallingState;
 
@@ -32,7 +32,6 @@ bool FallingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//�K�v�ȃ^�X�N���g�p�ł���悤�ɂ���
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
@@ -44,12 +43,10 @@ bool FallingState::onInit(const struct timespec& time)
 	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
 	gServo.setRunMode(true);
-	//gAccelManager.setRunMode(true);
-	//gLED.setRunMode(true);
-	//gLED.setColor(255, 255, 0);
-	//gBuzzer.setRunMode(true);
+	gLED.setRunMode(true);
+	gLED.setColor(255, 255, 0);
+	gBuzzer.setRunMode(true);
 
-	//������
 	mLastUpdateTime = mFallingStartTime = time;
 	mLastPressure = gPressureSensor.getPressure();
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;
@@ -57,11 +54,11 @@ bool FallingState::onInit(const struct timespec& time)
 
 	gServo.waitingHoldPara();
 
-//	//	if (mNavigatingFlag)
-//	//	{
-//	Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-//	system("sudo ip l set wlan0 up");//������on -> off��
-////	}
+	if (mNavigatingFlag)
+	{
+		Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
+	 	system("sudo ip link set wlan0 up");
+	}
 	return true;
 }
 
@@ -126,7 +123,7 @@ void FallingState::CheckGyroCount(const struct timespec& time)
 			int diff_time = Time::dt(time, mStartGyroCheckTime);
 
 			//LED����
-			//if (diff_time > 2) gLED.brink(0.2);
+			if (diff_time > 2) gLED.brink(0.2);
 
 			if (diff_time > GYRO_COUNT_TIME)
 			{
@@ -144,8 +141,8 @@ void FallingState::CheckGyroCount(const struct timespec& time)
 		{
 			Debug::print(LOG_SUMMARY, "Gyro Check Failed.  (Gyro Diff: %f > %f)\r\n", l2_accel, GYRO_THRESHOLD);
 			mCoutinuousGyroCount = 0;
-			//gLED.stopBrink();
-			//gLED.setColor(255, 255, 0);
+			gLED.stopBrink();
+			gLED.setColor(255, 255, 0);
 			return;
 		}
 	}
@@ -174,13 +171,13 @@ void FallingState::CheckPressureCount(const timespec & time)
 
 			if (diff_time > PRESSURE_COUNT_TIME)
 			{
-				//gBuzzer.start(70, 1);
+				gBuzzer.start(70, 1);
 				mPressureCountSuccessFlag = true;
 				Debug::print(LOG_SUMMARY, "Pressure Check Success\r\n");
 				mContinuousPressureCount = 0;
 				return;
 			}
-			//gBuzzer.start(25, 2);
+			gBuzzer.start(25, 2);
 
 			mContinuousPressureCount++;
 			Debug::print(LOG_SUMMARY, "Pressure Check Update %d(s) / %d(s) (Pressure Diff: %f < %f)\r\n", diff_time, PRESSURE_COUNT_TIME, diff_pressure, PRESSURE_THRESHOLD);
@@ -197,7 +194,7 @@ void FallingState::CheckPressureCount(const timespec & time)
 
 void FallingState::nextState()
 {
-	//gLED.clearLED();
+	gLED.clearLED();
 	setRunMode(false);
 
 	if (!mNavigatingFlag)

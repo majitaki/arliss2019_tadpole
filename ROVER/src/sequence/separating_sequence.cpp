@@ -21,6 +21,8 @@
 #include "../sensor/gps.h"
 #include "../sensor/pressure.h"
 #include "../sensor/nineaxis.h"
+#include "../noisy/led.h"
+#include "../noisy/buzzer.h"
 
 SeparatingState gSeparatingState;
 bool SeparatingState::onInit(const struct timespec& time)
@@ -46,6 +48,7 @@ bool SeparatingState::onInit(const struct timespec& time)
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
 	//gServo.centerDirect();
+	gLED.setColor(0, 255, 255);
 
 	mLastUpdateTime = time;
 	mCurServoState = false;
@@ -54,6 +57,8 @@ bool SeparatingState::onInit(const struct timespec& time)
     mServoFightForFreeCount = 0;
     mServoGetDistanceCount = 0;
 	mCurStep = STEP_STABI_OPEN;
+	//mCurStep = STEP_GET_DISTANCE;
+	mCurMotorStep = STEP_MOTOR_RIGHT;
 
 	return true;
 }
@@ -62,7 +67,6 @@ void SeparatingState::onUpdate(const struct timespec& time)
 	switch (mCurStep)
 	{
 	case STEP_STABI_OPEN:
-		//gServo.holdPara();
 		gServo.wrap(1.0);
 		gServo.turn(0.0); 
 
@@ -85,12 +89,10 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		gServo.wrap(1.0);
 		if (mCurServoState)
 		{
-			//gServo.releasePara();
 			gServo.turn(1.0); 
 		}
 		else
 		{
-			//gServo.holdPara();
 			gServo.turn(0.0); 
 		}
 
@@ -115,7 +117,6 @@ void SeparatingState::onUpdate(const struct timespec& time)
         if(mCurServoState)
         {
 			gServo.wrap(1.0);
-            //gServo.holdPara();
         }
         else
         {
@@ -165,23 +166,47 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		gServo.wrap(1.0);
 		if(turn_side_state == Right){
 			gServo.turn(-0.8);
+		}else if(turn_side_state == Left){
+		 	gServo.turn(0.8);
 		}else{
-			gServo.turn(0.8);
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
+		 	gServo.turn(0.0);
+		 	gServo.wrap(0.0);
+			gMotorDrive.drive(0);
+			nextState();
+			break;
 		}
 
-		if(mCurServoState){
-			gMotorDrive.drive(100);
-		}else{
-			gMotorDrive.drive(-100);
+		switch(mCurMotorStep){
+		case STEP_MOTOR_RIGHT:
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Right\r\n");
+			gMotorDrive.drive(80);
+			mCurMotorStep = STEP_MOTOR_STOP;
+			break;
+		case STEP_MOTOR_LEFT:
+			gMotorDrive.drive(-80);
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Left\r\n");
+			mCurMotorStep = STEP_MOTOR_STOP;
+			break;
+		case STEP_MOTOR_STOP:
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Stop\r\n");
+			gMotorDrive.drive(0);
+			if(mCurServoState){
+				mCurMotorStep = STEP_MOTOR_LEFT;
+			}else{
+				mCurMotorStep = STEP_MOTOR_RIGHT;
+			}
+			mCurServoState = !mCurServoState;
+			break;
 		}
 
         ++mServoGetDistanceCount;
-        mCurServoState = !mCurServoState;
         Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Count (%d/%d)\r\n", mServoGetDistanceCount, SEPARATING_GET_DISTANCE_COUNT);
  
 		if(mServoGetDistanceCount >= SEPARATING_GET_DISTANCE_COUNT)
 		{
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
+			gMotorDrive.drive(0);
 			nextState();
 		}
 		break;
@@ -211,6 +236,7 @@ void SeparatingState::SetNavigatingFlag(bool flag)
 
 void SeparatingState::onClean()
 {
+	gLED.clearLED();
 	Debug::print(LOG_SUMMARY, "[Separating State] Finished\r\n");
 }
 

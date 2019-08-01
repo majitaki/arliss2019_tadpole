@@ -2,15 +2,15 @@
 
 const static double MOTOR_DRIVE_UPDATE_INTERVAL_TIME = 0.01; //second
 const static double MOTOR_DRIVE_PID_UPDATE_INTERVAL_TIME = 0.2; //second
-//ƒ‚[ƒ^[ƒsƒ“
-const static int PIN_PWM_A1 = 24;//ƒ‚[ƒ^PWM Right
-const static int PIN_PWM_A2 = 23;//ƒ‚[ƒ^”½“]ƒsƒ“ Right          
+//ï¿½ï¿½ï¿½[ï¿½^ï¿½[ï¿½sï¿½ï¿½
+const static int PIN_PWM_A1 = 24;//ï¿½ï¿½ï¿½[ï¿½^PWM Right
+const static int PIN_PWM_A2 = 23;//ï¿½ï¿½ï¿½[ï¿½^ï¿½ï¿½ï¿½]ï¿½sï¿½ï¿½ Right          
 const static int PIN_PWM_B1 = 6;
 const static int PIN_PWM_B2 = 5;
 //const static int PIN_PWM_C1 = 25;
-//const static int PIN_PWM_C2 = 23;//ƒ‚[ƒ^”½“]ƒsƒ“ Right         
+//const static int PIN_PWM_C2 = 23;//ï¿½ï¿½ï¿½[ï¿½^ï¿½ï¿½ï¿½]ï¿½sï¿½ï¿½ Right         
 
-								 //ƒ‚[ƒ^İ’è
+								 //ï¿½ï¿½ï¿½[ï¿½^ï¿½İ’ï¿½
 const static int MOTOR_MAX_POWER = 100;
-const static double MOTOR_MAX_POWER_CHANGE = (double)5;//ƒ‚[ƒ^o—Í‚ÌÅ‘å•Ï‰»—Ê
+const static double MOTOR_MAX_POWER_CHANGE = (double)5;//ï¿½ï¿½ï¿½[ï¿½^ï¿½oï¿½Í‚ÌÅ‘ï¿½Ï‰ï¿½ï¿½ï¿½
 const static double MOTOR_PID_MAX_ANGLE_DIFF = 90;// d_angle in pid is limited to this range
