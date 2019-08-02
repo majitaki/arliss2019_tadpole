@@ -1,3 +1,3 @@
 #!/bin/sh
-cd ./ROVER/build
+cd /home/pi/arliss2019_tadpole/ROVER/build
 ./tadpole
