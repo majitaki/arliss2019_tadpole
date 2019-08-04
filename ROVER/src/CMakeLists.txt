@@ -35,7 +35,7 @@ set(rover_src
 	sequence/waiting_sequence.cpp
 	sequence/falling_sequence.cpp
 	sequence/navigating_sequence.cpp
-    #sequence/closing_sequence.cpp
+    	sequence/closing_sequence.cpp
 	sequence/arliss_sequence.cpp
     sub_sequence/waking_turnside.cpp
     sub_sequence/waking_turnback.cpp

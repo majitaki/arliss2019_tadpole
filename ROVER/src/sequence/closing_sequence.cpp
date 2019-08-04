@@ -11,10 +11,11 @@
 #include "../rover_util/serial_command.h"
 #include "../rover_util/logging.h"
 #include "closing_sequence.h"
-#include "closing_sequence_constant.h"
 #include "./navigating_sequence.h"
 #include "../sensor/distance.h"
 #include "../sensor/nineaxis.h"
+#include "../noisy/led.h"
+#include "../noisy/buzzer.h"
 #include "../actuator/servo.h"
 #include "../actuator/motor.h"
 #include "testing_sequence.h"
@@ -44,8 +45,6 @@ bool ClosingState::onInit(const struct timespec& time)
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
     gNineAxisSensor.setRunMode(true);
-	gPressureSensor.setRunMode(true);
-	gLightSensor.setRunMode(true);
 	gSerialCommand.setRunMode(true);
     gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
@@ -53,7 +52,6 @@ bool ClosingState::onInit(const struct timespec& time)
 	gLED.setRunMode(true);
 	gBuzzer.setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
-	gGPSSensor.setRunMode(true);
 
 	return true;
 }
@@ -70,24 +68,25 @@ void ClosingState::onUpdate(const struct timespec& time)
     if (gWakingFromTurnSide.isActive())return;
 	if (gWakingFromTurnBack.isActive())return;
 
-
- 	 //finish
+ 	//finish
 	if (mDistToGoal < 50)
 	{
+		gMotorDrive.drive(0);
+		gServo.free();
 		nextState();
 		return;
 	}
 
-    //turn side
-    if (gNineAxisSensor.isTurnSide())
-    {
-        gWakingFromTurnSide.setRunMode(true);
-    }
-    // turn back
-    if (gNineAxisSensor.isTurnBack())
-    {
-        gWakingFromTurnBack.setRunMode(true);
-    }
+    	//turn side
+    	if (gNineAxisSensor.isTurnSide())
+    	{
+        	gWakingFromTurnSide.setRunMode(true);
+    	}
+    	// turn back
+    	if (gNineAxisSensor.isTurnBack())
+    	{
+        	gWakingFromTurnBack.setRunMode(true);
+    	}
 
   	//timeout
 	if (dt > CLOSING_ABORT_TIME_FOR_LAST)
@@ -105,15 +104,18 @@ void ClosingState::onUpdate(const struct timespec& time)
 			gMotorDrive.drive(100);
 			break;	
 		case Rotate:
-			Debug::print(LOG_SUMMARY, "Rotate State\r\n");
+			//Debug::print(LOG_SUMMARY, "[Closing] Rotate State\r\n");
 			//if goal position detected
-			if(mDistToGoal != 8191)
+			if(mDistToGoal < 8000)
 			{
+				Debug::print(LOG_SUMMARY,"[Closing] Rotate: Goal Detected\r\n");
 				gMotorDrive.drive(0);
 				mState = Approach;
+				Debug::print(LOG_SUMMARY, "[Closing] Approach State\r\n");
 			}
 			gMotorDrive.drive(80);
-			gServo.turn(1);
+			gServo.wrap(0);
+			gServo.turn(0.6);
 			break;
 		case Snaky:
 			Debug::print(LOG_SUMMARY, "Snaky State\r\n");
@@ -123,31 +125,33 @@ void ClosingState::onUpdate(const struct timespec& time)
 				mState = Rotate;
 			}
 			//if goal position detected
-			else if(mDistToGoal != 8191)
+			else if(mDistToGoal < 8000)
 			{
 				mState = Approach;
 			}
-            if(Time::dt(time, mSnakyLastUpdateTime) > SNAKY_UPDATE_INTERVAL_TIME)
-            {
-                mSnakyLastUpdateTime = time ;
-                mDirection *= -1;
-                gServo.turn(mDirection);
-            }
-			gMotorDrive.drive(80);	
+            		if(Time::dt(time, mSnakyLastUpdateTime) > SNAKY_UPDATE_INTERVAL_TIME)
+            		{
+                		mSnakyLastUpdateTime = time ;
+                		mDirection *= -1;
+                		gServo.turn(mDirection);
+            		}
+			gMotorDrive.drive(40);	
 			break;
 		case Approach:
-			Debug::print(LOG_SUMMARY, "Approach State\r\n");
 			//if goal position is unclear
-			if(mDistToGoal != 8191)
+			if(mDistToGoal < 8000)
 			{
 				gServo.turn(0);
-				gMotorDrive.drive(100);
+				gMotorDrive.drive(60);
 
 			}
 			else
 			{
-				mState = Snaky;
+				Debug::print(LOG_SUMMARY,"[Closing] Goal Missing\r\n");
+				mState = Rotate;
+				Debug::print(LOG_SUMMARY,"[Closing] Snaky State\r\n");
 				mSnakyStartedTime = time;
+				mSnakyLastUpdateTime = time;
 			}
 			break;	
 	}
