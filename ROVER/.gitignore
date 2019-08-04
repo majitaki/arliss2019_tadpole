@@ -1,5 +1,7 @@
 # build 
 /build/*
+# setting
+/setting/RTIMULib*
 # Log 
 /build/log/*
 #vscode
