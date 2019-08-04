@@ -13,8 +13,8 @@ const static int MIN_RAW_VALUE = 3500;
 const static int NECK_ID = 3;
 const static std::string NECK_NAME = "neck";
 const static int NECK_INNER = 8000;
-const static int NECK_CENTER = 5700;
-const static int NECK_OUTER = 5700;
+const static int NECK_CENTER = 4800;
+const static int NECK_OUTER = 4800;
 //direct
 const static int DIRECT_ID = 0;
 const static std::string DIRECT_NAME = "direct";
