@@ -54,11 +54,11 @@ bool FallingState::onInit(const struct timespec& time)
 
 	gServo.waitingHoldPara();
 
-	if (mNavigatingFlag)
-	{
-		Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
-	 	system("sudo ip link set wlan0 up");
-	}
+	//if (mNavigatingFlag)
+	//{
+	//	Debug::print(LOG_SUMMARY, "[Falling State] Wifi Start\r\n");
+	//	system("sudo ip link set wlan0 up");
+	//}
 	return true;
 }
 

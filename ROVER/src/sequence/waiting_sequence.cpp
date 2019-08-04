@@ -55,11 +55,11 @@ bool WaitingState::onInit(const struct timespec& time)
 	gServo.turn(-1.0);
 
 	//wifi stop
-	 if (mNavigatingFlag)
-	 {
-	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	 	system("sudo ip link set wlan0 down");
-	 }
+	// if (mNavigatingFlag)
+	// {
+	// 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
+	// 	system("sudo ip link set wlan0 down");
+	// }
 
 	return true;
 }
@@ -118,7 +118,9 @@ waiting wifistop        : wifi stop\r\n\
 		if (args[1].compare("wifistop") == 0)
 		{
 			Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-			system("sudo ip l set wlan0 down");//������on -> off��
+			//system("sudo ip l set wlan0 down");//������on -> off��
+            system("sudo ifconfig wlan0 down");
+            system("sudo systemctl stop create_ap");
 			return true;
 		}
 	}
@@ -127,7 +129,15 @@ waiting wifistop        : wifi stop\r\n\
 	return false;
 }
 void WaitingState::onClean()
-{
+{	
+    //wifi stop
+	if (mNavigatingFlag)
+	{
+	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Restart\r\n");
+		system("sudo ifconfig wlan0 up");
+		system("sudo systemctl restart create_ap");
+	}
+
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
 }
 
