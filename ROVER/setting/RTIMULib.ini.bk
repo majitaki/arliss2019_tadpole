@@ -83,12 +83,12 @@ I2CHumidityAddress=0
 
 # Compass calibration settings
 CompassCalValid=true
-CompassCalMinX=47.694374
-CompassCalMinY=-49.542591
-CompassCalMinZ=-69.749451
-CompassCalMaxX=113.667664
-CompassCalMaxY=11.103469
-CompassCalMaxZ=2.262195
+CompassCalMinX=38.070492
+CompassCalMinY=-84.824181
+CompassCalMinZ=-22.934467
+CompassCalMaxX=99.945488
+CompassCalMaxY=-25.188913
+CompassCalMaxZ=46.208530
 
 # #####################################################################
 # 
@@ -120,21 +120,21 @@ compassCalCorr33=1.000000
 
 # Accel calibration
 AccelCalValid=true
-AccelCalMinX=-1.866010
-AccelCalMinY=-1.065551
-AccelCalMinZ=-1.650835
-AccelCalMaxX=1.709604
-AccelCalMaxY=1.339905
-AccelCalMaxZ=1.392088
+AccelCalMinX=-1.285977
+AccelCalMinY=-1.055146
+AccelCalMinZ=-1.221437
+AccelCalMaxX=1.217265
+AccelCalMaxY=1.248647
+AccelCalMaxZ=1.044168
 
 # #####################################################################
 # 
 
 # Saved gyro bias data
 GyroBiasValid=true
-GyroBiasX=0.022354
-GyroBiasY=0.011549
-GyroBiasZ=-0.008248
+GyroBiasX=0.032760
+GyroBiasY=0.014070
+GyroBiasZ=-0.007582
 
 # #####################################################################
 # 

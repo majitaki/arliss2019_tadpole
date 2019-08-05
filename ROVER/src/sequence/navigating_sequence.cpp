@@ -57,7 +57,7 @@ bool NavigatingState::onInit(const struct timespec& time)
 	mDistanceToGoal = 999999;
 	mLastUpdateTime = time;
 	mInitialRunWhileTime = time;
-	mFarModePID = PID(NAVIGATING_UPDATE_INTERVAL_TIME, NAVIGATING_MAX_DELTA_ANGLE, -NAVIGATING_MAX_DELTA_ANGLE, 1, 3, 0.8);
+	mFarModePID = PID(NAVIGATING_UPDATE_INTERVAL_TIME, NAVIGATING_MAX_DELTA_ANGLE, -NAVIGATING_MAX_DELTA_ANGLE, 3, 0.2, 0.0);
 	mCheckStuckCount = 0;
 	mNearNaviCount = 0;
 	mStuckTime = time;
@@ -334,8 +334,8 @@ void NavigatingState::navigationFarMode()
 	double turn_slope = NAVIGATING_TURN_SLOPE;
 	double upper = turn_slope - (-1 * turn_slope);
 	double under = -1 * max_angle - max_angle;
-	//double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
-	double inc = deltaAngle * (upper / under);
+	double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
+	//double inc = deltaAngle * (upper / under);
 	gServo.turn(inc);
 	Debug::print(LOG_SUMMARY, "[Navi] current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }

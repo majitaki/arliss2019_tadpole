@@ -34,6 +34,7 @@ bool ClosingState::onInit(const struct timespec& time)
 
 	mStartTime = time;
 	mLastUpdateTime = mClosingStartTime = time;
+	mStateUpdateTime = time;
 	mDistToGoal = 9999;
 	mDirection = 1;
 	mState = Rotate;
@@ -99,21 +100,36 @@ void ClosingState::onUpdate(const struct timespec& time)
 	//
 	switch(mState)
 	{
-		case Initial:
-			//no usage
-			gMotorDrive.drive(100);
+		case Stop:
+			gMotorDrive.drive(0);
+			if (Time::dt(time, mStateUpdateTime) < STOP_LAST_TIME)
+			{
+				break;
+			}
+			if (mDistToGoal < 8000)
+			{
+				Debug::print(LOG_SUMMARY, "[Closing] Stop: Goal Detected\r\n");
+				mStateUpdateTime = time;
+				mState = Approach;
+				Debug::print(LOG_SUMMARY, "[Closing] Approach State\r\n");
+			}
+			else {
+				Debug::print(LOG_SUMMARY, "[Closing] Stop: Goal Missing\r\n");
+				mStateUpdateTime = time;
+				mState = Rotate;
+				Debug::print(LOG_SUMMARY, "[Closing] Rotate State\r\n");
+			}
+
 			break;	
 		case Rotate:
 			//Debug::print(LOG_SUMMARY, "[Closing] Rotate State\r\n");
 			//if goal position detected
-			if(mDistToGoal < 8000)
-			{
-				Debug::print(LOG_SUMMARY,"[Closing] Rotate: Goal Detected\r\n");
-				gMotorDrive.drive(0);
-				mState = Approach;
-				Debug::print(LOG_SUMMARY, "[Closing] Approach State\r\n");
+			if (Time::dt(time, mStateUpdateTime) > ROTATE_LAST_TIME) {
+				mStateUpdateTime = time;
+				mState = Stop;
+				Debug::print(LOG_SUMMARY, "Stop State\r\n");
 			}
-			gMotorDrive.drive(80);
+			gMotorDrive.drive(100);
 			gServo.wrap(0);
 			gServo.turn(0.6);
 			break;
@@ -135,10 +151,16 @@ void ClosingState::onUpdate(const struct timespec& time)
                 		mDirection *= -1;
                 		gServo.turn(mDirection);
             		}
-			gMotorDrive.drive(40);	
+			gMotorDrive.drive(80);	
 			break;
 		case Approach:
 			//if goal position is unclear
+			if (Time::dt(time, mLastUpdateTime) > APPROACH_LAST_TIME) {
+				mStateUpdateTime = time;
+				mState = Stop;
+				Debug::print(LOG_SUMMARY, "Stop State\r\n");
+			}
+			
 			if(mDistToGoal < 8000)
 			{
 				gServo.turn(0);

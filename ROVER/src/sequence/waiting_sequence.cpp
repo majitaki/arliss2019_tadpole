@@ -200,7 +200,9 @@ void WaitingState::nextState()
 	}
 	else
 	{
-		gServo.waitingHoldPara();
+		gServo.wrap(1.0);
+		gServo.turn(-1.0);
+		
 		gFallingState.setRunMode(true);
 		gFallingState.SetNavigatingFlag(true);
 	}

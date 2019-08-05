@@ -8,8 +8,9 @@
 #include <math.h>
 #include "../rover_util/utils.h"
 #include "motor.h"
+#include "servo.h"
 #include "motor_constant.h"
-//#include "../manager/accel_manager.h"
+#include "../sensor/nineaxis.h"
 MotorDrive gMotorDrive;
 
 bool Motor::init(int powPin, int revPin)
@@ -371,21 +372,15 @@ bool MotorDrive::onCommand(const std::vector<std::string>& args)
 			if (size == 2)
 			{
 				//PID制御開始(現在の向き)
-				drivePIDGyro(0, MOTOR_MAX_POWER, true);
+				PID pid = PID(MOTOR_DRIVE_PID_UPDATE_INTERVAL_TIME, 10, -10, 0.1, 0.01, 0);
+				drive(100, pid);
 				return true;
 			}
 			else if (size == 3)
 			{
 				//PID(相対角度指定)
-				//drivePIDGyro(atoi(args[2].c_str()), MOTOR_MAX_POWER, true);
 				PID pid = PID(MOTOR_DRIVE_PID_UPDATE_INTERVAL_TIME, 10, -10, 0.1, 0.01, 0);
 				drive(atof(args[2].c_str()), pid);
-				return true;
-			}
-			else if (size == 5)
-			{
-				//PIDパラメータ設定
-				setPIDGyro(atof(args[2].c_str()), atof(args[3].c_str()), atof(args[4].c_str()));
 				return true;
 			}
 		}
@@ -419,9 +414,8 @@ bool MotorDrive::onCommand(const std::vector<std::string>& args)
 	}
 	Debug::print(LOG_PRINT, "motor              : show motor state\r\n\
 motor [w/s/a/d/h]  : move\r\n\
-motor p            : pid start\r\n\
-motor p [angle]    : pid start with angle to move\r\n\
-motor p [P] [I] [D]: set pid params\r\n\
+motor p [power] : pid start for power\r\n\
+motor pa [angle] : pid start for angle\r\n\
 motor r [l] [r] [b]: set motor ratio\r\n\
 motor [l] [r] [b]  : drive motor by specified ratio\r\n\
 motor [cpose/cgyro] [param]   : set max control ratio\r\n");
@@ -432,6 +426,5 @@ MotorDrive::MotorDrive() : mMotorL(), mMotorR(), mMotorB(), mDriveMode(DRIVE_RAT
 {
 	setName("motor");
 	setPriority(TASK_PRIORITY_MOTOR, TASK_INTERVAL_MOTOR);
-
 }
 MotorDrive::~MotorDrive() {}

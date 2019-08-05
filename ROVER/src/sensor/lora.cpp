@@ -6,10 +6,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <wiringPi.h>
+#include <wiringSerial.h>
+#include <termios.h>
 
 Lora gLora;
 bool Lora::onInit(const struct timespec& time)
 {
+	fd = serialOpen("/dev/ttySOFT0", 9600);
+	if(fd < 0){
+		Debug::print(LOG_SUMMARY, "lora serial device cannot open\r\n");
+		return false;
+	}
+	struct termios options ;
+	delay(100);
+	serialPuts(fd,"hello world\r\n");
 	mLastUpdateTime = time;
 	return true;
 }
@@ -17,6 +28,7 @@ bool Lora::onInit(const struct timespec& time)
 void Lora::onClean()
 {
 	Debug::print(LOG_SUMMARY, "Lora is Finished\r\n");
+	serialClose(fd);
 }
 
 bool Lora::onCommand(const std::vector<std::string>& args)
@@ -26,6 +38,10 @@ bool Lora::onCommand(const std::vector<std::string>& args)
 	switch (args.size())
 	{
 	case 1:
+		return true;
+	case 2:
+		std::string str = args[1]; 
+		send(str);
 		return true;
 	}
 	Debug::print(LOG_PRINT, "Failed Command\r\n");
@@ -38,6 +54,12 @@ void Lora::onUpdate(const struct timespec& time)
 	{
 		return;
 	}
+}
+
+void Lora::send(const std::string & str)
+{
+	//serialPuts(fd, str.c_str() + "\r\n");
+	serialPuts(fd, "hello world\r\n");
 }
 
 Lora::Lora(): mLastUpdateTime()

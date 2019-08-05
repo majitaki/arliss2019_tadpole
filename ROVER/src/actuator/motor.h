@@ -81,6 +81,7 @@ private:
 	struct timespec mLastUpdatePIDTime;
 	int mTargetPower;
 	PID mDrivePID;
+	PID mTurnDrivePID;
 protected:
 	//初期化
 	virtual bool onInit(const struct timespec& time);

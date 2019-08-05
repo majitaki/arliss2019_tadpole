@@ -138,6 +138,9 @@ RTVector3 NineAxisSensor::getMagnet() {
 RTVector3 NineAxisSensor::getFusionPose() {
 	return mIMUData.fusionPose;
 }
+double NineAxisSensor::getYaw(){
+	return mIMUData.fusionPose.z() * RTMATH_RAD_TO_DEGREE;
+}
 bool NineAxisSensor::isTurnSide() const{
 	if(abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE) > TURNSIDE_DEGREE_THRESHOLD)
 		return true;

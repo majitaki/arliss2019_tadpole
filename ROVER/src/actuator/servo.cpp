@@ -18,6 +18,7 @@
 #include <termios.h>
 
 #include "../rover_util/utils.h"
+#include "../sensor/nineaxis.h"
 #include "servo.h"
 
 
@@ -33,7 +34,8 @@ bool Servo::onInit(const struct timespec& time)
 	/* シリアルポートオープン */
 	fd = serialOpen("/dev/ttyAMA0",115200);
 	if(fd < 0){
-		Debug::print(LOG_SUMMARY, "serial device cannot open\r\n");
+		Debug::print(LOG_SUMMARY, "servo serial device cannot open\r\n");
+		return false;
 	}
 	struct termios options ;
 
@@ -44,6 +46,9 @@ bool Servo::onInit(const struct timespec& time)
 	tcsetattr (fd,TCSANOW, &options) ;   // Set new options
 	delay(1000);
 
+	setPID(1000, -1000, 0.2, 0.05, 0.0);
+	enablePID = false;
+	enableGyroPID = false;
 	Debug::print(LOG_SUMMARY, "Servo is Ready!\r\n");
 	return true;
 }
@@ -57,10 +62,34 @@ void Servo::onUpdate(const timespec & time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < SERVO_UPDATE_INTERVAL_TIME)return;
 
-	//move(NECK_ID, mServoRawData.neck);
-	//move(DIRECT_ID, mServoRawData.direct);
-	//move(WAIST_ID, mServoRawData.waist);
-	//move(STABI_ID, mServoRawData.stabi);
+	if(enablePID){
+		int inc_pid = mServoPID.calculate(mTargetServoRawData.direct, mCurServoRawData.direct);
+
+		Debug::print(LOG_PRINT, "inc %d \r\n", inc_pid);
+		mCurServoRawData.direct += inc_pid;
+		move(DIRECT_ID, mCurServoRawData.direct);
+		Debug::print(LOG_PRINT, "current:%d target:%d \r\n", mCurServoRawData.direct, mTargetServoRawData.direct  );
+
+		if(abs(mCurServoRawData.direct - mTargetServoRawData.direct) < 100){
+			enablePID = false;
+		}
+	}
+
+	if(enableGyroPID){
+		double current_yaw = gNineAxisSensor.getYaw();
+		double deltaAngle = gNineAxisSensor.normalizeAngle(current_yaw - targetYaw);
+		double max_angle = 180;
+		deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
+
+		double turn_slope = 0.5;
+		double upper = turn_slope - (-1 * turn_slope);
+		double under = -1 * max_angle - max_angle;
+		Debug::print(LOG_PRINT, "waru %f \r\n", upper / under);
+		int inc_gyro_pid = mServoPID.calculate(0, deltaAngle) * (upper / under);
+		gServo.turn(inc_gyro_pid);
+		Debug::print(LOG_PRINT, "inc %d \r\n", inc_gyro_pid);
+		Debug::print(LOG_PRINT, "delta:%f \r\n", deltaAngle);
+	}
 
 	mLastUpdateTime = time;
 }
@@ -72,87 +101,107 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 
 	switch (args.size())
 	{
-	case 1:
-		showValueData();
-		Debug::print(LOG_PRINT,
-			"\r\n\
-servo wrap (range[-1.0,1.0])            : -1 is outer, 1 is inner, 0 is run style \r\n\
-servo turn (range[-1.0,1.0])            : -1 is left, 1 is right, 0 is center\r\n\
-servo (id, raw_value[3500,11500])       : \r\n\
-servo (name, raw_value[3500-11500])		: \r\n\
-servo free                  			: \r\n\
-servo free (id)                			: \r\n\
-servo free (name)              			: \r\n\
-servo getid (name)             			: \r\n\
-");
-		return true;
-	case 2:
-		if (args[1].compare("free") == 0)
-		{
-			free();
-			Debug::print(LOG_PRINT, "Servo Free\r\n");
+		case 1:
+			showValueData();
+			Debug::print(LOG_PRINT,
+				"\r\n\
+	servo wrap (range[-1.0,1.0])            : -1 is outer, 1 is inner, 0 is run style \r\n\
+	servo turn (range[-1.0,1.0])            : -1 is left, 1 is right, 0 is center\r\n\
+	servo turnp (range[-1.0,1.0])            : pid -1 is left, 1 is right, 0 is center\r\n\
+	servo turngyrop (yaw[-180, 180])            : gyro pid mode. yaw is target angle\r\n\
+	servo (id, raw_value[3500,11500])       : \r\n\
+	servo (name, raw_value[3500-11500])		: \r\n\
+	servo free                  			: \r\n\
+	servo free (id)                			: \r\n\
+	servo free (name)              			: \r\n\
+	servo getid (name)             			: \r\n\
+	");
 			return true;
-		}
-		break;
-	case 3:
-		if (args[1].compare("free") == 0)
-		{
-			int id = -1;
-			int raw_value = -1;
-			std::string str_second_input = args[2]; 
-			if(String::check_int(str_second_input)) {
-				id = atoi(str_second_input.c_str());
-				free(id);
-				Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
-			}else{
-				free(str_second_input);
-				Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
+		case 2:
+			if (args[1].compare("free") == 0)
+			{
+				free();
+				Debug::print(LOG_PRINT, "Servo Free\r\n");
+				return true;
 			}
-			return true;
-		}
-		else if (args[1].compare("getid") == 0)
-		{
-			std::string servo_name = args[2];
-			int servo_id = getServoID(servo_name); 
-			Debug::print(LOG_PRINT, "Servo ID is %d\r\n", servo_id);
-			return true;
-		}
-		else if (args[1].compare("wrap") == 0)
-		{
-			double range = 0.0;
-			range = atof(args[2].c_str());
-			if(range <-1 || range >1) break;
-			wrap(range);	
-			Debug::print(LOG_PRINT, "Servo Wrap %f\r\n", range);
-			return true;
-		}
-		else if (args[1].compare("turn") == 0)
-		{
-			double range = 0.0;
-			range = atof(args[2].c_str());
-			if(range <-1 || range >1) break;
-			turn(range);	
-			Debug::print(LOG_PRINT, "Servo Turn %f\r\n", range);
-			return true;
-		}
-		else
-		{
-			int id = -1;
-			int raw_value = -1;
-			std::string str_second_input = args[1];//id or name 
+			break;
+		case 3:
+			if (args[1].compare("free") == 0)
+			{
+				int id = -1;
+				int raw_value = -1;
+				std::string str_second_input = args[2]; 
+				if(String::check_int(str_second_input)) {
+					id = atoi(str_second_input.c_str());
+					free(id);
+					Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
+				}else{
+					free(str_second_input);
+					Debug::print(LOG_PRINT, "Servo Free %d\r\n", id);
+				}
+				return true;
+			}
+			else if (args[1].compare("getid") == 0)
+			{
+				std::string servo_name = args[2];
+				int servo_id = getServoID(servo_name); 
+				Debug::print(LOG_PRINT, "Servo ID is %d\r\n", servo_id);
+				return true;
+			}
+			else if (args[1].compare("wrap") == 0)
+			{
+				double range = 0.0;
+				range = atof(args[2].c_str());
+				if(range <-1 || range >1) break;
+				wrap(range);	
+				Debug::print(LOG_PRINT, "Servo Wrap %f\r\n", range);
+				return true;
+			}
+			else if (args[1].compare("turn") == 0)
+			{
+				double range = 0.0;
+				range = atof(args[2].c_str());
+				if(range <-1 || range >1) break;
+				turn(range);	
+				Debug::print(LOG_PRINT, "Servo Turn %f\r\n", range);
+				return true;
+			}
+			else if (args[1].compare("turnp") == 0)
+			{
+				double range = 0.0;
+				range = atof(args[2].c_str());
+				if(range <-1 || range >1) break;
+				//PID pid = PID(SERVO_UPDATE_INTERVAL_TIME, 1000, -1000, 0.2, 0.05, 0.0);
+				turnp(range);	
+				Debug::print(LOG_PRINT, "Servo TurnPID %f\r\n", range);
+				return true;	
+			}
+			else if (args[1].compare("turngyrop") == 0)
+			{
+				double target_yaw = 0;
+				target_yaw = atof(args[2].c_str());
+				turngyrop(target_yaw);	
+				Debug::print(LOG_PRINT, "Servo TurnGyroPID %f\r\n", target_yaw);
+				return true;	
+			}
+			else
+			{
+				int id = -1;
+				int raw_value = -1;
+				std::string str_second_input = args[1];//id or name 
 
-			if(String::check_int(str_second_input)) {
-				id = atoi(str_second_input.c_str());
-				raw_value = atoi(args[2].c_str());
-				move(id, raw_value);
-				Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
-			}else{
-				raw_value = atoi(args[2].c_str());
-				move(str_second_input, raw_value);
-				Debug::print(LOG_PRINT, "Servo Move %s %d\r\n", str_second_input, raw_value);
+				if(String::check_int(str_second_input)) {
+					id = atoi(str_second_input.c_str());
+					raw_value = atoi(args[2].c_str());
+					move(id, raw_value);
+					Debug::print(LOG_PRINT, "Servo Move %d %d\r\n", id, raw_value);
+				}else{
+					raw_value = atoi(args[2].c_str());
+					move(str_second_input, raw_value);
+					Debug::print(LOG_PRINT, "Servo Move %s %d\r\n", str_second_input, raw_value);
+				}
+				return true;
 			}
-			return true;
-		}
 		}
 	Debug::print(LOG_PRINT, "Failed Command\r\n");
 	return false;
@@ -160,17 +209,9 @@ servo getid (name)             			: \r\n\
 
 void Servo::wrap(double range){
 	wrap(NECK_NAME, range);
-	//move(DIRECT_ID, DIRECT_CENTER);
 	wrap(WAIST_NAME, range);
 	wrap(STABI_NAME, range);
 }
-
-// void Servo::wrapWithoutDirect(double range){
-// 	wrap(NECK_NAME, range);
-// 	wrap(WAIST_NAME, range);
-// 	wrap(STABI_NAME, range);
-// }
-
 void Servo::wrap(std::string servo_name, double range){
 	 if(range < -1 || range > 1){
 	 	Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
@@ -195,7 +236,7 @@ void Servo::wrap(std::string servo_name, double range){
 
 void Servo::turn(double range){
 	if(range < -1 || range > 1){
-		Debug::print(LOG_PRINT, "Please range is from -1 to 1.\r\n");
+		Debug::print(LOG_PRINT, "Please range is from -1 to 1\r\n");
 		return;
 	}
 
@@ -208,6 +249,24 @@ void Servo::turn(double range){
 	}
 }
 
+void Servo::turnp(double range){
+	if(range < -1 || range > 1){
+		Debug::print(LOG_PRINT, "Please range is from -1 to 1 except 0.\r\n");
+		return;
+	}
+
+	int raw_direct_value;
+	raw_direct_value = translateToRawValue(DIRECT_NAME, range);
+
+	mTargetServoRawData.direct = raw_direct_value;
+	enablePID = true;
+}
+
+void Servo::turngyrop(double target_yaw){
+	targetYaw = gNineAxisSensor.normalizeAngle(target_yaw);
+	enableGyroPID = true;
+}
+
 double Servo::translateToRange(int raw_value, int end_value, int center_value, double end_range){
 	return ((0.0 - end_range) / (double)(center_value - end_value)) * (double)(raw_value - center_value);
 }
@@ -216,33 +275,35 @@ int Servo::translateToRawValue(double range, int end_value, int center_value, do
 	return (int)(center_value + ((center_value - end_value) / (0.0 - end_range)) * range);
 }
 
-void Servo::registValueData(int id, int raw_value){
-	if(id == NECK_ID){
-		mServoRawData.neck = raw_value;
-	}else if(id == DIRECT_ID){
-		mServoRawData.direct = raw_value;
-	}else if(id == WAIST_ID){
-		mServoRawData.waist = raw_value;
-	}else if(id == STABI_ID){
-		mServoRawData.stabi = raw_value;
+int Servo::translateToRawValue(std::string servo_name, double range){
+	int servo_id = getServoID(servo_name);
+	int outer_value = getServoOuterValue(servo_name);
+	int inner_value = getServoInnerValue(servo_name);
+	int center_value = getServoCenterValue(servo_name);
+
+	if(range <= 0){
+		return translateToRawValue(range, outer_value, center_value, -1);
 	}
+	
+	if(range > 0){
+	 	return translateToRawValue(range, inner_value, center_value, 1);
+	}	
 }
 
-void Servo::waitingHoldPara(){
-	wrap(1.0);
-	turn(-1.0);
-}
-void Servo::holdPara(){
-	wrap(1.0);
-	turn(0.0); 
-}
-void Servo::releasePara(){
-	wrap(1.0);
-    turn(1.0); 
-   //delay(1000);
-   //move(WAIST_ID, 9000);
-   //delay(1000);
-   //move(WAIST_ID, 5000);
+void Servo::registValueData(int id, int raw_value){
+	if(id == NECK_ID){
+		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
+		mCurServoRawData.neck = raw_value;
+	}else if(id == DIRECT_ID){
+		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
+		mCurServoRawData.direct = raw_value;
+	}else if(id == WAIST_ID){
+		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
+		mCurServoRawData.waist = raw_value;
+	}else if(id == STABI_ID){
+		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
+		mCurServoRawData.stabi = raw_value;
+	}
 }
 
 void Servo::move(int id, int raw_value){
@@ -258,7 +319,7 @@ void Servo::move(int id, int raw_value){
 	serialPutchar(fd,(raw_value >> 7) & 0x7f);
 	serialPutchar(fd, raw_value & 0x7f);
 	serialFlush(fd);
-	delay(100);
+	delay(10);
 }
 void Servo::move(std::string servo_name, int raw_value){
 	int servo_id = getServoID(servo_name);
@@ -303,6 +364,8 @@ int Servo::getServoID(std::string name){
 int Servo::getServoOuterValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_OUTER;
+	}else if(name == DIRECT_NAME){
+		return DIRECT_LEFT;
 	}else if(name == WAIST_NAME){
 		return WAIST_OUTER;
 	}else if(name == STABI_NAME){
@@ -314,6 +377,8 @@ int Servo::getServoOuterValue(std::string name){
 int Servo::getServoInnerValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_INNER;
+	}else if(name == DIRECT_NAME){
+		return DIRECT_RIGHT;
 	}else if(name == WAIST_NAME){
 		return WAIST_INNER;
 	}else if(name == STABI_NAME){
@@ -347,13 +412,21 @@ std::string Servo::getServoName(int id){
 }
 
 void Servo::showValueData(){
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", NECK_NAME.c_str(), mServoRawData.neck, NECK_OUTER, NECK_INNER);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mServoRawData.waist, WAIST_OUTER, WAIST_INNER);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", STABI_NAME.c_str(), mServoRawData.stabi, STABI_OUTER, STABI_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", NECK_NAME.c_str(), mCurServoRawData.neck, NECK_OUTER, NECK_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mCurServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mCurServoRawData.waist, WAIST_OUTER, WAIST_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", STABI_NAME.c_str(), mCurServoRawData.stabi, STABI_OUTER, STABI_INNER);
 }
 
-Servo::Servo(): mLastUpdateTime(), mServoRawData{0, 0, 0, 0}
+void Servo::setPID(int max, int min, double k, double p, double i){
+	mServoPID = PID(SERVO_UPDATE_INTERVAL_TIME, max, min, k, p, i);
+}
+
+void Servo::setGyroPID(int max, int min, double k, double p, double i){
+	mServoGyroPID = PID(SERVO_UPDATE_INTERVAL_TIME, max, min, k, p, i);
+}
+
+Servo::Servo(): mLastUpdateTime(), mCurServoRawData{0, 0, 0, 0}, mTargetServoRawData{0, 0, 0, 0}, mServoPID(), mServoGyroPID(), targetYaw(0)
 {
 	setName("servo");
 	setPriority(TASK_PRIORITY_ACTUATOR, TASK_INTERVAL_MOTOR);

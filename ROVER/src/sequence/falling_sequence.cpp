@@ -52,7 +52,8 @@ bool FallingState::onInit(const struct timespec& time)
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;
 	mGyroCountSuccessFlag = mPressureCountSuccessFlag = false;
 
-	gServo.waitingHoldPara();
+	gServo.wrap(1.0);
+	gServo.turn(-1.0);
 
 	//if (mNavigatingFlag)
 	//{
@@ -203,7 +204,6 @@ void FallingState::nextState()
 	}
 	else
 	{
-		gServo.waitingHoldPara();
 		gSeparatingState.setRunMode(true);
 		gSeparatingState.SetNavigatingFlag(true);
 	}
