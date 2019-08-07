@@ -21,6 +21,8 @@ private:
 	bool mIsNewData;//�V�������W�f�[�^������ΐ^
 	bool mIsLogger;//�^�Ȃ�1�b���Ƃ�gps�R�}���h�����s
 	bool mErrorFlag;
+	bool mUseMeanFlag;
+	bool mClassMeanFlag;
 	gpsmm gps_rec;
 	struct gps_data_t *newdata;
 	std::list<VECTOR3> mLastPos;

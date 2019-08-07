@@ -43,6 +43,8 @@ bool GPSSensor::onInit(const struct timespec& time)
 	mIsNewData = false;
 	mIsLogger = false;
 	mRemoveErrorFlag = true;
+	mUseMeanFlag = true;
+	mClassMeanFlag = false;
 	return true;
 }
 void GPSSensor::onClean()
@@ -242,20 +244,46 @@ bool GPSSensor::getAvePos(VECTOR3& pos)
 }
 bool GPSSensor::getDirectionAngle(double & angle)
 {
-	/*VECTOR3 averagePos;
-	std::list<VECTOR3>::const_iterator it = mLastPos.begin();
-	while (it != mLastPos.end())
-	{
-		averagePos += *it;
-		++it;
+	if (mUseMeanFlag) {
+		VECTOR3 currentPos = mLastPos.front();
+		VECTOR3 avePos;
+		getAvePos(avePos);
+		angle = VECTOR3::calcAngleXY(avePos, currentPos);//���[�o�[�̕���
+		//VECTOR3 averagePos;
+		//std::list<VECTOR3>::const_iterator it = mLastPos.begin();
+		//while (it != mLastPos.end())
+		//{
+		//averagePos += *it;
+		//++it;
+		//}
+		//averagePos -= mLastPos.back();
+		//averagePos /= mLastPos.size() - 1;
 	}
-	averagePos -= mLastPos.back();
-	averagePos /= mLastPos.size() - 1;*/
-
-	VECTOR3 currentPos = mLastPos.front();
-	VECTOR3 prePos = mLastPos.back();
-	angle = VECTOR3::calcAngleXY(prePos, currentPos);//���[�o�[�̕���
-
+	else if (mClassMeanFlag) {
+		VECTOR3 frontAvePos;
+		VECTOR3 backAvePos;
+		std::list<VECTOR3>::const_iterator it = mLastPos.begin();
+		int count = 0;
+		while (it != mLastPos.end())
+		{
+			if (count < int(mLastPos.size()/2)) {
+				frontAvePos += *it;
+			}
+			else {
+				backAvePos += *it;
+			}
+			++it;
+			count++;
+		}
+		frontAvePos /= int(mLastPos.size() / 2);
+		backAvePos /= mLastPos.size() - int(mLastPos.size() / 2);
+		angle = VECTOR3::calcAngleXY(backAvePos, frontAvePos);//���[�o�[�̕���
+	}
+	else {
+		VECTOR3 currentPos = mLastPos.front();
+		VECTOR3 prePos = mLastPos.back();
+		angle = VECTOR3::calcAngleXY(prePos, currentPos);//���[�o�[�̕���
+	}
 	return true;
 }
 void GPSSensor::clearSamples()
