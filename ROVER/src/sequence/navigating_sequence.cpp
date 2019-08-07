@@ -334,9 +334,9 @@ void NavigatingState::navigationFarMode()
 	double turn_slope = NAVIGATING_TURN_SLOPE;
 	double upper = turn_slope - (-1 * turn_slope);
 	double under = -1 * max_angle - max_angle;
-	double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
-	//double inc = deltaAngle * (upper / under);
-	gServo.turn(inc);
+	//double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
+	double inc = deltaAngle * (upper / under);
+	gServo.turnp(inc);
 	Debug::print(LOG_SUMMARY, "[Navi] current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }
 

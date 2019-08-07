@@ -46,7 +46,8 @@ bool Servo::onInit(const struct timespec& time)
 	tcsetattr (fd,TCSANOW, &options) ;   // Set new options
 	delay(1000);
 
-	setPID(1000, -1000, 0.2, 0.05, 0.0);
+	setPID(1000, -1000, 0.5, 0.01, 0.0);
+	setGyroPID(180, -180, 0.2, 0.05, 0.0);
 	enablePID = false;
 	enableGyroPID = false;
 	Debug::print(LOG_SUMMARY, "Servo is Ready!\r\n");
@@ -62,6 +63,18 @@ void Servo::onUpdate(const timespec & time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < SERVO_UPDATE_INTERVAL_TIME)return;
 
+	// if(enableGyroPID){
+	// 	double current_yaw = gNineAxisSensor.getYaw();
+	// 	double deltaAngle = gNineAxisSensor.normalizeAngle(current_yaw - targetYaw);
+	// 	double max_angle = 180;
+	// 	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
+
+	// 	double turn_slope = 1.0;
+	// 	double upper = turn_slope - (-1 * turn_slope);
+	// 	double under = -1 * max_angle - max_angle;
+	// 	gServo.turnp(deltaAngle * (upper / under));
+	// }
+
 	if(enablePID){
 		int inc_pid = mServoPID.calculate(mTargetServoRawData.direct, mCurServoRawData.direct);
 
@@ -69,26 +82,10 @@ void Servo::onUpdate(const timespec & time)
 		mCurServoRawData.direct += inc_pid;
 		move(DIRECT_ID, mCurServoRawData.direct);
 		Debug::print(LOG_PRINT, "current:%d target:%d \r\n", mCurServoRawData.direct, mTargetServoRawData.direct  );
-
-		if(abs(mCurServoRawData.direct - mTargetServoRawData.direct) < 100){
+		Debug::print(LOG_PRINT, "diff:%d \r\n", abs(mCurServoRawData.direct - mTargetServoRawData.direct));
+		if(abs(mCurServoRawData.direct - mTargetServoRawData.direct) < 10){
 			enablePID = false;
 		}
-	}
-
-	if(enableGyroPID){
-		double current_yaw = gNineAxisSensor.getYaw();
-		double deltaAngle = gNineAxisSensor.normalizeAngle(current_yaw - targetYaw);
-		double max_angle = 180;
-		deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
-
-		double turn_slope = 0.5;
-		double upper = turn_slope - (-1 * turn_slope);
-		double under = -1 * max_angle - max_angle;
-		Debug::print(LOG_PRINT, "waru %f \r\n", upper / under);
-		int inc_gyro_pid = mServoPID.calculate(0, deltaAngle) * (upper / under);
-		gServo.turn(inc_gyro_pid);
-		Debug::print(LOG_PRINT, "inc %d \r\n", inc_gyro_pid);
-		Debug::print(LOG_PRINT, "delta:%f \r\n", deltaAngle);
 	}
 
 	mLastUpdateTime = time;
@@ -264,7 +261,16 @@ void Servo::turnp(double range){
 
 void Servo::turngyrop(double target_yaw){
 	targetYaw = gNineAxisSensor.normalizeAngle(target_yaw);
-	enableGyroPID = true;
+	double current_yaw = gNineAxisSensor.getYaw();
+	double deltaAngle = gNineAxisSensor.normalizeAngle(current_yaw - targetYaw);
+	double max_angle = 180;
+	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
+
+	double turn_slope = 1.0;
+	double upper = turn_slope - (-1 * turn_slope);
+	double under = -1 * max_angle - max_angle;
+	gServo.turnp(deltaAngle * (upper / under));
+	//enableGyroPID = true;
 }
 
 double Servo::translateToRange(int raw_value, int end_value, int center_value, double end_range){
@@ -292,16 +298,12 @@ int Servo::translateToRawValue(std::string servo_name, double range){
 
 void Servo::registValueData(int id, int raw_value){
 	if(id == NECK_ID){
-		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
 		mCurServoRawData.neck = raw_value;
 	}else if(id == DIRECT_ID){
-		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
 		mCurServoRawData.direct = raw_value;
 	}else if(id == WAIST_ID){
-		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
 		mCurServoRawData.waist = raw_value;
 	}else if(id == STABI_ID){
-		if(raw_value > 0 && raw_value < MIN_RAW_VALUE) raw_value = CENTER_RAW_VALUE;
 		mCurServoRawData.stabi = raw_value;
 	}
 }
@@ -365,7 +367,7 @@ int Servo::getServoOuterValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_OUTER;
 	}else if(name == DIRECT_NAME){
-		return DIRECT_LEFT;
+		return DIRECT_RIGHT;
 	}else if(name == WAIST_NAME){
 		return WAIST_OUTER;
 	}else if(name == STABI_NAME){
@@ -378,7 +380,7 @@ int Servo::getServoInnerValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_INNER;
 	}else if(name == DIRECT_NAME){
-		return DIRECT_RIGHT;
+		return DIRECT_LEFT;
 	}else if(name == WAIST_NAME){
 		return WAIST_INNER;
 	}else if(name == STABI_NAME){
@@ -390,6 +392,8 @@ int Servo::getServoInnerValue(std::string name){
 int Servo::getServoCenterValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_CENTER;
+	}else if(name == DIRECT_NAME){
+		return DIRECT_CENTER;
 	}else if(name == WAIST_NAME){
 		return WAIST_CENTER;
 	}else if(name == STABI_NAME){
