@@ -9,7 +9,7 @@ cdetecting setmode ON
 //navigating 35.660337 139.542973
 //navigating 35.6602901 139.5428091
 //navigating 35.64000 139.54497
-navigating 35.7139135 139.7615014
+navigating 35.6403220 139.5442398
 
 motor r 100 100 100
 

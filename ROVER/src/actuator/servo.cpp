@@ -78,11 +78,11 @@ void Servo::onUpdate(const timespec & time)
 	if(enablePID){
 		int inc_pid = mServoPID.calculate(mTargetServoRawData.direct, mCurServoRawData.direct);
 
-		Debug::print(LOG_PRINT, "inc %d \r\n", inc_pid);
+		//Debug::print(LOG_PRINT, "inc %d \r\n", inc_pid);
 		mCurServoRawData.direct += inc_pid;
 		move(DIRECT_ID, mCurServoRawData.direct);
-		Debug::print(LOG_PRINT, "current:%d target:%d \r\n", mCurServoRawData.direct, mTargetServoRawData.direct  );
-		Debug::print(LOG_PRINT, "diff:%d \r\n", abs(mCurServoRawData.direct - mTargetServoRawData.direct));
+		//Debug::print(LOG_PRINT, "current:%d target:%d \r\n", mCurServoRawData.direct, mTargetServoRawData.direct  );
+		//Debug::print(LOG_PRINT, "diff:%d \r\n", abs(mCurServoRawData.direct - mTargetServoRawData.direct));
 		if(abs(mCurServoRawData.direct - mTargetServoRawData.direct) < 10){
 			enablePID = false;
 		}

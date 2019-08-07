@@ -244,7 +244,6 @@ bool NavigatingState::onCommand(const std::vector<std::string>& args)
 			Debug::print(LOG_PRINT, "Current Goal (%f %f)\r\n", mGoalPos.x, mGoalPos.y);
 		}
 		else
-            enableMiddleMode = true;
 		{
 			Debug::print(LOG_PRINT, "NO Goal\r\n");
 		}
@@ -325,6 +324,7 @@ void NavigatingState::navigationFarMode()
 	deltaAngle = gNineAxisSensor.normalizeAngle(roverAngle - goalAngle);//�Ԃ̊p�x
 	auto max_angle = NAVIGATING_MAX_DELTA_ANGLE;
 	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
+	//deltaAngle *= -1;
 
 	double currentSpeed = gGPSSensor.getSpeed();
 	Debug::print(LOG_SUMMARY, "[Navi] Speed: %f \r\n", currentSpeed);
@@ -335,8 +335,9 @@ void NavigatingState::navigationFarMode()
 	double upper = turn_slope - (-1 * turn_slope);
 	double under = -1 * max_angle - max_angle;
 	//double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
-	double inc = deltaAngle * (upper / under);
+	double inc = -1 * deltaAngle * (upper / under);
 	gServo.turnp(inc);
+	gServo.turn(0);
 	Debug::print(LOG_SUMMARY, "[Navi] current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }
 

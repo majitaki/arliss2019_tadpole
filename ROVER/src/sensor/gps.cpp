@@ -43,7 +43,7 @@ bool GPSSensor::onInit(const struct timespec& time)
 	mIsNewData = false;
 	mIsLogger = false;
 	mRemoveErrorFlag = true;
-	mUseMeanFlag = true;
+	mUseMeanFlag = false;
 	mClassMeanFlag = false;
 	return true;
 }
