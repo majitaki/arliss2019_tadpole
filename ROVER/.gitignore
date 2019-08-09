@@ -1,7 +1,8 @@
 # build 
 /build/*
 # setting
-/setting/RTIMULib*
+/setting/*.ini
+/setting/*.bk
 # Log 
 /build/log/*
 #vscode
