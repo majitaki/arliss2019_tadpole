@@ -9,19 +9,21 @@
 #include "../rover_util/delayed_execution.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
-#include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "../sensor/nineaxis.h"
-//#include "../manager/accel_manager.h"
-#include "../sensor/pressure.h"
-#include "../sensor/gps.h"
-#include "./falling_sequence.h"
-#include "./separating_sequence.h"
+#include "falling_sequence.h"
+#include "separating_sequence.h"
 #include "testing_sequence.h"
+
+#include "../sensor/gps.h"
+#include "../sensor/light.h"
+#include "../sensor/nineaxis.h"
+#include "../sensor/pressure.h"
+#include "../sensor/distance.h"
+#include "../actuator/motor.h"
 #include "../actuator/servo.h"
-#include "../noisy/led.h"
 #include "../noisy/buzzer.h"
+#include "../noisy/led.h"
 
 FallingState gFallingState;
 
@@ -34,19 +36,28 @@ bool FallingState::onInit(const struct timespec& time)
 
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
+
+	//util
+	gSerialCommand.setRunMode(true);
 	gDelayedExecutor.setRunMode(true);
+	//log
+    gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
+	//sensor
+	gLightSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
 	gGPSSensor.setRunMode(true);
-	gSerialCommand.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
-	gMotorDrive.setRunMode(true);
-	gUnitedLoggingState.setRunMode(true);
-	gMovementLoggingState.setRunMode(true);
+	gDistanceSensor.setRunMode(true);
+	//actuator
 	gServo.setRunMode(true);
+	gMotorDrive.setRunMode(true);
+	//noise
 	gLED.setRunMode(true);
-	gLED.setColor(255, 255, 0);
 	gBuzzer.setRunMode(true);
 
+	//initialize
+	gLED.setColor(255, 255, 0);
 	mLastUpdateTime = mFallingStartTime = time;
 	mLastPressure = gPressureSensor.getPressure();
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;

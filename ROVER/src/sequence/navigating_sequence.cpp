@@ -2,26 +2,27 @@
 #include "../rover_util/delayed_execution.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
-#include "../actuator/motor.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
 #include "testing_sequence.h"
-#include "../sensor/distance.h"
-#include "../sensor/pressure.h"
-#include "../sensor/light.h"
-#include "../noisy/buzzer.h"
-#include "../noisy/led.h"
 #include "navigating_sequence.h"
-#include "../sensor/gps.h"
-#include "../sensor/nineaxis.h"
-#include "../actuator/servo.h"
 #include "navigating_sequence_constant.h"
+#include "closing_sequence.h"
 #include "../sub_sequence/waking_turnside.h"
 #include "../sub_sequence/waking_turnback.h"
 #include "../sub_sequence/stucking.h"
-//#include "../sub_sequence/near_navigating.h"
 #include "../sub_sequence/digging.h"
-#include "closing_sequence.h"
+
+#include "../sensor/gps.h"
+#include "../sensor/light.h"
+#include "../sensor/nineaxis.h"
+#include "../sensor/pressure.h"
+#include "../sensor/distance.h"
+#include "../actuator/motor.h"
+#include "../actuator/servo.h"
+#include "../noisy/buzzer.h"
+#include "../noisy/led.h"
+
 
 
 NavigatingState gNavigatingState;
@@ -36,20 +37,28 @@ bool NavigatingState::onInit(const struct timespec& time)
 
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
-	gDelayedExecutor.setRunMode(true);
-	gGPSSensor.setRunMode(true);
+
+	//util
 	gSerialCommand.setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	//log
+    gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
+	//sensor
+	gLightSensor.setRunMode(true);
+	gPressureSensor.setRunMode(true);
+	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
-	gMotorDrive.setRunMode(true);
-	gUnitedLoggingState.setRunMode(true);
-	gMovementLoggingState.setRunMode(true);
+	//actuator
 	gServo.setRunMode(true);
-	gPressureSensor.setRunMode(true);
-	gLightSensor.setRunMode(true);
-	gBuzzer.setRunMode(true);
+	gMotorDrive.setRunMode(true);
+	//noise
 	gLED.setRunMode(true);
+	gBuzzer.setRunMode(true);
 
+
+	//initialize
 	gLED.setColor(100, 100, 100);
 	gServo.wrap(0.0);
 	//gGPSSensor.clearSample();
