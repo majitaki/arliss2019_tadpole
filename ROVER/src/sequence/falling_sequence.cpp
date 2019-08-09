@@ -132,7 +132,7 @@ void FallingState::CheckGyroCount(const struct timespec& time)
         float az = gNineAxisSensor.getGyro().z();
         float l2_accel = std::sqrt(pow(ax, 2) + std::pow(ay, 2) + std::pow(az, 2));
 
-		if (l2_accel < GYRO_THRESHOLD)
+		if (l2_accel < GYRO_THRESHOLD && gNineAxisSensor.isActive())
 		{
 			int diff_time = Time::dt(time, mStartGyroCheckTime);
 
@@ -178,7 +178,7 @@ void FallingState::CheckPressureCount(const timespec & time)
 		float diff_pressure = abs(new_pressure - mLastPressure);
 		mLastPressure = new_pressure;
 
-		if (diff_pressure < PRESSURE_THRESHOLD)
+		if (diff_pressure < PRESSURE_THRESHOLD && gPressureSensor.isActive())
 		{
 			int diff_time = Time::dt(time, mStartPressureCheckTime);
 

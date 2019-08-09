@@ -18,6 +18,7 @@ protected:
 public:
 	int getDistance();
 	void showData();
+	bool checkWorking();
 	DistanceSensor();
 	~DistanceSensor();
 };

@@ -18,9 +18,25 @@ bool DistanceSensor::onInit(const struct timespec& time)
 		Debug::print(LOG_SUMMARY, "Failed to Begin Distance Sensor\r\n");
 		return false;
 	}
+
+	if(!checkWorking()){
+		return false;
+	}	
+
 	Debug::print(LOG_SUMMARY, "Distance Sensor is Ready!\r\n");
+	isParalysised = true;
 
 	mLastUpdateTime = time;
+	return true;
+}
+
+bool DistanceSensor::checkWorking()
+{
+	mDistance = tofReadDistance();
+	if(mDistance == 34815 || mDistance == 65535){
+		Debug::print(LOG_SUMMARY, "Distance Sensor is not working!\r\n");
+		return false;
+	}
 	return true;
 }
 
@@ -64,11 +80,10 @@ void DistanceSensor::onUpdate(const struct timespec& time)
 		showData();
 	}
 
-	mDistance = tofReadDistance();
-	if(mDistance == 34815 || mDistance == 65535){
-		Debug::print(LOG_SUMMARY, "Distance Sensor is not working!\r\n");
-		isParalysised = true;
-		this->setRunMode(false);
+	if(!checkWorking()){
+		if(this -> onInit(time)){
+			setRunMode(false);
+		}
 	}
 }
 

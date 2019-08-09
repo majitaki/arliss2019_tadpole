@@ -31,7 +31,6 @@ bool Lora::onInit(const struct timespec& time)
 		Debug::print(LOG_SUMMARY, "lora serial device cannot open\r\n");
 		return false;
 	}
-
 	//sleep(false);
 	//serialPuts(fd,"1\r\n");
 	//serialPuts(fd,"start\r\n");
