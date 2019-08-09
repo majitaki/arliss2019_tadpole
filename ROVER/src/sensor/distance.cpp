@@ -12,14 +12,31 @@
 DistanceSensor gDistanceSensor;
 bool DistanceSensor::onInit(const struct timespec& time)
 {
+	isParalysised = false;
 	mInit = tofInit(1, 0x29, 1);
 	if(mInit != 1){
 		Debug::print(LOG_SUMMARY, "Failed to Begin Distance Sensor\r\n");
 		return false;
 	}
+
+	if(!checkWorking()){
+		return false;
+	}	
+
 	Debug::print(LOG_SUMMARY, "Distance Sensor is Ready!\r\n");
+	isParalysised = true;
 
 	mLastUpdateTime = time;
+	return true;
+}
+
+bool DistanceSensor::checkWorking()
+{
+	mDistance = tofReadDistance();
+	if(mDistance == 34815 || mDistance == 65535){
+		Debug::print(LOG_SUMMARY, "Distance Sensor is not working!\r\n");
+		return false;
+	}
 	return true;
 }
 
@@ -63,10 +80,10 @@ void DistanceSensor::onUpdate(const struct timespec& time)
 		showData();
 	}
 
-	mDistance = tofReadDistance();
-	if(mDistance == 34815 || mDistance == 65535){
-		Debug::print(LOG_SUMMARY, "Distance Sensor is not working!\r\n");
-		this->onInit(time);
+	if(!checkWorking()){
+		if(this -> onInit(time)){
+			setRunMode(false);
+		}
 	}
 }
 
