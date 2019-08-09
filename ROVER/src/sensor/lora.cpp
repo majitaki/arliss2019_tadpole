@@ -20,7 +20,12 @@ bool Lora::onInit(const struct timespec& time)
 	}
 	struct termios options ;
 	delay(100);
-	serialPuts(fd,"hello world\r\n");
+    //pinMode(17, OUTPUT);
+	//digitalWrite(17, 1);
+	//digitalWrite(17, 0);
+	delay(100);
+	serialPuts(fd,"1\r\n");
+	serialPuts(fd,"start\r\n");
 	mLastUpdateTime = time;
 	return true;
 }

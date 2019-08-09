@@ -47,9 +47,7 @@ bool Servo::onInit(const struct timespec& time)
 	delay(1000);
 
 	setPID(1000, -1000, 0.5, 0.01, 0.0);
-	setGyroPID(180, -180, 0.2, 0.05, 0.0);
 	enablePID = false;
-	enableGyroPID = false;
 	Debug::print(LOG_SUMMARY, "Servo is Ready!\r\n");
 	return true;
 }
@@ -426,11 +424,7 @@ void Servo::setPID(int max, int min, double k, double p, double i){
 	mServoPID = PID(SERVO_UPDATE_INTERVAL_TIME, max, min, k, p, i);
 }
 
-void Servo::setGyroPID(int max, int min, double k, double p, double i){
-	mServoGyroPID = PID(SERVO_UPDATE_INTERVAL_TIME, max, min, k, p, i);
-}
-
-Servo::Servo(): mLastUpdateTime(), mCurServoRawData{0, 0, 0, 0}, mTargetServoRawData{0, 0, 0, 0}, mServoPID(), mServoGyroPID(), targetYaw(0)
+Servo::Servo(): mLastUpdateTime(), mCurServoRawData{0, 0, 0, 0}, mTargetServoRawData{0, 0, 0, 0}, mServoPID(), targetYaw(0)
 {
 	setName("servo");
 	setPriority(TASK_PRIORITY_ACTUATOR, TASK_INTERVAL_MOTOR);

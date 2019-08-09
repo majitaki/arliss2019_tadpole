@@ -12,7 +12,6 @@
 DistanceSensor gDistanceSensor;
 bool DistanceSensor::onInit(const struct timespec& time)
 {
-	isParalysised = false;
 	mInit = tofInit(1, 0x29, 1);
 	if(mInit != 1){
 		Debug::print(LOG_SUMMARY, "Failed to Begin Distance Sensor\r\n");
@@ -67,8 +66,7 @@ void DistanceSensor::onUpdate(const struct timespec& time)
 	mDistance = tofReadDistance();
 	if(mDistance == 34815 || mDistance == 65535){
 		Debug::print(LOG_SUMMARY, "Distance Sensor is not working!\r\n");
-		isParalysised = true;
-		this->setRunMode(false);
+		this->onInit(time);
 	}
 }
 
