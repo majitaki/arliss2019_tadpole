@@ -11,16 +11,22 @@
 #include "../rover_util/serial_command.h"
 #include "../rover_util/logging.h"
 #include "closing_sequence.h"
-#include "./navigating_sequence.h"
-#include "../sensor/distance.h"
-#include "../sensor/nineaxis.h"
-#include "../noisy/led.h"
-#include "../noisy/buzzer.h"
-#include "../actuator/servo.h"
-#include "../actuator/motor.h"
+#include "navigating_sequence.h"
 #include "testing_sequence.h"
 #include "../sub_sequence/waking_turnside.h"
 #include "../sub_sequence/waking_turnback.h"
+
+#include "../sensor/gps.h"
+#include "../sensor/light.h"
+#include "../sensor/nineaxis.h"
+#include "../sensor/pressure.h"
+#include "../sensor/distance.h"
+#include "../actuator/motor.h"
+#include "../actuator/servo.h"
+#include "../noisy/buzzer.h"
+#include "../noisy/led.h"
+
+
 
 ClosingState gClosingState;
 
@@ -32,28 +38,35 @@ bool ClosingState::onInit(const struct timespec& time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
+	TaskManager::getInstance()->setRunMode(false);
+	setRunMode(true);
+
+	//util
+	gSerialCommand.setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	//log
+    gUnitedLoggingState.setRunMode(true);
+	gMovementLoggingState.setRunMode(true);
+	//sensor
+	gLightSensor.setRunMode(true);
+	gPressureSensor.setRunMode(true);
+	gGPSSensor.setRunMode(true);
+	gNineAxisSensor.setRunMode(true);
+	gDistanceSensor.setRunMode(true);
+	//actuator
+	gServo.setRunMode(true);
+	gMotorDrive.setRunMode(true);
+	//noise
+	gLED.setRunMode(true);
+	gBuzzer.setRunMode(true);
+
+	//initialize
 	mStartTime = time;
 	mLastUpdateTime = mClosingStartTime = time;
 	mStateUpdateTime = time;
 	mDistToGoal = 9999;
 	mDirection = 1;
 	mState = Rotate;
-
-	TaskManager::getInstance()->setRunMode(false);
-	setRunMode(true);
-
-	gDistanceSensor.setRunMode(true);
-	gMotorDrive.setRunMode(true);
-	gServo.setRunMode(true);
-    gNineAxisSensor.setRunMode(true);
-	gSerialCommand.setRunMode(true);
-    gUnitedLoggingState.setRunMode(true);
-	gMovementLoggingState.setRunMode(true);
-	gDelayedExecutor.setRunMode(true);
-	gLED.setRunMode(true);
-	gBuzzer.setRunMode(true);
-	gDelayedExecutor.setRunMode(true);
-
 	return true;
 }
 

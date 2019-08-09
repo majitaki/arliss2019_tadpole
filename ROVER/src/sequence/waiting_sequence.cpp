@@ -9,20 +9,23 @@
 #include "../rover_util/delayed_execution.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
-#include "../sensor/light.h"
-#include "../manager/accel_manager.h"
 #include "../constants.h"
 #include "../rover_util/logging.h"
-#include "./testing_sequence.h"
-#include "./waiting_sequence.h"
-#include "./falling_sequence.h"
+#include "testing_sequence.h"
+#include "waiting_sequence.h"
+#include "falling_sequence.h"
+
+#include "../sensor/gps.h"
+#include "../sensor/light.h"
+#include "../sensor/nineaxis.h"
+#include "../sensor/pressure.h"
+#include "../sensor/distance.h"
+#include "../actuator/motor.h"
 #include "../actuator/servo.h"
-#include "../noisy/led.h"
 #include "../noisy/buzzer.h"
+#include "../noisy/led.h"
 
 WaitingState gWaitingState;
-
-
 bool WaitingState::onInit(const struct timespec& time)
 {
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
@@ -34,21 +37,30 @@ bool WaitingState::onInit(const struct timespec& time)
 
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
-	gLightSensor.setRunMode(true);
+	//util
 	gSerialCommand.setRunMode(true);
+	gDelayedExecutor.setRunMode(true);
+	//log
     gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
-	gDelayedExecutor.setRunMode(true);
-	gServo.setRunMode(true);
-	gLED.setRunMode(true);
-	gLED.setColor(255, 0, 255);
-	gBuzzer.setRunMode(true);
+	//sensor
+	gLightSensor.setRunMode(true);
 	gPressureSensor.setRunMode(true);
+	gGPSSensor.setRunMode(true);
+	gNineAxisSensor.setRunMode(true);
+	gDistanceSensor.setRunMode(true);
+	//actuator
+	gServo.setRunMode(true);
+	//noise
+	gLED.setRunMode(true);
+	gBuzzer.setRunMode(true);
 
+	//initialize
 	mLastUpdateTime = mWaitingStartTime = time;
 	mContinuousLightCount = 0;
 	mLightCountSuccessFlag = false;
 	mMaxAltitude = 0;
+	gLED.setColor(255, 0, 255);
 
 	//gServo.waitingHoldPara();
 	gServo.wrap(1.0);

@@ -11,19 +11,18 @@
 #include "testing_sequence.h"
 #include "../rover_util/utils.h"
 #include "../rover_util/serial_command.h"
+#include "../constants.h"
+#include "../rover_util/logging.h"
+
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
 #include "../actuator/motor.h"
-#include "../constants.h"
-#include "../rover_util/logging.h"
-//#include "../manager/accel_manager.h"
+#include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
 #include "../noisy/led.h"
-#include "../actuator/servo.h"
-//#include "../sub_sequence/demo.h"
 
 TestingState gTestingState;
 
@@ -36,19 +35,25 @@ bool TestingState::onInit(const struct timespec& time)
 
 	TaskManager::getInstance()->setRunMode(false);
 	setRunMode(true);
+	//util
 	gDelayedExecutor.setRunMode(true);
-	gPressureSensor.setRunMode(true);
-	gGPSSensor.setRunMode(true);
-	gMotorDrive.setRunMode(true);
-	gLightSensor.setRunMode(true);
-	gServo.setRunMode(true);
 	gSerialCommand.setRunMode(true);
+	//log
 	gUnitedLoggingState.setRunMode(true);
 	gMovementLoggingState.setRunMode(true);
-	gBuzzer.setRunMode(true);
-	gLED.setRunMode(true);
+	//sensor
+	gPressureSensor.setRunMode(true);
+	gLightSensor.setRunMode(true);
+	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	//actuator
+	gMotorDrive.setRunMode(true);
+	gServo.setRunMode(true);
+	//noise
+	gBuzzer.setRunMode(true);
+	gLED.setRunMode(true);
+
 	gServo.free();
 
 	gLED.clearLED();

@@ -225,7 +225,7 @@ bool RTIMUMPU9250::IMUInit()
     if (!m_settings->HALRead(m_slaveAddr, MPU9250_WHO_AM_I, 1, &result, "Failed to read MPU9250 id"))
         return false;
 
-    if (result != MPU9250_ID) {
+    if (result != MPU9250_ID && result != MPU9250_ID_2) {
         HAL_ERROR2("Incorrect %s id %d\n", IMUName(), result);
         return false;
     }
