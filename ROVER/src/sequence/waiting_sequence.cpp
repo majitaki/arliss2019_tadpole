@@ -61,17 +61,12 @@ bool WaitingState::onInit(const struct timespec& time)
 	mLightCountSuccessFlag = false;
 	mMaxAltitude = 0;
 	gLED.setColor(255, 0, 255);
+	gLED.clearLED();
+	isWifiFlag = true;
 
 	//gServo.waitingHoldPara();
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
-
-	//wifi stop
-	// if (mNavigatingFlag)
-	// {
-	// 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Stop\r\n");
-	// 	system("sudo ip link set wlan0 down");
-	// }
 
 	return true;
 }
@@ -133,6 +128,7 @@ waiting wifistop        : wifi stop\r\n\
 			//system("sudo ip l set wlan0 down");//������on -> off��
             system("sudo ifconfig wlan0 down");
             system("sudo systemctl stop create_ap");
+			isWifiFlag = false;
 			return true;
 		}
 	}
@@ -143,11 +139,12 @@ waiting wifistop        : wifi stop\r\n\
 void WaitingState::onClean()
 {	
     //wifi stop
-	if (mNavigatingFlag)
+	if (mNavigatingFlag && !isWifiFlag)
 	{
 	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Restart\r\n");
 		system("sudo ifconfig wlan0 up");
 		system("sudo systemctl restart create_ap");
+		isWifiFlag = true;
 	}
 
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
@@ -223,7 +220,7 @@ void WaitingState::SetNavigatingFlag(bool flag)
 {
 	mNavigatingFlag = flag;
 }
-WaitingState::WaitingState()
+WaitingState::WaitingState():isWifiFlag(true)
 {
 	setName("waiting");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);

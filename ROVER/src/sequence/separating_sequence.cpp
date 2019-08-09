@@ -227,6 +227,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 }
 void SeparatingState::nextState()
 {
+	gLED.clearLED();
 	setRunMode(false);
     gServo.turn(0.0);
 

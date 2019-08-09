@@ -14,6 +14,7 @@
 #include "falling_sequence.h"
 #include "separating_sequence.h"
 #include "testing_sequence.h"
+#include "waiting_sequence.h"
 
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
@@ -58,6 +59,7 @@ bool FallingState::onInit(const struct timespec& time)
 
 	//initialize
 	gLED.setColor(255, 255, 0);
+	gLED.clearLED();
 	mLastUpdateTime = mFallingStartTime = time;
 	mLastPressure = gPressureSensor.getPressure();
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;
@@ -134,7 +136,6 @@ void FallingState::CheckGyroCount(const struct timespec& time)
 		{
 			int diff_time = Time::dt(time, mStartGyroCheckTime);
 
-			//LED����
 			if (diff_time > 2) gLED.brink(0.2);
 
 			if (diff_time > GYRO_COUNT_TIME)
@@ -189,7 +190,7 @@ void FallingState::CheckPressureCount(const timespec & time)
 				mContinuousPressureCount = 0;
 				return;
 			}
-			gBuzzer.start(25, 2);
+			gBuzzer.start(25, 1);
 
 			mContinuousPressureCount++;
 			Debug::print(LOG_SUMMARY, "Pressure Check Update %d(s) / %d(s) (Pressure Diff: %f < %f)\r\n", diff_time, PRESSURE_COUNT_TIME, diff_pressure, PRESSURE_THRESHOLD);

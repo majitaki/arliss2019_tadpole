@@ -3,6 +3,7 @@
 # setting
 /setting/*.ini
 /setting/*.bk
+/setting/*.ko
 # Log 
 /build/log/*
 #vscode

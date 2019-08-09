@@ -19,6 +19,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -47,6 +48,7 @@ bool TestingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
@@ -109,8 +111,6 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
             }
 			else Debug::print(LOG_PRINT, "- Distance is NOT working\r\n");
 	
-
-
 			return true;
 		}
 		else if (args[1].compare("time") == 0)

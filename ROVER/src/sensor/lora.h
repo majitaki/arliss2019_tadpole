@@ -14,6 +14,7 @@ protected:
 	virtual void onUpdate(const struct timespec& time);
 public:
 	void send(const std::string & str);
+	void sleep(bool enableSleepMode);
 	Lora();
 	~Lora();
 };

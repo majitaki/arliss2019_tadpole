@@ -20,22 +20,22 @@ private:
 	bool mLightCountSuccessFlag;
 
 	struct timespec mLastUpdateTime;
-	struct timespec mWaitingStartTime;//��ԊJ�n����
+	struct timespec mWaitingStartTime;
 	struct timespec mStartLightCheckTime;
 
-	unsigned int mContinuousLightCount;//���Z���T�[�̔�������������
+	unsigned int mContinuousLightCount;
 
 	void CheckLightCount(const struct timespec& time);
-	bool mNavigatingFlag; //�i�r�Q�[�V�����̒��Ŏ��s����Ă��邩�D
+	bool mNavigatingFlag; 
+	bool isWifiFlag;
 	double mMaxAltitude;
-	struct timespec mStartTime;//��ԊJ�n����
+	struct timespec mStartTime;
 
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
 	virtual bool onCommand(const std::vector<std::string>& args);
 	virtual void onClean();
-	//���̏�ԂɈڍs
 	void nextState();
 
 public:
