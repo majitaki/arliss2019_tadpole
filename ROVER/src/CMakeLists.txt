@@ -55,8 +55,8 @@ set(LIBRARIES
 	-lrt 
 	-lpthread
 	-lwiringPi
-	-lpigpio
-	-lpigpiod_if2
+	#-lpigpio
+	#-lpigpiod_if2
 	-lvl53l0x
 	${GPSD_LIBRARIES}
 	)
