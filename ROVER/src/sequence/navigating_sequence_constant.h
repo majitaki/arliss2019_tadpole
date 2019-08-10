@@ -2,8 +2,9 @@
 
 const static double NAVIGATING_UPDATE_INTERVAL_TIME = 0.1; //second
 const static double NAVIGATING_INITIAL_RUN_WHILE_TIME = 5; //second
-const static double NAVIGATING_GOAL_NEAR_DISTANCE_THRESHOLD = 10;//meter
+const static double NAVIGATING_GOAL_NEAR_DISTANCE_THRESHOLD = 1;//meter
 const static double NAVIGATING_GOAL_FAR_DISTANCE_THRESHOLD = 5;
+const static double NAVIGATING_MIDDLE_DISTANCE_RATE = 3.0 / 4.0; // (from goal to middle point) / (from goal to start)
 const static int NAVIGATING_STUCK_COUNT = 3;
 const static int NAVIGATING_NEAR_MODE_LIMIT = 3;
 const static double NAVIGATING_STUCK_CHECK_INTERVAL_TIME = 3; //second

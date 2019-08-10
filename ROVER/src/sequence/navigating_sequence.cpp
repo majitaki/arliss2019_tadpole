@@ -18,6 +18,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -50,6 +51,7 @@ bool NavigatingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gServo.setRunMode(true);
 	gMotorDrive.setRunMode(true);
@@ -72,9 +74,11 @@ bool NavigatingState::onInit(const struct timespec& time)
 	mStuckTime = time;
 	mFreezeTime = time;
 	FreezeFlag = false;
+	gLora.enableGPSsend(true);
     
     mMidDistanceToGoal = onEstMidDistance(); 
     enableMiddleMode = true;
+	enableNearNaviMode = true;
     Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n",mMidDistanceToGoal);
 
 
@@ -101,7 +105,6 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	if (gWakingFromTurnBack.isActive())return;
 	if (gStucking.isActive())return;
     if (gDigging.isActive())return;
-	//if (gNearNavigating.isActive())return;
 
 	switch (mSubState)
 	{
@@ -189,8 +192,8 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		}
 		else
 		{
-			mSubState = FarGoalNavi;
-			//mSubState = NearGoalNavi;
+			//mSubState = FarGoalNavi;
+			mSubState = NearGoalNavi;
 		}
 		break;
 	case FarGoalNavi:
@@ -203,17 +206,13 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		mSubState = CheckGoal;
 		break;
 	case NearGoalNavi:
-		//gMotorDrive.drive(50);
-		//gServo.releasePara();
-
 		Debug::print(LOG_SUMMARY, "[Navi] NearGoal %d / %d\r\n", mNearNaviCount++, NAVIGATING_NEAR_MODE_LIMIT);
-		//navigationFarMode();
-		//gNearNavigating.setRunMode(true);
+
 		mSubState = Initial;
 		break;
 	case CheckGoal:
 		//Debug::print(LOG_SUMMARY, "[Navi]CheckGoal\r\n");
-		if (mDistanceToGoal <= NAVIGATING_GOAL_FAR_DISTANCE_THRESHOLD)
+		if (mDistanceToGoal <= NAVIGATING_GOAL_FAR_DISTANCE_THRESHOLD && mNearNaviCount > NAVIGATING_NEAR_MODE_LIMIT)
 		{
 			mSubState = FarGoal;
 		}
@@ -316,7 +315,7 @@ void NavigatingState::onEstDistance()
 double NavigatingState::onEstMidDistance()
 {
     onEstDistance();
-    return mDistanceToGoal*3/4;
+    return mDistanceToGoal * NAVIGATING_MIDDLE_DISTANCE_RATE;
 }
 void NavigatingState::navigationFarMode()
 {
@@ -326,11 +325,11 @@ void NavigatingState::navigationFarMode()
 	VECTOR3 currentPos;
 	gGPSSensor.get(currentPos, false);
 
-	goalAngle = VECTOR3::calcAngleXY(currentPos, mGoalPos);//�S�[���̕���
+	goalAngle = VECTOR3::calcAngleXY(currentPos, mGoalPos);
 	gGPSSensor.getDirectionAngle(roverAngle);
 
 	double deltaAngle = 0;
-	deltaAngle = gNineAxisSensor.normalizeAngle(roverAngle - goalAngle);//�Ԃ̊p�x
+	deltaAngle = gNineAxisSensor.normalizeAngle(roverAngle - goalAngle);
 	auto max_angle = NAVIGATING_MAX_DELTA_ANGLE;
 	deltaAngle = std::max(std::min(deltaAngle, max_angle), -1 * max_angle);
 	//deltaAngle *= -1;
@@ -350,13 +349,18 @@ void NavigatingState::navigationFarMode()
 	Debug::print(LOG_SUMMARY, "[Navi] current: %f target: %f inc: %f\r\n", deltaAngle, 0.0, inc);
 }
 
+void NavigatingState::navigationNearMode()
+{
+
+}
+
 void NavigatingState::nextState()
 {
 	gLED.clearLED();
 	setRunMode(false);
 	//gTestingState.setRunMode(true);
 
-	if (!mNavigatingFlag)
+	if (!mMissionFlag)
 	{
 		gTestingState.setRunMode(true);
 	}
@@ -365,6 +369,7 @@ void NavigatingState::nextState()
 		//gClosingState.setRunMode(true);
 		//gClosingState.SetNavigatingFlag(true);
 		gTestingState.setRunMode(true);
+		SetMissionFlag(false);
 	}
 
 }
@@ -380,15 +385,15 @@ bool NavigatingState::getGoal(VECTOR3 & pos)
 	pos = mGoalPos;
 	return true;
 }
-void NavigatingState::SetNavigatingFlag(bool flag)
+void NavigatingState::SetMissionFlag(bool flag)
 {
-	mNavigatingFlag = flag;
+	mMissionFlag = flag;
 }
-NavigatingState::NavigatingState() :mFarModePID()
+NavigatingState::NavigatingState() :mFarModePID(), enableNearNaviMode(false)
 {
 	setName("navigating");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
-	SetNavigatingFlag(false);
+	SetMissionFlag(false);
 }
 NavigatingState::~NavigatingState()
 {

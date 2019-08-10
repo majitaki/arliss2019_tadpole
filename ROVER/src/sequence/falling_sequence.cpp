@@ -21,6 +21,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -50,6 +51,7 @@ bool FallingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gServo.setRunMode(true);
 	gMotorDrive.setRunMode(true);
@@ -64,6 +66,7 @@ bool FallingState::onInit(const struct timespec& time)
 	mLastPressure = gPressureSensor.getPressure();
 	mCoutinuousGyroCount = mContinuousPressureCount = 0;
 	mGyroCountSuccessFlag = mPressureCountSuccessFlag = false;
+	gLora.enableGPSsend(true);
 
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
@@ -210,25 +213,26 @@ void FallingState::nextState()
 	gLED.clearLED();
 	setRunMode(false);
 
-	if (!mNavigatingFlag)
+	if (!mMissionFlag)
 	{
 		gTestingState.setRunMode(true);
 	}
 	else
 	{
 		gSeparatingState.setRunMode(true);
-		gSeparatingState.SetNavigatingFlag(true);
+		gSeparatingState.SetMissionFlag(true);
+		SetMissionFlag(false);
 	}
 }
-void FallingState::SetNavigatingFlag(bool flag)
+void FallingState::SetMissionFlag(bool flag)
 {
-	mNavigatingFlag = flag;
+	mMissionFlag = flag;
 }
 FallingState::FallingState()
 {
 	setName("falling");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
-	SetNavigatingFlag(false);
+	SetMissionFlag(false);
 }
 FallingState::~FallingState()
 {

@@ -21,6 +21,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -53,6 +54,7 @@ bool ClosingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gServo.setRunMode(true);
 	gMotorDrive.setRunMode(true);
@@ -67,6 +69,7 @@ bool ClosingState::onInit(const struct timespec& time)
 	mDistToGoal = 9999;
 	mDirection = 1;
 	mState = Rotate;
+	gLora.enableGPSsend(true);
 	return true;
 }
 
@@ -216,17 +219,18 @@ void ClosingState::nextState()
 	//Debug::print(LOG_SUMMARY, "[Closing State] Finished\r\n");
 	setRunMode(false);
 	gTestingState.setRunMode(true);
+	SetMissionFlag(false);
 
 }
-void ClosingState::SetNavigatingFlag(bool flag)
+void ClosingState::SetMissionFlag(bool flag)
 {
-	mNavigatingFlag = flag;
+	mMissionFlag = flag;
 }
 ClosingState::ClosingState()
 {
 	setName("closing");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
-	SetNavigatingFlag(false);
+	SetMissionFlag(false);
 }
 ClosingState::~ClosingState()
 {

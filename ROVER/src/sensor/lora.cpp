@@ -1,6 +1,7 @@
 #include "./lora.h"
 #include "./lora_constant.h"
 #include "../rover_util/utils.h"
+#include "../sensor/gps.h"
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,7 +14,6 @@
 Lora gLora;
 bool Lora::onInit(const struct timespec& time)
 {
-	//system("sh ../setting/insmod.sh");
 	std::string str_insmod = "sudo insmod ../setting/soft_uart.ko"; 
 	std::string str_tx = " gpio_tx=";
 	std::string str_txpin = std::to_string(LORA_TX_PIN);
@@ -21,21 +21,20 @@ bool Lora::onInit(const struct timespec& time)
 	std::string str_rxpin = std::to_string(LORA_RX_PIN);
 	std::string str_command = str_insmod + str_tx + str_txpin  + str_rx + str_rxpin;
 	system(str_command.c_str());
-	//system(std::string("sudo ../setting/insmod soft_uart.ko") + std::string(" gpio_tx=") + std::to_string(LORA_TX_PIN) + std::string(" gpio_rx=") + std::to_string(LORA_RX_PIN));
-	//system("");
     pinMode(LORA_SLEEP_PIN, OUTPUT);
 	delay(10);
 
 	fd = serialOpen("/dev/ttySOFT0", 9600);
 	if(fd < 0){
 		Debug::print(LOG_SUMMARY, "lora serial device cannot open\r\n");
+		this->onClean();
 		return false;
 	}
-	//sleep(false);
-	//serialPuts(fd,"1\r\n");
-	//serialPuts(fd,"start\r\n");
-	send("1");
-	send("start");
+
+	for(int i = 0; i < 5; i++){
+		send("1");
+		send("start");
+	}
 	mLastUpdateTime = time;
 	return true;
 }
@@ -57,11 +56,25 @@ bool Lora::onCommand(const std::vector<std::string>& args)
 	switch (args.size())
 	{
 	case 1:
+		Debug::print(LOG_PRINT,
+			"\r\n\
+			lora send [data]: lora send data\r\n\
+			lora gps        : lora send gps on/off \r\n\
+		");
 		return true;
 	case 2:
-		std::string str = args[1]; 
-		send(str);
-		return true;
+		if (args[1].compare("gps") == 0)
+		{
+			enableGPSsend(!enableGPSsendFlag);
+			return true;
+		}
+	case 3:
+		if (args[1].compare("send") == 0)
+		{
+			std::string str = args[2]; 
+			send(str);
+			return true;
+		}
 	}
 	Debug::print(LOG_PRINT, "Failed Command\r\n");
 	return false;
@@ -69,10 +82,22 @@ bool Lora::onCommand(const std::vector<std::string>& args)
 
 void Lora::onUpdate(const struct timespec& time)
 {
-	if (Time::dt(time, mLastUpdateTime) < LORA_UPDATE_INTERVAL_TIME)
-	{
+	double dt = Time::dt(time, mLastUpdateTime);
+	if (dt < LORA_UPDATE_INTERVAL_TIME)return;
+	mLastUpdateTime = time;
+
+	if(!gGPSSensor.isActive() && enableGPSsendFlag){
+		Debug::print(LOG_SUMMARY, "lora can't send gps because gps task is not working\r\n");
 		return;
+	} 
+
+	if(enableGPSsendFlag){
+		VECTOR3 currentPos;
+		gGPSSensor.get(currentPos, false);
+		std::string str_gps = "lati: " + std::to_string(currentPos.x) + " long: " + std::to_string(currentPos.y);
+		send(str_gps);
 	}
+
 }
 
 void Lora::send(const std::string & str)
@@ -97,7 +122,16 @@ void Lora::sleep(bool enableSleepMode){
 	}
 }
 
-Lora::Lora(): mLastUpdateTime()
+void Lora::enableGPSsend(bool flag){
+	if(flag){
+		if(!gGPSSensor.isActive()) gGPSSensor.setRunMode(true);
+		enableGPSsendFlag = true;
+	}else{
+		enableGPSsendFlag = false;
+	}
+}
+
+Lora::Lora(): mLastUpdateTime(), enableGPSsendFlag(false)
 {
 	setName("lora");
 	setPriority(TASK_PRIORITY_SENSOR, TASK_INTERVAL_SENSOR);

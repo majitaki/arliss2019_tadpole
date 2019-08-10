@@ -21,6 +21,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -51,6 +52,7 @@ bool SeparatingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gServo.setRunMode(true);
 	gMotorDrive.setRunMode(true);
@@ -62,6 +64,7 @@ bool SeparatingState::onInit(const struct timespec& time)
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
 	gLED.setColor(0, 255, 255);
+	gLora.enableGPSsend(true);
 
 	mLastUpdateTime = time;
 	mCurServoState = false;
@@ -231,21 +234,22 @@ void SeparatingState::nextState()
 	setRunMode(false);
     gServo.turn(0.0);
 
-	if (!mNavigatingFlag)
+	if (!mMissionFlag)
 	{
 		gTestingState.setRunMode(true);
 	}
 	else
 	{
 		gNavigatingState.setRunMode(true);
-		gNavigatingState.SetNavigatingFlag(true);
+		gNavigatingState.SetMissionFlag(true);
+		SetMissionFlag(false);
 	}
 
 
 }
-void SeparatingState::SetNavigatingFlag(bool flag)
+void SeparatingState::SetMissionFlag(bool flag)
 {
-	mNavigatingFlag = flag;
+	mMissionFlag = flag;
 }
 
 void SeparatingState::onClean()
@@ -258,7 +262,7 @@ SeparatingState::SeparatingState() : mCurServoState(false), mServoCount(0), mSer
 {
 	setName("separating");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
-	SetNavigatingFlag(false);
+	SetMissionFlag(false);
 }
 SeparatingState::~SeparatingState()
 {

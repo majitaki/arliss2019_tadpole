@@ -17,7 +17,7 @@ private:
 	enum STEP mCurStep;
 	enum MOTOR_STEP{STEP_MOTOR_RIGHT, STEP_MOTOR_STOP, STEP_MOTOR_LEFT};
 	enum MOTOR_STEP mCurMotorStep;
-	bool mNavigatingFlag; 
+	bool mMissionFlag; 
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -26,7 +26,7 @@ protected:
 	//���̏�ԂɈڍs
 	void nextState();
 public:
-	void SetNavigatingFlag(bool flag);
+	void SetMissionFlag(bool flag);
 	SeparatingState();
 	~SeparatingState();
 };

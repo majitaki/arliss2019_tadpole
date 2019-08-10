@@ -34,7 +34,7 @@ private:
 	void CheckGyroCount(const struct timespec& time);
 	void CheckPressureCount(const struct timespec& time);
 
-	bool mNavigatingFlag; //�i�r�Q�[�V�����̒��Ŏ��s����Ă��邩�D
+	bool mMissionFlag; //�i�r�Q�[�V�����̒��Ŏ��s����Ă��邩�D
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -43,7 +43,7 @@ protected:
 	//���̏�ԂɈڍs
 	void nextState();
 public:
-	void SetNavigatingFlag(bool flag);
+	void SetMissionFlag(bool flag);
 	FallingState();
 	~FallingState();
 };

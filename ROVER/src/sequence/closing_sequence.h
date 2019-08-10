@@ -27,7 +27,7 @@ private:
 	struct timespec mStartTime;
 	struct timespec mSnakyStartedTime;
 
-	bool mNavigatingFlag;
+	bool mMissionFlag;
 
 	unsigned int mContinuousLightCount;
 	int mDistToGoal; 
@@ -42,7 +42,7 @@ protected:
 	void nextState();
 
 public:
-	void SetNavigatingFlag(bool flag);
+	void SetMissionFlag(bool flag);
 	ClosingState();
 	~ClosingState();
 };

@@ -7,6 +7,7 @@ class Lora : public TaskBase
 private:
 	int fd;
 	struct timespec mLastUpdateTime;
+	bool enableGPSsendFlag;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -15,6 +16,7 @@ protected:
 public:
 	void send(const std::string & str);
 	void sleep(bool enableSleepMode);
+	void enableGPSsend(bool flag);
 	Lora();
 	~Lora();
 };

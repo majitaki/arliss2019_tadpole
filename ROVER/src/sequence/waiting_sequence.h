@@ -26,8 +26,9 @@ private:
 	unsigned int mContinuousLightCount;
 
 	void CheckLightCount(const struct timespec& time);
-	bool mNavigatingFlag; 
+	bool mMissionFlag; 
 	bool isWifiFlag;
+	bool isLoraFlag;
 	double mMaxAltitude;
 	struct timespec mStartTime;
 
@@ -39,7 +40,7 @@ protected:
 	void nextState();
 
 public:
-	void SetNavigatingFlag(bool flag);
+	void SetMissionFlag(bool flag);
 	WaitingState();
 	~WaitingState();
 };

@@ -5,7 +5,7 @@
 #include "../rover_util/utils.h"
 
 
-//ƒS[ƒ‹‚Ö‚ÌˆÚ“®’†
+//ï¿½Sï¿½[ï¿½ï¿½ï¿½Ö‚ÌˆÚ“ï¿½ï¿½ï¿½
 class NavigatingState : public TaskBase
 {
 private:
@@ -21,7 +21,7 @@ private:
 	PID mFarModePID;
 	bool FreezeFlag;
 
-	//ƒS[ƒ‹ˆÊ’u
+	//ï¿½Sï¿½[ï¿½ï¿½ï¿½Ê’u
 	VECTOR3 mGoalPos;
 	bool mIsGoalPos;
 	double mDistanceToGoal;
@@ -32,11 +32,15 @@ private:
 	int mNearNaviCount;
 
     bool enableMiddleMode;
-	bool mNavigatingFlag; //ƒiƒrƒQ[ƒVƒ‡ƒ“‚Ì’†‚ÅÀs‚³‚ê‚Ä‚¢‚é‚©D
+	bool enableNearNaviMode;
+	//bool mNavigatingFlag; //mean mission flag
+	bool mMissionFlag; //mean mission flag
+	bool mNearNaviFlag; // mean near navi flag
 	void onCheckGoalInfo();
 	void onEstDistance();
     double onEstMidDistance();
 	void navigationFarMode();
+	void navigationNearMode();
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -46,7 +50,7 @@ protected:
 public:
 	void setGoal(const VECTOR3& pos);
 	bool getGoal(VECTOR3& pos);
-	void SetNavigatingFlag(bool flag);
+	void SetMissionFlag(bool flag);
 
 	NavigatingState();
 	~NavigatingState();

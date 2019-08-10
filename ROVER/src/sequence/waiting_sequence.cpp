@@ -20,6 +20,7 @@
 #include "../sensor/nineaxis.h"
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
+#include "../sensor/lora.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -49,6 +50,7 @@ bool WaitingState::onInit(const struct timespec& time)
 	gGPSSensor.setRunMode(true);
 	gNineAxisSensor.setRunMode(true);
 	gDistanceSensor.setRunMode(true);
+	gLora.setRunMode(true);
 	//actuator
 	gServo.setRunMode(true);
 	//noise
@@ -63,8 +65,9 @@ bool WaitingState::onInit(const struct timespec& time)
 	gLED.setColor(255, 0, 255);
 	gLED.clearLED();
 	isWifiFlag = true;
+	isLoraFlag = true;
+	gLora.enableGPSsend(true);
 
-	//gServo.waitingHoldPara();
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
 
@@ -130,6 +133,11 @@ waiting wifistop        : wifi stop\r\n\
             system("sudo systemctl stop create_ap");
 			isWifiFlag = false;
 			return true;
+		}else if (args[1].compare("lorastop") == 0){
+			Debug::print(LOG_SUMMARY, "[Waiting State] Lora Stop\r\n");
+			gLora.setRunMode(false);
+			isLoraFlag = false;
+			return true;
 		}
 	}
 
@@ -139,12 +147,18 @@ waiting wifistop        : wifi stop\r\n\
 void WaitingState::onClean()
 {	
     //wifi stop
-	if (mNavigatingFlag && !isWifiFlag)
+	if(!isWifiFlag)
 	{
 	 	Debug::print(LOG_SUMMARY, "[Waiting State] Wifi Restart\r\n");
 		system("sudo ifconfig wlan0 up");
 		system("sudo systemctl restart create_ap");
 		isWifiFlag = true;
+	}
+
+	if(!isLoraFlag){
+	 	Debug::print(LOG_SUMMARY, "[Waiting State] Lora Restart\r\n");
+		gLora.setRunMode(true);
+		isLoraFlag = true;
 	}
 
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
@@ -203,7 +217,7 @@ void WaitingState::nextState()
 {
 	gLED.clearLED();
 	setRunMode(false);
-	if (!mNavigatingFlag)
+	if (!mMissionFlag)
 	{
 		gTestingState.setRunMode(true);
 	}
@@ -213,18 +227,19 @@ void WaitingState::nextState()
 		gServo.turn(-1.0);
 		
 		gFallingState.setRunMode(true);
-		gFallingState.SetNavigatingFlag(true);
+		gFallingState.SetMissionFlag(true);
+		SetMissionFlag(false);
 	}
 }
-void WaitingState::SetNavigatingFlag(bool flag)
+void WaitingState::SetMissionFlag(bool flag)
 {
-	mNavigatingFlag = flag;
+	mMissionFlag = flag;
 }
-WaitingState::WaitingState():isWifiFlag(true)
+WaitingState::WaitingState():isWifiFlag(true), isLoraFlag(true)
 {
 	setName("waiting");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);
-	SetNavigatingFlag(false);
+	SetMissionFlag(false);
 }
 WaitingState::~WaitingState()
 {

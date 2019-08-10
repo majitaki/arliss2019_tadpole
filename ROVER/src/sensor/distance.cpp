@@ -24,7 +24,6 @@ bool DistanceSensor::onInit(const struct timespec& time)
 	}	
 
 	Debug::print(LOG_SUMMARY, "Distance Sensor is Ready!\r\n");
-	isParalysised = true;
 
 	mLastUpdateTime = time;
 	return true;

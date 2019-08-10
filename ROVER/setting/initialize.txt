@@ -36,6 +36,7 @@ alias stuck start stucking
 alias test testing sensor
 //other
 alias wifistop waiting wifistop
+alias lorastop waiting lorastop
 
 //load individual adjustment
 exec individual_adjustment.txt
