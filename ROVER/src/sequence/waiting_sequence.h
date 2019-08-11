@@ -12,23 +12,29 @@ const static unsigned int WAITING_ABORT_TIME_FOR_LAST = 5400;
 //light
 const static int LIGHT_COUNT_TIME = 10; 
 const static int WAITING_STATE_PRESSURE_THRESHOLD_FOR_SUB_GOAL = 2000; //meter
-
+//distance
+const static int DISTANCE_COUNT_TIME = 10;
+const static int WAITING_DISTANCE_THRESHOLD = 200;
 
 class WaitingState : public TaskBase
 {
 private:
 	bool mLightCountSuccessFlag;
+	bool mDistanceCountSuccessFlag;
 
 	struct timespec mLastUpdateTime;
 	struct timespec mWaitingStartTime;
 	struct timespec mStartLightCheckTime;
 
 	unsigned int mContinuousLightCount;
+	unsigned int mContinuousDistanceCount;
 
 	void CheckLightCount(const struct timespec& time);
+	void CheckDistanceCount(const struct timespec& time);
 	bool mMissionFlag; 
 	bool isWifiFlag;
 	bool isLoraFlag;
+	bool mCoupleFlag;
 	double mMaxAltitude;
 	struct timespec mStartTime;
 

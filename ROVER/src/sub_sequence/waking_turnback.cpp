@@ -43,36 +43,6 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 
 	switch (mCurStep)
 	{
-	case STEP_CHECK_LIE:
-		if (gNineAxisSensor.isTurnSide())
-		{
-			gWakingFromTurnSide.setRunMode(true);
-			mCurStep = STEP_WAIT_LIE;
-			return;
-		}
-	case STEP_WAIT_LIE:
-		if (gWakingFromTurnSide.isActive())return;
-		gMotorDrive.drive(mStartPower);
-		mLastUpdateTime = time;
-		mCurStep = STEP_START;
-		break;
-	case STEP_STOP:
-		if (Time::dt(time, mLastUpdateTime) > 2)
-		{
-			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to land\r\n");
-			setRunMode(false);
-			gMotorDrive.drive(0);
-		}
-		if (!gNineAxisSensor.isTurnBack())
-		{
-			Debug::print(LOG_SUMMARY, "Waking Landed!\r\n");
-			mLastUpdateTime = time;
-			mCurStep = STEP_VERIFY;
-			gMotorDrive.drive(0);
-		}
-		break;
-
-		double dt;
 	case STEP_START:
 		if (Time::dt(time, mLastUpdateTime) > 5)//���莞�ԉ��]�����m�����Ȃ��ꍇ�����]�s�\�Ɣ��f
 		{
@@ -100,7 +70,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 
 		if (!gNineAxisSensor.isTurnBack())
 		{
-			Debug::print(LOG_SUMMARY, "Waking Successed!\r\n");
+			Debug::print(LOG_SUMMARY, "Waking Succeed!\r\n");
 			setRunMode(false);
 			return;
 		}

@@ -92,11 +92,13 @@ bool NineAxisSensor::onCommand(const std::vector<std::string>& args)
 			Debug::print(LOG_PRINT, "nineaxis back :checking isTurnSide\r\n");
 			if(isTurnSide()) Debug::print(LOG_PRINT, "true\r\n");
 			else Debug::print(LOG_PRINT, "false\r\n");
+			return true;
 		}
 		else if(args[1].compare("back") == 0){
 			Debug::print(LOG_PRINT, "nineaxis back :checking isTurnBack\r\n");
 			if(isTurnBack()) Debug::print(LOG_PRINT, "true\r\n");
 			else Debug::print(LOG_PRINT, "false\r\n");
+			return true;
 		}
 		break;
 	}
@@ -173,7 +175,7 @@ TurnSideDirection NineAxisSensor::getTurnSideDirection() const{
 }
 
 bool NineAxisSensor::isTurnBack() const{
-	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD)
+	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > 2*TURNBACK_DEGREE_THRESHOLD || mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < -1*TURNBACK_DEGREE_THRESHOLD)
 		return true;
 	return false;
 }

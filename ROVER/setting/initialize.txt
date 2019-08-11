@@ -3,7 +3,7 @@ start testing
 detecting setmode ON
 cdetecting setmode ON
 //true goal
-navigating 35.7427053 140.0119198
+navigating 40.14274 139.98750
 
 motor r 100 100 100
 

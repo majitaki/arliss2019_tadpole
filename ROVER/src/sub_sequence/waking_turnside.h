@@ -8,7 +8,7 @@
 class WakingFromTurnSide : public TaskBase
 {
 private:
-	enum SubState{Rolling, Checking};
+	enum SubState{Rolling,Bridging, Checking};
 	enum SubState mSubState;
 	struct timespec mLastUpdateTime;
 	struct timespec mCheckTime;
@@ -16,6 +16,7 @@ private:
 	double mSpeedupPeriod;
 	int mWakeRetryCount;
 	PID mWakePID;
+	bool mBridging;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
