@@ -80,7 +80,7 @@ bool NavigatingState::onInit(const struct timespec& time)
     
     mMidDistanceToGoal = onEstMidDistance(); 
     enableMiddleMode = true;
-	enableNearNaviMode = true;
+	enableNearNaviMode = false;
     Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n",mMidDistanceToGoal);
 
 
