@@ -35,6 +35,8 @@ bool Lora::onInit(const struct timespec& time)
 		send("1");
 		send("start");
 	}
+	Debug::print(LOG_SUMMARY, "Lora is Ready!\r\n");
+
 	mLastUpdateTime = time;
 	return true;
 }

@@ -9,7 +9,7 @@
 class NavigatingState : public TaskBase
 {
 private:
-	enum SubState { InitialRunWhile, Initial, TurningSide, TurningBack, Stucking, Digging, CheckGoalInfo, EstimateDistanceToGoal, CheckDistance, NearGoalNavi, FarGoalNavi, CheckGoal, FarGoal };
+	enum SubState { InitialRunWhile, Initial, TurningSide, TurningBack, Stucking, Digging, CheckGoalInfo, EstimateDistanceToGoal, CheckDistance, NearGoalNavi, FarGoalNavi, CheckGoal, FarGoal};
 	enum SubState mSubState;
 
 	struct timespec mLastUpdateTime;
@@ -21,7 +21,6 @@ private:
 	PID mFarModePID;
 	bool FreezeFlag;
 
-	//�S�[���ʒu
 	VECTOR3 mGoalPos;
 	bool mIsGoalPos;
 	double mDistanceToGoal;
@@ -30,17 +29,15 @@ private:
 	double mPrevPIDValue;
 	int mCheckStuckCount;
 	int mNearNaviCount;
-
+	double mDeltaAngle;
     bool enableMiddleMode;
 	bool enableNearNaviMode;
-	//bool mNavigatingFlag; //mean mission flag
 	bool mMissionFlag; //mean mission flag
-	bool mNearNaviFlag; // mean near navi flag
+	bool mInitialRunWhileFlag;
 	void onCheckGoalInfo();
 	void onEstDistance();
     double onEstMidDistance();
 	void navigationFarMode();
-	void navigationNearMode();
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -51,6 +48,7 @@ public:
 	void setGoal(const VECTOR3& pos);
 	bool getGoal(VECTOR3& pos);
 	void SetMissionFlag(bool flag);
+	double getDeltaAngle();
 
 	NavigatingState();
 	~NavigatingState();

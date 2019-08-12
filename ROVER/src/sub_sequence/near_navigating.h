@@ -9,21 +9,13 @@ class NearNavigating : public TaskBase
 {
 private:
 	struct timespec mLastUpdateTime;
-	PID mNearModePID;
+	struct timespec mLastNearNaviTime;
 	enum SubState
 	{
-		Initial, EstimateInitialPosition, RunLittle, EstimateDirection, RunForGoal, CheckGoal, NearGoal
+		NearGoalNavi, CheckGoal, NearGoal
 	};
 	enum SubState mSubState;
-	enum GoalIs
-	{
-		Null, FarFront, Front, CloseFront, FarSide, Side, CloseSide, FarBack, Back, CloseBack
-	};
-	enum GoalIs mGoalIs;
-	struct timespec mCheckTime;
-	VECTOR3 mInitPos;
-	VECTOR3 mEstPos;
-	int mNearNaviRetryCount;
+	bool isGoalLeft;
 
 	void navigationNearMode();
 protected:

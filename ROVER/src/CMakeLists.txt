@@ -41,7 +41,7 @@ set(rover_src
     sub_sequence/waking_turnside.cpp
     sub_sequence/waking_turnback.cpp
     sub_sequence/stucking.cpp
-	#sub_sequence/near_navigating.cpp
+	sub_sequence/near_navigating.cpp
     sub_sequence/digging.cpp
 	main.cpp	
 )

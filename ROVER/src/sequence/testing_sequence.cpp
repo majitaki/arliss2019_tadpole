@@ -59,11 +59,11 @@ bool TestingState::onInit(const struct timespec& time)
 	gServo.free();
 
 	gLED.clearLED();
-	std::function<void()> f = [&]()
-	{
-	};
-	auto pExecutable = new DelayedExecutableFunction(f, 1000);
-	gDelayedExecutor.add(std::shared_ptr<DelayedExecutable>(pExecutable));
+	//std::function<void()> f = [&]()
+	//{
+	//};
+	//auto pExecutable = new DelayedExecutableFunction(f, 1000);
+	//gDelayedExecutor.add(std::shared_ptr<DelayedExecutable>(pExecutable));
 
 	return true;
 }
