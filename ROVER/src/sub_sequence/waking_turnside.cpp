@@ -76,10 +76,10 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 		gServo.wrap(0.0);
 		turn_side_state = gNineAxisSensor.getTurnSideDirection();
 		if (turn_side_state == Right) {
-			gServo.turn(1);
+			gServo.turn(0.9);
 		}
 		else if (turn_side_state == Left) {
-			gServo.turn(-1);
+			gServo.turn(-0.9);
 		}
 		gMotorDrive.drive(100);
 		break;

@@ -8,12 +8,12 @@
 
 const static float WAITING_STATE_UPDATE_INTERVAL_TIME = 1;
 const static unsigned int WAITING_ABORT_TIME_FOR_SUB_GOAL = 3600;
-const static unsigned int WAITING_ABORT_TIME_FOR_LAST = 5400;
+const static unsigned int WAITING_ABORT_TIME_FOR_LAST = 360;
 //light
 const static int LIGHT_COUNT_TIME = 10; 
 const static int WAITING_STATE_PRESSURE_THRESHOLD_FOR_SUB_GOAL = 2000; //meter
 //distance
-const static int DISTANCE_COUNT_TIME = 10;
+const static int DISTANCE_COUNT_TIME = 2;
 const static int WAITING_DISTANCE_THRESHOLD = 200;
 
 class WaitingState : public TaskBase

@@ -7,6 +7,7 @@
 class SeparatingState : public TaskBase
 {
 private:
+	struct timespec mStartStepTime;
 	struct timespec mLastUpdateTime;
 	bool mCurServoState;			
 	unsigned int mServoCount;		
@@ -19,6 +20,7 @@ private:
 	enum MOTOR_STEP mCurMotorStep;
 	bool mMissionFlag; 
 	bool move;
+	bool mReadyFlag;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
