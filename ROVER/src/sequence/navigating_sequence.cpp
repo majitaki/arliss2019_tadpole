@@ -68,14 +68,13 @@ bool NavigatingState::onInit(const struct timespec& time)
 	mSubState = InitialRunWhile;
 	mDistanceToGoal = 999999;
 	mLastUpdateTime = time;
-	mInitialRunWhileTime = time;
 	//mFarModePID = PID(NAVIGATING_UPDATE_INTERVAL_TIME, NAVIGATING_MAX_DELTA_ANGLE, -NAVIGATING_MAX_DELTA_ANGLE, 3, 0.2, 0.0);
 	mCheckStuckCount = 0;
 	mNearNaviCount = 0;
 	mStuckTime = time;
 	mFreezeTime = time;
 	FreezeFlag = false;
-	mInitialRunWhileFlag = false;
+	mInitialRunWhileFlag = true;
 	gLora.enableGPSsend(true);
     
     mMidDistanceToGoal = onEstMidDistance(); 
@@ -92,23 +91,25 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	if (dt < NAVIGATING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
 
-	switch (mSubState)
-	{
-	case InitialRunWhile:
-		if(!mInitialRunWhileFlag){
-			mInitialRunWhileFlag = true;
-			Debug::print(LOG_SUMMARY, "[Navi] InitialRunWhile...\r\n");
-		}
-		double dt = Time::dt(time, mInitialRunWhileTime);
-		if (dt > NAVIGATING_INITIAL_RUN_WHILE_TIME) {
-			mSubState = Initial;
-			mInitialRunWhileFlag = false;
-		}
-		//gGPSSensor.clearSamples();
-		gMotorDrive.drive(100);
-		gServo.wrap(0.0);
-		return;
-	}
+	//switch (mSubState)
+	//{
+	// case InitialRunWhile:
+	// 	if(mInitialRunWhileFlag){
+	// 		mInitialRunWhileFlag = false;
+	// 		mInitialRunWhileTime = time;
+	// 		Debug::print(LOG_SUMMARY, "[Navi] InitialRunWhile...\r\n");
+	// 	}
+	// 	double dt = Time::dt(time, mInitialRunWhileTime);
+	// 	if (dt > NAVIGATING_INITIAL_RUN_WHILE_TIME) {
+	// 		mSubState = Initial;
+	// 		//mInitialRunWhileFlag = true;
+	// 	}
+	// 	//gGPSSensor.clearSamples();
+	// 	gMotorDrive.drive(100);
+	// 	gServo.wrap(0.0);
+	// 	gServo.turn(0.0);
+	// 	return;
+	// }
 
 	if (gWakingFromTurnSide.isActive())return;
 	if (gWakingFromTurnBack.isActive())return;
@@ -118,6 +119,23 @@ void NavigatingState::onUpdate(const struct timespec& time)
 
 	switch (mSubState)
 	{
+	case InitialRunWhile:
+	{
+		if(mInitialRunWhileFlag){
+			mInitialRunWhileFlag = false;
+			mInitialRunWhileTime = time;
+			Debug::print(LOG_SUMMARY, "[Navi] InitialRunWhile...\r\n");
+		}
+		double dt = Time::dt(time, mInitialRunWhileTime);
+		if (dt > NAVIGATING_INITIAL_RUN_WHILE_TIME) {
+			mSubState = Initial;
+		}
+		//gGPSSensor.clearSamples();
+		gMotorDrive.drive(100);
+		gServo.wrap(0.0);
+		gServo.turn(0.0);
+		return;
+	}	
 	case Initial:
 	{
 		//Debug::print(LOG_SUMMARY, "[Navi]Initial\r\n");
@@ -148,13 +166,13 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	case TurningSide:
 		Debug::print(LOG_SUMMARY, "[Navi] TurningSide\r\n");
 		gWakingFromTurnSide.setRunMode(true);
-		mSubState = InitialRunWhile;
+		mSubState = Initial;
 		FreezeFlag = true;
 		break;
 	case TurningBack:
 		Debug::print(LOG_SUMMARY, "[Navi] TurningBack\r\n");
 		gWakingFromTurnBack.setRunMode(true);
-		mSubState = InitialRunWhile;
+		mSubState = Initial;
 		FreezeFlag = true;
 		break;
 	case Stucking:
@@ -162,7 +180,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		if (mCheckStuckCount++ > NAVIGATING_STUCK_COUNT)
 		{
 			gStucking.setRunMode(true);
-			mSubState = InitialRunWhile;
+			mSubState = Initial;
 		}
 		FreezeFlag = true;
 		break;
@@ -171,7 +189,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
         Debug::print(LOG_SUMMARY,"[Navi] Digging");
         gDigging.setRunMode(true);
         mSubState = InitialRunWhile;
-        FreezeFlag = true;
+        mInitialRunWhileFlag = true;
         break;
 	case EstimateDistanceToGoal:
 		//Debug::print(LOG_SUMMARY, "[Navi]EstDistance\r\n");
@@ -222,7 +240,8 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	case NearGoalNavi:
 		Debug::print(LOG_SUMMARY, "[Navi] NearGoal %d / %d\r\n", mNearNaviCount++, NAVIGATING_NEAR_MODE_LIMIT);
 		gNearNavigating.setRunMode(true);
-		mSubState = Initial;
+		mSubState = InitialRunWhile;
+        mInitialRunWhileFlag = true;
 		break;
 	case CheckGoal:
 		//Debug::print(LOG_SUMMARY, "[Navi]CheckGoal\r\n");

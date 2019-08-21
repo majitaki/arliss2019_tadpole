@@ -27,15 +27,16 @@ bool NearNavigating::onInit(const timespec & time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	if(!gNavigatingState.isActive()) {
-		Debug::print(LOG_SUMMARY, "[Near] Failed to Begin Near Navigating\r\n");
-		return false;
-	}
+	//if(!gNavigatingState.isActive()) {
+	//	Debug::print(LOG_SUMMARY, "[Near] Failed to Begin Near Navigating\r\n");
+	//	return false;
+	//}
 
 	//initialize
 	mLastUpdateTime = time;
 	mLastNearNaviTime = time;
 	mSubState = NearGoalNavi;
+	turn_value = NEAR_NAVIGATING_SERVO_TURN;
 	isGoalLeft = (gNavigatingState.getDeltaAngle() > 0) ? true : false;
 	return true;
 }
@@ -43,27 +44,33 @@ bool NearNavigating::onInit(const timespec & time)
 void NearNavigating::onUpdate(const timespec & time)
 {
 	double dt = Time::dt(time, mLastUpdateTime);
-	if (dt < NEAR_NAVIGATING_UPDATE_INTERVAL_TIME)return;
+	if (dt < NEAR_NAVIGATING_UPDATE_INTERVAL_TIME) return;
 	mLastUpdateTime = time;
+
+	double dt_near_navi = Time::dt(time, mLastNearNaviTime);
+	if (dt_near_navi > NEAR_NAVIGATING_MAX_NAVI_TIME){
+		mSubState = Fail;
+	}
 
 	switch (mSubState)
 	{
 		case NearGoalNavi:
 		{
-			double dt_near_navi = Time::dt(time, mLastNearNaviTime);
-			if (dt_near_navi > NEAR_NAVIGATING_MAX_NAVI_TIME){
-				setRunMode(false);
-				return;
-			}
-
-			Debug::print(LOG_SUMMARY, "[Near] NearGoalNavi\r\n");
+			//Debug::print(LOG_SUMMARY, "[Near] NearGoalNavi\r\n");
+			
 			navigationNearMode();
+			if(turn_value < 0){
+				mSubState = Fail;
+				break;
+			}
 			mSubState = CheckGoal;
 			break;
 		}
 		case CheckGoal:
 		{
+			//gServo.turn(0.0);
 			int mLaserDistance = gDistanceSensor.getDistance();
+			Debug::print(LOG_SUMMARY, "[Near] Laser Distance: %d : %d\r\n", mLaserDistance, NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD);
 			if(mLaserDistance <= NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD){
 				mSubState = NearGoal;
 				break;
@@ -73,12 +80,16 @@ void NearNavigating::onUpdate(const timespec & time)
 		}
 		case NearGoal:
 		{
-			gMotorDrive.drive(0);
-			gServo.wrap(0.0);
 			Debug::print(LOG_SUMMARY, "[Near] Near Mode Goal\r\n");
 			Debug::print(LOG_SUMMARY, "[Near] Navigating Finish Point:(%f %f)\r\n", gGPSSensor.getPosx(), gGPSSensor.getPosy());
 			Time::showNowTime();
 			nextState();
+			break;
+		}
+		case Fail:
+		{
+			Debug::print(LOG_SUMMARY, "[Near] Near Mode Failed\r\n");
+			setRunMode(false);
 			break;
 		}
 	}
@@ -109,9 +120,15 @@ void NearNavigating::nextState()
 void NearNavigating::navigationNearMode()
 {
 	gMotorDrive.drive(100);
-	double turn_value = NEAR_NAVIGATING_SERVO_TURN;
-	if(isGoalLeft) turn_value *= -1;
-	gServo.turnp(turn_value);
+	turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
+
+	gServo.wrap(0.0);
+	if(isGoalLeft) {
+		gServo.turn(turn_value * -1);
+	}else{
+		gServo.turn(turn_value);
+	}
+	Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f / %f (%s)\r\n", turn_value, NEAR_NAVIGATING_SERVO_TURN, isGoalLeft ? "Left" : "Right");
 }
 
 NearNavigating::NearNavigating(): isGoalLeft(false)

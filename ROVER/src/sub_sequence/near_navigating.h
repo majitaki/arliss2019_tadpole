@@ -10,9 +10,11 @@ class NearNavigating : public TaskBase
 private:
 	struct timespec mLastUpdateTime;
 	struct timespec mLastNearNaviTime;
+	double turn_value;
+	int count;
 	enum SubState
 	{
-		NearGoalNavi, CheckGoal, NearGoal
+		NearGoalNavi, CheckGoal, NearGoal, Fail
 	};
 	enum SubState mSubState;
 	bool isGoalLeft;
