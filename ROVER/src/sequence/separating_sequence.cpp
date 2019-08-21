@@ -15,6 +15,7 @@
 #include "separating_sequence_constant.h"
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
+#include "../sub_sequence/waking_turnback.h"
 
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
@@ -72,14 +73,16 @@ bool SeparatingState::onInit(const struct timespec& time)
     mServoOpenCount = 0;
     mServoFightForFreeCount = 0;
     mServoGetDistanceCount = 0;
-	mCurStep = STEP_STABI_OPEN;
-	//mCurStep = STEP_GET_DISTANCE;
+	//mCurStep = STEP_STABI_OPEN;
+	mCurStep = STEP_GET_DISTANCE;
 	mCurMotorStep = STEP_MOTOR_RIGHT;
-
+	move = false;
+	mReadyFlag = false;
 	return true;
 }
 void SeparatingState::onUpdate(const struct timespec& time)
 {
+	TurnSideDirection turn_side_state;
 	switch (mCurStep)
 	{
 	case STEP_STABI_OPEN:
@@ -176,43 +179,39 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (Time::dt(time, mLastUpdateTime) < SEPARATING_MOTOR_INTERVAL)return;
         mLastUpdateTime = time;
 
-		TurnSideDirection turn_side_state = gNineAxisSensor.getTurnSideDirection();
+		turn_side_state = gNineAxisSensor.getTurnSideDirection();
 		//TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
 
-		gServo.wrap(1.0);
+		gServo.turn(0.0
+			);
 		if(turn_side_state == Right){
-			gServo.turn(-0.8);
+			//gServo.turn(-0.5);
 		}else if(turn_side_state == Left){
-		 	gServo.turn(0.8);
+		 	//gServo.turn(0.8);
 		}else{
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
-		 	gServo.turn(0.0);
+		 	gMotorDrive.drive(0);
+			gServo.turn(0.0);
 		 	gServo.wrap(0.0);
-			gMotorDrive.drive(0);
-			nextState();
+			//nextState();
+			mCurStep = STEP_RUN_WHILE;
+			Debug::print(LOG_SUMMARY, "[Separating State] Run While started\r\n");
 			break;
 		}
 
 		switch(mCurMotorStep){
 		case STEP_MOTOR_RIGHT:
+			gServo.wrap(1.0);
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Right\r\n");
-			gMotorDrive.drive(80);
-			mCurMotorStep = STEP_MOTOR_STOP;
-			break;
-		case STEP_MOTOR_LEFT:
 			gMotorDrive.drive(-80);
-			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Left\r\n");
 			mCurMotorStep = STEP_MOTOR_STOP;
 			break;
 		case STEP_MOTOR_STOP:
-			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Stop\r\n");
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance servo release\r\n");
 			gMotorDrive.drive(0);
-			if(mCurServoState){
-				mCurMotorStep = STEP_MOTOR_LEFT;
-			}else{
-				mCurMotorStep = STEP_MOTOR_RIGHT;
-			}
-			mCurServoState = !mCurServoState;
+			gServo.wrap(-1.0);
+			mCurMotorStep = STEP_MOTOR_RIGHT;
+			// mCurServoState = !mCurServoState;
 			break;
 		}
 
@@ -223,9 +222,69 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		{
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
 			gMotorDrive.drive(0);
-			nextState();
+			mCurStep = STEP_DECIDE_DIRECTION;
+			mStartStepTime = time;
 		}
 		break;
+	case STEP_DECIDE_DIRECTION:
+		if (Time::dt(time, mStartStepTime) > SEPARATING_DECIDE_DIRECTION_ABORT_TIME) mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
+		if (Time::dt(time, mLastUpdateTime) < 0.5) return;
+        mLastUpdateTime = time;
+		
+		if(!gNineAxisSensor.isTurnSide()){
+			Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION Finished\r\n");
+			nextState();
+		} 
+		gServo.wrap(1);
+		gServo.turn(0);
+		if(move){
+			gMotorDrive.drive(-10);
+		}
+		else{
+			gMotorDrive.drive(0);
+			if(gDistanceSensor.getDistance()>8000){
+				//gaikokkaku wo mituketetara
+				if (mReadyFlag) {
+					Debug::print(LOG_SUMMARY, "[Separating State] found safe way to run !\r\n");
+					mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
+					gServo.wrap(0.0);
+				}
+			}
+			else {
+				//gaikokkaku mmituketenakattara
+				if (!mReadyFlag)
+				{
+					Debug::print(LOG_SUMMARY, "[Separating State] armor detected\r\n");
+					mReadyFlag = true;
+				}
+			}
+		}
+		move = !move;
+		break;
+	case STEP_STABLE_AWAKE_FROM_SIDE:
+		if (Time::dt(time, mStartStepTime) > SEPARATING_AWAKE_ABORT_TIME) nextState();
+		if(!gNineAxisSensor.isTurnSide()){
+			mLastUpdateTime = time;
+			mCurStep = STEP_RUN_WHILE;
+		}
+		turn_side_state = gNineAxisSensor.getTurnSideDirection();
+		if(turn_side_state == Right) {
+			gServo.turn(1);
+		}
+		else if (turn_side_state == Left){
+			gServo.turn(-1);
+		}
+		gMotorDrive.drive(-100);
+		break;
+
+	case STEP_RUN_WHILE:
+		if (gNineAxisSensor.isTurnBack()) gMotorDrive.drive(-100);
+		else gMotorDrive.drive(100);
+		if (Time::dt(time, mLastUpdateTime) < SEPARATIMG_RUN_WHILE_DURATION || gWakingFromTurnBack.isActive()) return;
+		gMotorDrive.drive(0);
+		nextState();
+		break;
+
 	};
 }
 void SeparatingState::nextState()
@@ -233,6 +292,7 @@ void SeparatingState::nextState()
 	gLED.clearLED();
 	setRunMode(false);
     gServo.turn(0.0);
+	gMotorDrive.drive(0);
 
 	if (!mMissionFlag)
 	{

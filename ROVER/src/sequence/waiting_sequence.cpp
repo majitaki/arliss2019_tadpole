@@ -21,6 +21,7 @@
 #include "../sensor/pressure.h"
 #include "../sensor/distance.h"
 #include "../sensor/lora.h"
+#include "../sensor/distance.h"
 #include "../actuator/motor.h"
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
@@ -64,6 +65,7 @@ bool WaitingState::onInit(const struct timespec& time)
 	mMaxAltitude = 0;
 	gLED.setColor(255, 0, 255);
 	gLED.clearLED();
+	mCoupleFlag = true;
 	isWifiFlag = true;
 	isLoraFlag = true;
 	gLora.enableGPSsend(true);
@@ -80,28 +82,38 @@ void WaitingState::onUpdate(const struct timespec& time)
 	mLastUpdateTime = time;
 
 	CheckLightCount(time);
+	CheckDistanceCount(time);
 
 	//update max altitude
-	double currentAlt = gPressureSensor.getAltitude();
-	if (currentAlt > mMaxAltitude) mMaxAltitude = currentAlt;
-
-	if (mLightCountSuccessFlag)
+	if(mCoupleFlag)
 	{
-		nextState();
-		return;
+		if (mLightCountSuccessFlag && mDistanceCountSuccessFlag)
+		{
+			nextState();
+			return;
+		}
 	}
+	else
+	{
+		if (mLightCountSuccessFlag)
+		{
+			nextState();
+			return;
+		}
+	}
+
 
 	double dt = Time::dt(time, mWaitingStartTime);
 	Debug::print(LOG_SUMMARY, "[Waiting State] Abort Check %1.1f / %d(Sub) %d(Last)\r\n", dt, WAITING_ABORT_TIME_FOR_SUB_GOAL, WAITING_ABORT_TIME_FOR_LAST);
 
 	if (dt > WAITING_ABORT_TIME_FOR_SUB_GOAL) {
-		Debug::print(LOG_SUMMARY, "[Waiting State] Altitude Check %f / %d\r\n", mMaxAltitude, WAITING_STATE_PRESSURE_THRESHOLD_FOR_SUB_GOAL);
+		/*Debug::print(LOG_SUMMARY, "[Waiting State] Altitude Check %f / %d\r\n", mMaxAltitude, WAITING_STATE_PRESSURE_THRESHOLD_FOR_SUB_GOAL);
 		if (mMaxAltitude > WAITING_STATE_PRESSURE_THRESHOLD_FOR_SUB_GOAL)
 		{
 			Debug::print(LOG_SUMMARY, "Waiting Second Check Success\r\n");
 			nextState();
 			return;
-		}
+		}*/
 	}
 
 	if (dt > WAITING_ABORT_TIME_FOR_LAST)
@@ -164,9 +176,39 @@ void WaitingState::onClean()
 	Debug::print(LOG_SUMMARY, "[Waiting State] Finished\r\n");
 }
 
-void WaitingState::CheckLightCount(const timespec & time)
+void WaitingState::CheckDistanceCount(const timespec& time)
 {
-	if (mLightCountSuccessFlag)return;
+	if (mDistanceCountSuccessFlag) return;
+	int currentDist = gDistanceSensor.getDistance();
+	Debug::print(LOG_SUMMARY, "[Waiting State] Distance : %d\r\n",currentDist);
+	if (currentDist > WAITING_DISTANCE_THRESHOLD) {
+		if (mContinuousDistanceCount == 0)
+		{
+			mContinuousDistanceCount++;
+			Debug::print(LOG_SUMMARY, "[Waiting State] Distance Check Initialize\r\n");
+		}
+		else {
+			mContinuousDistanceCount++;
+			Debug::print(LOG_SUMMARY, "[Waiting State] Distance Check Update %d(times) / %d(times)\r\n", mContinuousDistanceCount, DISTANCE_COUNT_TIME);
+			if (mContinuousDistanceCount > DISTANCE_COUNT_TIME) {
+				Debug::print(LOG_SUMMARY, "[Waiting State] Distance Check Success.\r\n");
+				mDistanceCountSuccessFlag = true;
+			}
+		}
+		gLED.brink(0.2);
+	}
+	else {
+		Debug::print(LOG_SUMMARY, "[Waiting State] Distance Check Failed.\r\n");
+		mContinuousDistanceCount = 0;
+		gLED.stopBrink();
+		gLED.setColor(255, 0, 255);
+	}
+	return;
+}
+
+void WaitingState::CheckLightCount(const timespec& time)
+{
+	if (mLightCountSuccessFlag) return;
 
 	if (mContinuousLightCount == 0)
 	{
@@ -193,7 +235,7 @@ void WaitingState::CheckLightCount(const timespec & time)
 				return;
 			}
 
-			gLED.brink(0.2);
+			
 			gBuzzer.start(25, 2);
 
 			mContinuousLightCount++;
@@ -206,8 +248,6 @@ void WaitingState::CheckLightCount(const timespec & time)
 			Debug::print(LOG_SUMMARY, "[Waiting State] Light Check Failed.\r\n");
 			mContinuousLightCount = 0;
 			gBuzzer.start(50);
-			gLED.stopBrink();
-			gLED.setColor(255, 0, 255);
 			return;
 		}
 	}
