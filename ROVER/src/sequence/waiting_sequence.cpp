@@ -72,7 +72,7 @@ bool WaitingState::onInit(const struct timespec& time)
 
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
-
+	mDistanceCountSuccessFlag = true;
 	return true;
 }
 

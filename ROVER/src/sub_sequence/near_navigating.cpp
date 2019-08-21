@@ -35,9 +35,11 @@ bool NearNavigating::onInit(const timespec & time)
 	//initialize
 	mLastUpdateTime = time;
 	mLastNearNaviTime = time;
-	mSubState = NearGoalNavi;
+	mCheckTime = time;
+	mSubState = Initial;
 	turn_value = NEAR_NAVIGATING_SERVO_TURN;
 	isGoalLeft = (gNavigatingState.getDeltaAngle() > 0) ? true : false;
+	mCheckCount = 0;
 	return true;
 }
 
@@ -48,35 +50,58 @@ void NearNavigating::onUpdate(const timespec & time)
 	mLastUpdateTime = time;
 
 	double dt_near_navi = Time::dt(time, mLastNearNaviTime);
-	if (dt_near_navi > NEAR_NAVIGATING_MAX_NAVI_TIME){
+	if (dt_near_navi > NEAR_NAVIGATING_TIMEOUT){
 		mSubState = Fail;
 	}
 
 	switch (mSubState)
 	{
+		case Initial:
+		{
+			mCheckTime = time;
+			mSubState = NearGoalNavi;
+			break;
+		}
 		case NearGoalNavi:
 		{
-			//Debug::print(LOG_SUMMARY, "[Near] NearGoalNavi\r\n");
-			
-			navigationNearMode();
-			if(turn_value < 0){
-				mSubState = Fail;
+			double dt = Time::dt(time, mCheckTime);
+			if (dt < NEAR_NAVIGATING_RUNNING_INTERVAL_TIME){
+				navigationNearMode();
+				if(turn_value < 0){
+					mSubState = Fail;
+				}
 				break;
-			}
+			} 
+
+			mCheckTime = time;
 			mSubState = CheckGoal;
 			break;
 		}
 		case CheckGoal:
 		{
-			//gServo.turn(0.0);
-			int mLaserDistance = gDistanceSensor.getDistance();
-			Debug::print(LOG_SUMMARY, "[Near] Laser Distance: %d : %d\r\n", mLaserDistance, NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD);
-			if(mLaserDistance <= NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD){
+			double dt = Time::dt(time, mCheckTime);
+			if (dt < NEAR_NAVIGATING_STOP_INTERVAL_TIME){
+				gMotorDrive.drive(0);
+				int mLaserDistance = gDistanceSensor.getDistance();
+				Debug::print(LOG_SUMMARY, "[Near] Laser Distance: %d : %d\r\n", mLaserDistance, NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD);
+
+				if( mLaserDistance < NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD){
+					mCheckCount++;
+				}else{
+					mCheckCount = 0;
+				}
+				break;
+			} 
+
+			if(mCheckCount >= NEAR_NAVIGATING_GOAL_CHECK_COUNT){
 				mSubState = NearGoal;
+				mCheckTime = time;
+				break;
+			}else{
+				mSubState = NearGoalNavi;
+				mCheckTime = time;
 				break;
 			}
-			mSubState = NearGoalNavi;
-			break;
 		}
 		case NearGoal:
 		{

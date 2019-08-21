@@ -73,8 +73,8 @@ bool SeparatingState::onInit(const struct timespec& time)
     mServoOpenCount = 0;
     mServoFightForFreeCount = 0;
     mServoGetDistanceCount = 0;
-	//mCurStep = STEP_STABI_OPEN;
-	mCurStep = STEP_GET_DISTANCE;
+	mCurStep = STEP_STABI_OPEN;
+	//mCurStep = STEP_GET_DISTANCE;
 	mCurMotorStep = STEP_MOTOR_RIGHT;
 	move = false;
 	mReadyFlag = false;
@@ -108,7 +108,8 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		gServo.wrap(1.0);
 		if (mCurServoState)
 		{
-			gServo.turn(1.0); 
+			//gServo.turn(1.0); 
+			gServo.move("direct", 5200); 
 		}
 		else
 		{

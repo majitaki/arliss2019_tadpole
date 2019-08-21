@@ -79,7 +79,7 @@ bool NavigatingState::onInit(const struct timespec& time)
     
     mMidDistanceToGoal = onEstMidDistance(); 
     enableMiddleMode = true;
-	enableNearNaviMode = false;
+	enableNearNaviMode = true;
     Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n",mMidDistanceToGoal);
 
 
@@ -188,8 +188,10 @@ void NavigatingState::onUpdate(const struct timespec& time)
         enableMiddleMode = false; 
         Debug::print(LOG_SUMMARY,"[Navi] Digging");
         gDigging.setRunMode(true);
-        mSubState = InitialRunWhile;
-        mInitialRunWhileFlag = true;
+		mSubState = Initial;
+		FreezeFlag = true;
+        //mSubState = InitialRunWhile;
+        //mInitialRunWhileFlag = true;
         break;
 	case EstimateDistanceToGoal:
 		//Debug::print(LOG_SUMMARY, "[Navi]EstDistance\r\n");

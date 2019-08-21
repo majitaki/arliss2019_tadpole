@@ -13,7 +13,7 @@ const static int GYRO_COUNT_TIME = 10; //ï¿½Wï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï
 const static float GYRO_THRESHOLD = 1;
 //pressure
 const static int PRESSURE_COUNT_TIME = 10; //ï¿½ï¿½Cï¿½ï¿½ï¿½Jï¿½Eï¿½ï¿½ï¿½gï¿½ÌŒpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½b)
-const static double PRESSURE_THRESHOLD = 0.8;
+const static double PRESSURE_THRESHOLD = 1.0;
 
 class FallingState : public TaskBase
 {

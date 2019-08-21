@@ -33,6 +33,7 @@ bool WakingFromTurnBack::onInit(const timespec & time)
     gNineAxisSensor.setRunMode(true);
 	mWakeRetryCount = 0;
 	mLastUpdateTime = time;
+	mChangeFlag = false;
 	return true;
 }
 
@@ -51,19 +52,27 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 			mCurStep = STEP_VERIFY;
 			gMotorDrive.drive(0);
 		}
+
 		if (gNineAxisSensor.isTurnBack())
 		{
 			Debug::print(LOG_SUMMARY, "TurnBack Detected : Rotation!\r\n");
 			gServo.wrap(1.0);
 			gServo.turn(0.0); 
-            gMotorDrive.drive(100);
+            gMotorDrive.drive(-100);
+			mCurStep = STEP_CHANGE;
 			mLastUpdateTime = time;
+		}
+		break;
+	case STEP_CHANGE:
+		if (Time::dt(time, mLastUpdateTime) > 0.5){
+            gMotorDrive.drive(100);
 			mCurStep = STEP_VERIFY;
+			mLastUpdateTime = time;
 		}
 		break;
 
 	case STEP_VERIFY:
-		if (Time::dt(time, mLastUpdateTime) <= 2.5)
+		if (Time::dt(time, mLastUpdateTime) <= 1)
 		{
 			return;
 		}
