@@ -7,4 +7,4 @@ const static int GPS_SAMPLES = 5;
 const static int GPS_ERROR_AVE_IT_THRESHOLD = 30; //meter
 const static int GPS_ERROR_AVE_NEW_THRESHOLD = 50; //meter
 const static int GPS_MINIMUM_SAMPLES_FOR_AVERAGE = 2;
-const static double GPS_STUCK_THRESHOLD = 0.1;//meter
+const static double GPS_STUCK_THRESHOLD = 0.05;//meter

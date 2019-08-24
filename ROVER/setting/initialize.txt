@@ -3,7 +3,7 @@ start testing
 detecting setmode ON
 cdetecting setmode ON
 //true goal
-navigating 35.6594012 139.541665
+navigating 35.6593881 139.5416987
 
 motor r 100 100 100
 
@@ -37,6 +37,8 @@ alias test testing sensor
 //other
 alias wifistop waiting wifistop
 alias lorastop waiting lorastop
+alias lll servo turn -0.3
+alias rrr servo turn 0.3
 
 //load individual adjustment
 exec individual_adjustment.txt

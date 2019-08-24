@@ -94,6 +94,8 @@ void NearNavigating::onUpdate(const timespec & time)
 			} 
 
 			if(mCheckCount >= NEAR_NAVIGATING_GOAL_CHECK_COUNT){
+				gServo.turn(0);
+				gMotorDrive.drive(100);
 				mSubState = NearGoal;
 				mCheckTime = time;
 				break;
