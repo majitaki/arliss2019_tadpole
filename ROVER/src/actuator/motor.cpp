@@ -8,9 +8,7 @@
 #include <math.h>
 #include "../rover_util/utils.h"
 #include "motor.h"
-#include "servo.h"
 #include "motor_constant.h"
-#include "../sensor/nineaxis.h"
 MotorDrive gMotorDrive;
 
 bool Motor::init(int powPin, int revPin)
@@ -109,10 +107,6 @@ Motor::~Motor()
 
 bool MotorDrive::onInit(const struct timespec& time)
 {
-	//ジャイロを使うように設定
-	//gAccelManager.setRunMode(true);
-	//gNineAxisSensor.setRunMode(true);
-
 	//初期化
 	if (!mMotorR.init(PIN_PWM_A1, PIN_PWM_A2) || !mMotorL.init(PIN_PWM_B1, PIN_PWM_B2) /*|| !mMotorB.init(PIN_PWM_C1, PIN_PWM_C2)*/)
 	{
