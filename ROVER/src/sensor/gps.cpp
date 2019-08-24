@@ -1,3 +1,8 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include<picojson.h>
+
 #include <wiringPiI2C.h>
 #include <wiringPi.h>
 #include <time.h>
@@ -45,8 +50,42 @@ bool GPSSensor::onInit(const struct timespec& time)
 	mRemoveErrorFlag = true;
 	mUseMeanFlag = false;
 	mClassMeanFlag = false;
+	mSettingSampleNum = GPS_SAMPLES;
+	mSettingStuckTh = GPS_STUCK_THRESHOLD;
+
+	if(!readJSON()){
+		mSettingSampleNum = GPS_SAMPLES;
+		mSettingStuckTh = GPS_STUCK_THRESHOLD;
+	}
+
 	return true;
 }
+
+bool GPSSensor::readJSON()
+{
+	// JSONデータの読み込み。
+    std::ifstream ifs("../setting/gps.json", std::ios::in);
+    if (ifs.fail()) {
+		Debug::print(LOG_SUMMARY, "Failed to read GPS JSON\r\n");
+        return false;
+    }
+    const std::string json((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    ifs.close();
+
+    // JSONデータを解析する。
+    picojson::value v;
+    const std::string err = picojson::parse(v, json);
+    if (err.empty() == false) {
+        std::cerr << err << std::endl;
+        return false;
+    }
+
+	picojson::object& obj = v.get<picojson::object>();
+	mSettingStuckTh = obj["gps_stuck_threshold"].get<double>();
+	mSettingSampleNum  = (int)obj["gps_sample_num"].get<double>();
+	return true;
+}
+
 void GPSSensor::onClean()
 {
 }
@@ -83,7 +122,7 @@ void GPSSensor::onUpdate(const struct timespec& time)
 			mIsNewData = true;
 			mLastGetNewDataTime = time;
 
-			if (mLastPos.size() > GPS_SAMPLES)
+			if (mLastPos.size() > mSettingSampleNum)
 			{
 				mLastPos.pop_back();
 			}
@@ -129,7 +168,7 @@ gps rem_error   : remove error true/false\r\n\n\
 		}
 		return true;
 	default:
-		return true;
+		return false;
 	}
 }
 bool GPSSensor::get(VECTOR3& pos, bool disableNewFlag)
@@ -137,14 +176,13 @@ bool GPSSensor::get(VECTOR3& pos, bool disableNewFlag)
 	VECTOR3 new_pos = mLastPos.front();
 	if (mSatelites >= 4 && !(new_pos.x == 0 && new_pos.y == 0 && new_pos.z == 0))//3D fix
 	{
-		if (!disableNewFlag)mIsNewData = false;//�f�[�^���擾�������Ƃ��L�^
-		pos = new_pos;//������pos�ɑ��
+		if (!disableNewFlag)mIsNewData = false;
+		pos = new_pos;
 		return true;
 	}
 	return false;//Invalid Position
 }
 
-//GPS�̂��ꂼ��̈ʒu���W��Ԃ��֐�
 double GPSSensor::getPosx() const
 {
 	return mPos.x;
@@ -181,7 +219,7 @@ bool GPSSensor::removeErrorSample()
 	VECTOR3 ave_pos;
 	if (!mRemoveErrorFlag) return false;
 	if (!getAvePos(ave_pos)) return false;
-	if (mLastPos.size() <= GPS_SAMPLES / 2) return false;
+	if (mLastPos.size() <= mSettingSampleNum / 2) return false;
 
 	//mLastPos.unique();
 
@@ -297,7 +335,7 @@ bool GPSSensor::isStuckGPS()
 	if(mSatelites == 0) return false;
 
 	double distance = VECTOR3::calcDistanceXY(mLastPos.front(), ave_pos);
-	return distance < GPS_STUCK_THRESHOLD ? true : false;
+	return distance < mSettingStuckTh ? true : false;
 }
 
 
@@ -309,7 +347,7 @@ bool GPSSensor::isStuckGPS(double &distance)
 
 	distance = VECTOR3::calcDistanceXY(mLastPos.front(), ave_pos);
 	Debug::print(LOG_SUMMARY, "isStuck: %f \r\n",distance);
-	return distance < GPS_STUCK_THRESHOLD ? true : false;
+	return distance < mSettingStuckTh ? true : false;
 }
 
 void GPSSensor::showState()
@@ -317,7 +355,6 @@ void GPSSensor::showState()
 	if (mSatelites < 4)
 	{
 		Debug::print(LOG_SUMMARY, "Unknown Position\r\nSatelites: %d\r\n", mSatelites);
-		return;
 	}
 
 	VECTOR3 ave_pos;
@@ -344,13 +381,13 @@ void GPSSensor::showState()
 	Debug::print(LOG_SUMMARY, "Ave Position: %f %f %f \r\n", ave_pos.x, ave_pos.y, ave_pos.z);
 	Debug::print(LOG_SUMMARY, "Distance between New and Ave: %f \r\n", VECTOR3::calcDistanceXY(new_pos, ave_pos));
 	Debug::print(LOG_SUMMARY, "Distance between New and Old: %f \r\n", VECTOR3::calcDistanceXY(new_pos, old_pos));
-	Debug::print(LOG_SUMMARY, "Samples: %d \r\n", mLastPos.size());
+	Debug::print(LOG_SUMMARY, "Samples: %d / %d \r\n", mLastPos.size(), mSettingSampleNum);
 	Debug::print(LOG_SUMMARY, "Time: %d \r\n", mGpsTime);
 	Debug::print(LOG_SUMMARY, "Course: %f \r\n", mGpsCourse);
 	Debug::print(LOG_SUMMARY, "Speed: %f \r\n", mGpsSpeed);
 	Debug::print(LOG_SUMMARY, "Angle: %f \r\n", angle);
 	Debug::print(LOG_SUMMARY, "Stuck: %s \r\n", isStuckGPS(distance) ? "true" : "false");
-	Debug::print(LOG_SUMMARY, "Stuck distance: %f threshold: %f\r\n", distance, GPS_STUCK_THRESHOLD);
+	Debug::print(LOG_SUMMARY, "Stuck distance: %f threshold: %f\r\n", distance, mSettingStuckTh);
 	Debug::print(LOG_SUMMARY, "Remove Error function: %s \r\n", mRemoveErrorFlag ? "true" : "false");
 }
 

@@ -40,6 +40,10 @@ bool NearNavigating::onInit(const timespec & time)
 	turn_value = NEAR_NAVIGATING_SERVO_TURN;
 	isGoalLeft = (gNavigatingState.getDeltaAngle() > 0) ? true : false;
 	mCheckCount = 0;
+
+
+
+
 	return true;
 }
 

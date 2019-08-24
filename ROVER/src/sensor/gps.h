@@ -8,26 +8,29 @@
 class GPSSensor : public TaskBase
 {
 private:
-	struct timespec mLastUpdateTime;//�O��̃`�F�b�N����
+	struct timespec mLastUpdateTime;
 	struct timespec mLastGetNewDataTime;
 	struct timespec mLastGetRemoveTime;
-	int mFileHandle;//winringPi i2c�@�̃t�@�C���n���h��
-	VECTOR3 mPos;//���W(�o�x�A�ܓx�A���x)
+	int mFileHandle;//winringPi i2
+	VECTOR3 mPos;
 	VECTOR3 mAveragePos;
-	int mSatelites;//�⑫�����q���̐�
+	int mSatelites;
 	int mGpsTime;
 	float mGpsSpeed;
 	float mGpsCourse;
-	bool mIsNewData;//�V�������W�f�[�^������ΐ^
-	bool mIsLogger;//�^�Ȃ�1�b���Ƃ�gps�R�}���h�����s
+	bool mIsNewData;
+	bool mIsLogger;
 	bool mErrorFlag;
 	bool mUseMeanFlag;
 	bool mClassMeanFlag;
 	gpsmm gps_rec;
 	struct gps_data_t *newdata;
 	std::list<VECTOR3> mLastPos;
-	void showState();//�⑫�����q�����ƍ��W��\��
+	void showState();
+	bool readJSON();
 	bool mRemoveErrorFlag;
+	int mSettingSampleNum;
+	double mSettingStuckTh;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -36,8 +39,6 @@ protected:
 
 public:
 	bool get(VECTOR3& pos, bool disableNewFlag = false);
-
-	//�O��̍��W�擾�ȍ~�Ƀf�[�^���X�V���ꂽ�ꍇ�͐^
 	bool isNewPos() const;
 	int getTime() const;
 	double getPosx() const;

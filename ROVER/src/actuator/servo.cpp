@@ -258,7 +258,7 @@ void Servo::turnp(double range){
 }
 
 void Servo::turngyrop(double target_yaw){
-	if(!gNineAxisSensor.isActive) gNineAxisSensor.setRunMode(true);
+	if(!gNineAxisSensor.isActive()) gNineAxisSensor.setRunMode(true);
 
 	targetYaw = gNineAxisSensor.normalizeAngle(target_yaw);
 	double current_yaw = gNineAxisSensor.getYaw();

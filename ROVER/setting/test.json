@@ -1,0 +1,5 @@
+{
+    "gps_stuck_threshold": "0.5",
+    "gps_sample_num": 10,
+    "some_mode": true
+}

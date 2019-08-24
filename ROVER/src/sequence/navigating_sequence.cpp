@@ -144,6 +144,9 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		if (FreezeFlag) {
 			FreezeFlag = false;
 			mFreezeTime = time;
+			gMotorDrive.drive(100);
+			gServo.wrap(0.0);
+			gServo.turn(0.0);
 			Debug::print(LOG_SUMMARY, "[Navi] Freeze\r\n");
 		}
 		double dt_freeze = Time::dt(time, mFreezeTime);

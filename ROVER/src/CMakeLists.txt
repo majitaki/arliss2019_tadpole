@@ -10,6 +10,7 @@ project(${PROJ_NAME})
 find_package(PkgConfig)
 pkg_check_modules(GPSD REQUIRED libgps)
 include_directories(${GPSD_INCLUDE_DIRS})
+include_directories(/usr/local/include)
 
 link_directories(/usr/lib/)
 link_directories(/usr/local/lib/)
@@ -27,10 +28,10 @@ set(rover_src
 	sensor/light.cpp 
 	sensor/nineaxis.cpp 
 	sensor/pressure.cpp 
-    sensor/distance.cpp
-    sensor/lora.cpp
-    noisy/buzzer.cpp
-    noisy/led.cpp
+	sensor/distance.cpp
+	sensor/lora.cpp
+	noisy/buzzer.cpp
+	noisy/led.cpp
 	sequence/testing_sequence.cpp
 	sequence/separating_sequence.cpp
 	sequence/waiting_sequence.cpp
@@ -38,11 +39,11 @@ set(rover_src
 	sequence/navigating_sequence.cpp
 	sequence/closing_sequence.cpp
 	sequence/arliss_sequence.cpp
-    sub_sequence/waking_turnside.cpp
-    sub_sequence/waking_turnback.cpp
-    sub_sequence/stucking.cpp
+	sub_sequence/waking_turnside.cpp
+	sub_sequence/waking_turnback.cpp
+	sub_sequence/stucking.cpp
 	sub_sequence/near_navigating.cpp
-    sub_sequence/digging.cpp
+	sub_sequence/digging.cpp
 	main.cpp	
 )
 
@@ -55,8 +56,6 @@ set(LIBRARIES
 	-lrt 
 	-lpthread
 	-lwiringPi
-	#-lpigpio
-	#-lpigpiod_if2
 	-lvl53l0x
 	${GPSD_LIBRARIES}
 	)
