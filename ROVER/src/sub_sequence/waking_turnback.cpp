@@ -26,10 +26,8 @@ bool WakingFromTurnBack::onInit(const timespec & time)
 
 	//initialize
 	mCurStep = STEP_START;
-	mStartPower = 50;
 	gMotorDrive.setRunMode(true);
 	gServo.setRunMode(true);
-	//gAccelManager.setRunMode(true);
     gNineAxisSensor.setRunMode(true);
 	mWakeRetryCount = 0;
 	mLastUpdateTime = time;
