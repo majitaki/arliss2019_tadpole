@@ -20,12 +20,11 @@ bool WakingFromTurnSide::onInit(const timespec & time)
 	Debug::print(LOG_SUMMARY, "-------------------------\r\n");
 	Time::showNowTime();
 
-	//initialize
-    //gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
-	mSubState = Lying;
+	mSubState = CheckTurnSide;
 	mCheckTime = time;
 	mBridging = false;
+	mCheckFlag = false;
 	mCurrentPower = 30;
 	mWakeRetryCount = 0;
 	return true;
@@ -36,61 +35,102 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < WAKING_TURN_SIDE_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
-	TurnSideDirection turn_side_state;
+
+	if(!gNineAxisSensor.isTurnSide() && mSubState != Checking){
+		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Entry Checking\r\n");
+		mSubState = Checking;
+	}
 
 	switch (mSubState)
 	{
-	case Lying:
-		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Lying\r\n");
+	case CheckTurnSide:
+        gMotorDrive.drive(0);
+        gServo.wrap(0);
+        gServo.turn(0);
+
+		mTurnSideDirection = gNineAxisSensor.getTurnSideDirection();
 		//right
-        if(gNineAxisSensor.getTurnSideDirection() == Right){
-			gServo.turn(-1 * WAKING_TURN_SIDE_MAX_SIDE);
+        if(mTurnSideDirection== Right){
+			//gServo.turn(-1 * WAKING_TURN_SIDE_MAX_SIDE);
+			Debug::print(LOG_SUMMARY, "[WakingTurnSide] Check Turn Side: Right\r\n");
 		}
-        else if(gNineAxisSensor.getTurnSideDirection() == Left){
-			gServo.turn(WAKING_TURN_SIDE_MAX_SIDE);
+        else if(mTurnSideDirection == Left){
+			//gServo.turn(WAKING_TURN_SIDE_MAX_SIDE);
+			Debug::print(LOG_SUMMARY, "[WakingTurnSide] Check Turn Side: Left\r\n");
 		}
+
 		mSubState = Rolling;
+		mCheckTime = time;
 		break;
 	case Rolling:
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Rolling\r\n");
         gServo.wrap(0);
+        gServo.turn(0);
         gMotorDrive.drive(100);
 
-		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())
-		if ( Time::dt(time, mCheckTime) > 10 || !gNineAxisSensor.isTurnSide())
+		if (Time::dt(time, mCheckTime) > WAKING_TURN_SIDE_ONLY_ROLLING_TIME)
 		{
-            gServo.wrap(0);
-            gMotorDrive.drive(0);
-            //gServo.wrap(0);
-			mSubState = Checking;
+			mSubState = BendRolling;
 			mCheckTime = time;
-			break;
 		}
 		break;
 	
-	case Bridging:
-		if(!gNineAxisSensor.isTurnSide())
+	case BendRolling:
+		Debug::print(LOG_SUMMARY, "[WakingTurnSide] BendRolling\r\n");
+        gMotorDrive.drive(100);
+        gServo.wrap(0);
+
+        if(mTurnSideDirection== Right){
+			gServo.turn(-1 * WAKING_TURN_SIDE_MAX_SIDE);
+		}
+        else if(mTurnSideDirection == Left){
+			gServo.turn(WAKING_TURN_SIDE_MAX_SIDE);
+		}
+
+
+		if (Time::dt(time, mCheckTime) > WAKING_TURN_SIDE_BEND_ROLLING_TIME)
 		{
+            gMotorDrive.drive(0);
+			gServo.turn(0);
 			gServo.wrap(0);
-			gMotorDrive.drive(0);
 			mSubState = Checking;
 			mCheckTime = time;
 		}
-		gServo.wrap(0.0);
-		turn_side_state = gNineAxisSensor.getTurnSideDirection();
-		if (turn_side_state == Right) {
-			gServo.turn(0.9);
-		}
-		else if (turn_side_state == Left) {
-			gServo.turn(-0.9);
-		}
-		gMotorDrive.drive(100);
 		break;
+	// case Bridging:
+	// 	TurnSideDirection turn_side_state;
+	// 	if(!gNineAxisSensor.isTurnSide())
+	// 	{
+	// 		gServo.wrap(0);
+	// 		gMotorDrive.drive(0);
+	// 		mSubState = Checking;
+	// 		mCheckTime = time;
+	// 	}
+	// 	gServo.wrap(0.0);
+	// 	turn_side_state = gNineAxisSensor.getTurnSideDirection();
+	// 	if (turn_side_state == Right) {
+	// 		gServo.turn(0.9);
+	// 	}
+	// 	else if (turn_side_state == Left) {
+	// 		gServo.turn(-0.9);
+	// 	}
+	// 	gMotorDrive.drive(100);
+	// 	break;
 
 	case Checking:
-		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Checking\r\n");
-		if (Time::dt(time, mCheckTime) > 3)
+		if(!mCheckFlag)
 		{
+			Debug::print(LOG_SUMMARY, "[WakingTurnSide] Checking\r\n");
+			mCheckTime = time;
+            gMotorDrive.drive(0);
+			gServo.turn(0);
+			gServo.wrap(1.0);
+			mCheckFlag = !mCheckFlag;
+		}
+
+		if (Time::dt(time, mCheckTime) > WAKING_TURN_SIDE_CHECK_TIME)
+		{
+			Debug::print(LOG_SUMMARY, "[WakingTurnSide] End Checking\r\n");
             if(!gNineAxisSensor.isTurnSide())
 			{
 				Debug::print(LOG_SUMMARY, "[WakingTurnSide] Succeed\r\n");
@@ -109,9 +149,9 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 				Debug::print(LOG_SUMMARY, "[WakingTurnSide] Bridging\r\n");
 				mSubState = Bridging;
 			}
-			else mSubState = Lying;
+			else mSubState = CheckTurnSide;
 			mCheckTime = time;
-			//mCurrentPower = 30;
+			mCheckFlag = false;
 		}
 		break;
 	}

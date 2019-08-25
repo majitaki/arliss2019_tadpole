@@ -3,12 +3,13 @@
 #include <list>
 #include "../rover_util/task.h"
 #include "../rover_util/utils.h"
+#include "../sensor/nineaxis.h"
 
 
 class WakingFromTurnSide : public TaskBase
 {
 private:
-	enum SubState{Lying, Rolling,Bridging, Checking};
+	enum SubState{CheckTurnSide, Rolling, BendRolling, Bridging, Checking};
 	enum SubState mSubState;
 	struct timespec mLastUpdateTime;
 	struct timespec mCheckTime;
@@ -17,6 +18,8 @@ private:
 	int mWakeRetryCount;
 	PID mWakePID;
 	bool mBridging;
+	bool mCheckFlag;
+	TurnSideDirection mTurnSideDirection;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);

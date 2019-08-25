@@ -20,6 +20,8 @@ alias st servo wrap 0
 alias rr servo turn 1
 alias ll servo turn -1
 alias cc servo turn 0
+alias wrap servo wrap
+alias turn servo turn
 //sensor
 alias nx nineaxis
 alias pr pressure
@@ -37,8 +39,6 @@ alias test testing sensor
 //other
 alias wifistop waiting wifistop
 alias lorastop waiting lorastop
-alias lll servo turn -0.3
-alias rrr servo turn 0.3
 
 //load individual adjustment
 exec individual_adjustment.txt
