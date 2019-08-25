@@ -42,8 +42,6 @@ bool NearNavigating::onInit(const timespec & time)
 	mCheckCount = 0;
 
 
-
-
 	return true;
 }
 

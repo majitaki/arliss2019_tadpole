@@ -149,13 +149,13 @@ void NavigatingState::onUpdate(const struct timespec& time)
 			gServo.turn(0.0);
 			Debug::print(LOG_SUMMARY, "[Navi] Freeze\r\n");
 		}
+
 		double dt_freeze = Time::dt(time, mFreezeTime);
 		if (dt_freeze > NAVIGATING_FREEZE_TIME)
 		{
 			if (gNineAxisSensor.isTurnSide()) { mSubState = TurningSide;  FreezeFlag = true; break; }
 			if (gNineAxisSensor.isTurnBack()) { mSubState = TurningBack; FreezeFlag = true; break; }
 			if (gGPSSensor.isStuckGPS()) { mSubState = Stucking; FreezeFlag = true; break; }
-
 		}
 
 		mCheckStuckCount = 0;

@@ -23,40 +23,39 @@ bool WakingFromTurnSide::onInit(const timespec & time)
 	//initialize
     //gMotorDrive.setRunMode(true);
 	mLastUpdateTime = time;
-	mSubState = Lieing;
+	mSubState = Lying;
 	mCheckTime = time;
 	mBridging = false;
 	mCurrentPower = 30;
 	mWakeRetryCount = 0;
-	mWakePID = PID(MOTOR_DRIVE_PID_UPDATE_INTERVAL_TIME, 10, -10, 0.1, 0.01, 0);
 	return true;
 }
 
 void WakingFromTurnSide::onUpdate(const timespec & time)
 {
-	TurnSideDirection turn_side_state;
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < WAKING_TURN_SIDE_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
+	TurnSideDirection turn_side_state;
 
 	switch (mSubState)
 	{
-	case Lieing:
-		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Lieing\r\n");
+	case Lying:
+		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Lying\r\n");
 		//right
         if(gNineAxisSensor.getTurnSideDirection() == Right){
-			gServo.turn(-0.5);
+			gServo.turn(-1 * WAKING_TURN_SIDE_MAX_SIDE);
 		}
         else if(gNineAxisSensor.getTurnSideDirection() == Left){
-			gServo.turn(0.5);
+			gServo.turn(WAKING_TURN_SIDE_MAX_SIDE);
 		}
 		mSubState = Rolling;
 		break;
 	case Rolling:
 		Debug::print(LOG_SUMMARY, "[WakingTurnSide] Rolling\r\n");
         gServo.wrap(0);
-        
         gMotorDrive.drive(100);
+
 		//if (mCurrentPower > MOTOR_MAX_POWER || !gNineAxisSensor.isTurnSide())
 		if ( Time::dt(time, mCheckTime) > 10 || !gNineAxisSensor.isTurnSide())
 		{
@@ -110,7 +109,7 @@ void WakingFromTurnSide::onUpdate(const timespec & time)
 				Debug::print(LOG_SUMMARY, "[WakingTurnSide] Bridging\r\n");
 				mSubState = Bridging;
 			}
-			else mSubState = Lieing;
+			else mSubState = Lying;
 			mCheckTime = time;
 			//mCurrentPower = 30;
 		}
@@ -132,7 +131,7 @@ void WakingFromTurnSide::onClean()
 
 }
 
-WakingFromTurnSide::WakingFromTurnSide():mWakePID()
+WakingFromTurnSide::WakingFromTurnSide()
 {
 	setName("waking_turnside");
 	setPriority(TASK_PRIORITY_SEQUENCE, TASK_INTERVAL_SEQUENCE);

@@ -11,6 +11,7 @@
 #include "stucking.h"
 #include "stucking_constant.h"
 #include "../sensor/gps.h"
+#include "../sensor/nineaxis.h"
 #include "../actuator/servo_constant.h"
 
 Stucking gStucking;
@@ -36,6 +37,11 @@ void Stucking::onUpdate(const timespec & time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < STUCKING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
+
+	if(gNineAxisSensor.isTurnSide() || gNineAxisSensor.isTurnBack()) 
+	{ 
+			mSubState = Final;
+	}
 
 	switch (mSubState)
 	{

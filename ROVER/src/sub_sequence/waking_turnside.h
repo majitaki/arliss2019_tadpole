@@ -8,7 +8,7 @@
 class WakingFromTurnSide : public TaskBase
 {
 private:
-	enum SubState{Lieing, Rolling,Bridging, Checking};
+	enum SubState{Lying, Rolling,Bridging, Checking};
 	enum SubState mSubState;
 	struct timespec mLastUpdateTime;
 	struct timespec mCheckTime;

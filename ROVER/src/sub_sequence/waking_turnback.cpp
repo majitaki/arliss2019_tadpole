@@ -45,7 +45,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 	switch (mCurStep)
 	{
 	case STEP_START:
-		if (Time::dt(time, mLastUpdateTime) > 5)//���莞�ԉ��]�����m�����Ȃ��ꍇ�����]�s�\�Ɣ��f
+		if (Time::dt(time, mLastUpdateTime) > WAKING_TURN_BACK_TIMEOUT)
 		{
 			Debug::print(LOG_SUMMARY, "Waking Timeout : unable to spin\r\n");
 			mLastUpdateTime = time;
@@ -64,7 +64,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		}
 		break;
 	case STEP_CHANGE:
-		if (Time::dt(time, mLastUpdateTime) > 0.5){
+		if (Time::dt(time, mLastUpdateTime) > WAKING_TURN_BACK_FORWARD_TIME){
             gMotorDrive.drive(100);
 			mCurStep = STEP_VERIFY;
 			mLastUpdateTime = time;
@@ -72,7 +72,7 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		break;
 
 	case STEP_VERIFY:
-		if (Time::dt(time, mLastUpdateTime) <= 1)
+		if (Time::dt(time, mLastUpdateTime) <= WAKING_TURN_BACK_VERIFY_TIME)
 		{
 			return;
 		}
@@ -87,11 +87,6 @@ void WakingFromTurnBack::onUpdate(const timespec & time)
 		{
 			mLastUpdateTime = time;
 			mCurStep = STEP_START;
-			//mCurStep = STEP_VERIFY;
-			//power = std::min((unsigned int)100, mStartPower + ((mWakeRetryCount + 1) * 5));	//���s�񐔂��ƂɃ��[�^�o�͂��グ��
-																							//gMotorDrive.drive(power);
-			//gMotorDrive.drive(power, power, 0);
-            //gMotorDrive.drive(100);
 
 			if (++mWakeRetryCount > WAKING_TURN_BACK_RETRY_COUNT)
 			{
