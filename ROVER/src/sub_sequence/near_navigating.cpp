@@ -40,8 +40,12 @@ bool NearNavigating::onInit(const timespec & time)
 	turn_value = NEAR_NAVIGATING_SERVO_TURN;
 	isGoalLeft = (gNavigatingState.getDeltaAngle() > 0) ? true : false;
 	mCheckCount = 0;
+	mTurnValueChangeFlag = true;
 
-
+	isGyroOperation = false;
+	turn_value2 = 0.9;
+	gMotorDrive.drive(100);
+	gServo.wrap(-1);
 	return true;
 }
 
@@ -61,7 +65,23 @@ void NearNavigating::onUpdate(const timespec & time)
 		case Initial:
 		{
 			mCheckTime = time;
-			mSubState = NearGoalNavi;
+			if (isGyroOperation) mSubState = Roll;
+			else mSubState = NearGoalNavi;
+			break;
+		}
+		case Roll:
+		{
+			double dt = Time::dt(time, mCheckTime);
+			if (abs(gNineAxisSensor.getYaw()) < 5) {
+				gServo.turn(turn_value2);
+				if(turn_value  > 0) turn_value2-= 0.1;
+				else nextState();
+			}
+			if (dt > NEAR_NAVIGATING_ROLL_DURATION) {
+				mCheckTime = time;
+				mSubState = CheckGoal;
+			}
+
 			break;
 		}
 		case NearGoalNavi:
@@ -74,7 +94,7 @@ void NearNavigating::onUpdate(const timespec & time)
 				}
 				break;
 			} 
-
+			mTurnValueChangeFlag = true;
 			mCheckTime = time;
 			mSubState = CheckGoal;
 			break;
@@ -82,30 +102,40 @@ void NearNavigating::onUpdate(const timespec & time)
 		case CheckGoal:
 		{
 			double dt = Time::dt(time, mCheckTime);
-			if (dt < NEAR_NAVIGATING_STOP_INTERVAL_TIME){
+			if (mCheckCount < NEAR_NAVIGATING_CHECK_COUNT){
 				gMotorDrive.drive(0);
 				int mLaserDistance = gDistanceSensor.getDistance();
 				Debug::print(LOG_SUMMARY, "[Near] Laser Distance: %d : %d\r\n", mLaserDistance, NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD);
 
 				if( mLaserDistance < NEAR_NAVIGATING_GOAL_DISTANCE_THRESHOLD){
-					mCheckCount++;
+					mSuccessCount++;
 				}else{
-					mCheckCount = 0;
+					mSuccessCount = 0;
 				}
+				mCheckCount++;
 				break;
 			} 
+			mCheckCount = 0;
 
-			if(mCheckCount >= NEAR_NAVIGATING_GOAL_CHECK_COUNT){
-				gServo.turn(0);
-				gMotorDrive.drive(100);
-				mSubState = NearGoal;
+			if(mSuccessCount >= NEAR_NAVIGATING_GOAL_CHECK_COUNT){
+				Debug::print(LOG_SUMMARY, "[Near] Found Goal !\r\n");
+				mSubState = RunWhile;
 				mCheckTime = time;
 				break;
 			}else{
-				mSubState = NearGoalNavi;
+				if(isGyroOperation) mSubState = Roll;
+				else mSubState = NearGoalNavi;
 				mCheckTime = time;
 				break;
 			}
+		}
+		case RunWhile:
+		{
+			gServo.turn(0);
+			gMotorDrive.drive(100);
+			double dt = Time::dt(time, mCheckTime);
+			if (dt > NEAR_NAVIGATING_RUNWHILE_DURATION)  mSubState = CheckGoal;
+			break;
 		}
 		case NearGoal:
 		{
@@ -149,7 +179,12 @@ void NearNavigating::nextState()
 void NearNavigating::navigationNearMode()
 {
 	gMotorDrive.drive(100);
-	turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
+	gServo.wrap(0.0);
+
+	if(mTurnValueChangeFlag){
+		turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
+		mTurnValueChangeFlag = false;
+	}
 
 	gServo.wrap(0.0);
 	if(isGoalLeft) {

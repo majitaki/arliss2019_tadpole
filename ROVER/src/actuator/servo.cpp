@@ -203,9 +203,11 @@ bool Servo::onCommand(const std::vector<std::string>& args)
 }
 
 void Servo::wrap(double range){
-	wrap(NECK_NAME, range);
-	wrap(WAIST_NAME, range);
+	// wrap(NECK_NAME, range);
+	// wrap(WAIST_NAME, range);
 	wrap(STABI_NAME, range);
+	wrap(WAIST_NAME, range);
+	wrap(NECK_NAME, range);
 }
 void Servo::wrap(std::string servo_name, double range){
 	 if(range < -1 || range > 1){
@@ -269,7 +271,7 @@ void Servo::turngyrop(double target_yaw){
 	double turn_slope = 1.0;
 	double upper = turn_slope - (-1 * turn_slope);
 	double under = -1 * max_angle - max_angle;
-	gServo.turnp(deltaAngle * (upper / under));
+	gServo.turnp(-1*deltaAngle * (upper / under));
 	//enableGyroPID = true;
 }
 

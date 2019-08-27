@@ -12,13 +12,17 @@ private:
 	struct timespec mLastNearNaviTime;
 	struct timespec mCheckTime;
 	double turn_value;
+	double turn_value2;
 	int mCheckCount;
+	int mSuccessCount;
 	enum SubState
 	{
-		Initial, NearGoalNavi, CheckGoal, NearGoal, Fail
+		Initial, Roll, NearGoalNavi, CheckGoal, RunWhile, NearGoal, Fail
 	};
 	enum SubState mSubState;
 	bool isGoalLeft;
+	bool isGyroOperation;
+	bool mTurnValueChangeFlag;
 
 	void navigationNearMode();
 protected:
