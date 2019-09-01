@@ -60,6 +60,9 @@ void NearNavigating::onUpdate(const timespec & time)
 		mSubState = Fail;
 	}
 
+	if (gNineAxisSensor.isTurnSide()) { mSubState = Fail;}
+	if (gNineAxisSensor.isTurnBack()) { mSubState = Fail;}
+
 	switch (mSubState)
 	{
 		case Initial:
@@ -89,7 +92,7 @@ void NearNavigating::onUpdate(const timespec & time)
 			double dt = Time::dt(time, mCheckTime);
 			if (dt < NEAR_NAVIGATING_RUNNING_INTERVAL_TIME){
 				navigationNearMode();
-				if(turn_value < 0){
+				if(turn_value < 0.3){
 					mSubState = Fail;
 				}
 				break;
@@ -134,7 +137,7 @@ void NearNavigating::onUpdate(const timespec & time)
 			gServo.turn(0);
 			gMotorDrive.drive(100);
 			double dt = Time::dt(time, mCheckTime);
-			if (dt > NEAR_NAVIGATING_RUNWHILE_DURATION)  mSubState = CheckGoal;
+			if (dt > NEAR_NAVIGATING_RUNWHILE_DURATION)  mSubState = NearGoal;
 			break;
 		}
 		case NearGoal:
