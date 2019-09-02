@@ -61,23 +61,8 @@ bool SeparatingState::onInit(const struct timespec& time)
 	gLED.setRunMode(true);
 	gBuzzer.setRunMode(true);
 
-	//initialize
-	gServo.wrap(1.0);
-	gServo.turn(-1.0);
-	gLED.setColor(0, 255, 255);
-	gLora.enableGPSsend(true);
+	init(time);
 
-	mLastUpdateTime = time;
-	mCurServoState = false;
-	mServoCount = 0;
-    mServoOpenCount = 0;
-    mServoFightForFreeCount = 0;
-    mServoGetDistanceCount = 0;
-	mCurStep = STEP_STABI_OPEN;
-	//mCurStep = STEP_GET_DISTANCE;
-	mCurMotorStep = STEP_MOTOR_RIGHT;
-	move = false;
-	mReadyFlag = false;
 	return true;
 }
 void SeparatingState::onUpdate(const struct timespec& time)
@@ -170,49 +155,78 @@ void SeparatingState::onUpdate(const struct timespec& time)
         Debug::print(LOG_SUMMARY, "[Separating State] Fighting Free Count (%d/%d)\r\n", mServoFightForFreeCount, SEPARATING_FIGHT_FOR_FREE_COUNT);
         if(mServoFightForFreeCount >= SEPARATING_FIGHT_FOR_FREE_COUNT)
         {
-            mCurStep = STEP_GET_DISTANCE;
+            mCurStep = STEP_CHECK_IF_INSIDE;
             mCurServoState = true;
             mLastUpdateTime = time;
+			mStartStepTime = time;
 			Debug::print(LOG_SUMMARY, "[Separating State] Fighting Free Finished\r\n");
         }
         break;
+   case STEP_CHECK_IF_INSIDE:
+	   if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL)return;
+	   mLastUpdateTime = time;
+
+	   Debug::print(LOG_SUMMARY, "[Separating State] CheckIfInside Abort time: %1.1f/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_CHECK_INSIDE_ABORT_TIME);
+	   if(Time::dt(time, mStartStepTime) > SEPARATING_CHECK_INSIDE_ABORT_TIME)
+	   {
+		   Debug::print(LOG_SUMMARY, "[Separating State] inside of gaikokkaku :(  RETRY!!!! %d/%d\r\n", mRetryCount,SEPARATING_RETRY_MAX_COUNT);
+		   if(mRetryCount < SEPARATING_RETRY_MAX_COUNT){
+			   init(time);
+			   mRetryCount++;
+		   }
+		   else mCurStep = STEP_GET_DISTANCE;
+		   mLastUpdateTime = time;
+
+	   }
+		// Check 
+	   if(gDistanceSensor.getDistance() > 100)
+	   {
+		   mCheckCount++;
+	   }
+	   else
+	   {
+		   mCheckCount = 0;
+	   }
+
+	   Debug::print(LOG_SUMMARY, "[Separating State] Check Count %d/%d\r\n",mCheckCount,SEPARATING_CHECK_MAX_COUNT);
+	   if(mCheckCount > SEPARATING_CHECK_MAX_COUNT){
+		   Debug::print(LOG_SUMMARY, "[Separating State] outside of gaikokkaku :)\r\n");
+		   mCurStep = STEP_GET_DISTANCE;
+		   mLastUpdateTime = time;
+	   }
+
+	   break;
 	case STEP_GET_DISTANCE:
 		if (Time::dt(time, mLastUpdateTime) < SEPARATING_MOTOR_INTERVAL)return;
+		// if rover is still inside gaikokkaku
+
         mLastUpdateTime = time;
 
 		turn_side_state = gNineAxisSensor.getTurnSideDirection();
 		//TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
 
-		gServo.turn(0.0
-			);
-		if(turn_side_state == Right){
-			//gServo.turn(-0.5);
-		}else if(turn_side_state == Left){
-		 	//gServo.turn(0.8);
-		}else{
-			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
+		gServo.turn(0.0);
+		if(turn_side_state != Right && turn_side_state == Left){
+			Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
 		 	gMotorDrive.drive(0);
 			gServo.turn(0.0);
 		 	gServo.wrap(0.0);
-			//nextState();
 			mCurStep = STEP_RUN_WHILE;
-			Debug::print(LOG_SUMMARY, "[Separating State] Run While started\r\n");
 			break;
 		}
 
 		switch(mCurMotorStep){
-		case STEP_MOTOR_RIGHT:
+		case STEP_MOTOR_MOVE:
 			gServo.wrap(1.0);
-			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Right\r\n");
-			gMotorDrive.drive(-80);
+			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Motor Move\r\n");
+			gMotorDrive.drive(-100);
 			mCurMotorStep = STEP_MOTOR_STOP;
 			break;
 		case STEP_MOTOR_STOP:
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance servo release\r\n");
 			gMotorDrive.drive(0);
 			gServo.wrap(-1.0);
-			mCurMotorStep = STEP_MOTOR_RIGHT;
-			// mCurServoState = !mCurServoState;
+			mCurMotorStep = STEP_MOTOR_MOVE;
 			break;
 		}
 
@@ -223,7 +237,8 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		{
 			Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Finished\r\n");
 			gMotorDrive.drive(0);
-			mCurStep = STEP_DECIDE_DIRECTION;
+			if(mChijikiMode) mCurStep = STEP_MOVE_BY_CHIJIKI;
+			else mCurStep = STEP_DECIDE_DIRECTION;
 			mStartStepTime = time;
 		}
 		break;
@@ -243,8 +258,9 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		}
 		else{
 			gMotorDrive.drive(0);
-			if(gDistanceSensor.getDistance()>8000){
-				//gaikokkaku wo mituketetara
+			Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
+			if(gDistanceSensor.getDistance() > 8000){
+				//whenever missing gaikokkaku
 				if (mReadyFlag) {
 					Debug::print(LOG_SUMMARY, "[Separating State] found safe way to run !\r\n");
 					mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
@@ -255,14 +271,17 @@ void SeparatingState::onUpdate(const struct timespec& time)
 				//gaikokkaku mmituketenakattara
 				if (!mReadyFlag)
 				{
-					Debug::print(LOG_SUMMARY, "[Separating State] armor detected\r\n");
+					Debug::print(LOG_SUMMARY, "[Separating State] gaikokkaku detected\r\n");
 					mReadyFlag = true;
 				}
 			}
 		}
 		move = !move;
 		break;
+	case STEP_MOVE_BY_CHIJIKI:
+		break;
 	case STEP_STABLE_AWAKE_FROM_SIDE:
+		Debug::print(LOG_SUMMARY, "[Separating State] STEP_STABLE_AWAKE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_AWAKE_ABORT_TIME);
 		if (Time::dt(time, mStartStepTime) > SEPARATING_AWAKE_ABORT_TIME) nextState();
 		if(!gNineAxisSensor.isTurnSide()){
 			mLastUpdateTime = time;
@@ -279,9 +298,11 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		break;
 
 	case STEP_RUN_WHILE:
+		gServo.wrap(0.0);
 		if (gNineAxisSensor.isTurnBack()) gMotorDrive.drive(-100);
 		else gMotorDrive.drive(100);
-		if (Time::dt(time, mLastUpdateTime) < SEPARATIMG_RUN_WHILE_DURATION || gWakingFromTurnBack.isActive()) return;
+		Debug::print(LOG_SUMMARY, "[Separating State] STEP_RUN_WHILE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATIMG_RUN_WHILE_DURATION);
+		if (Time::dt(time, mLastUpdateTime) < SEPARATIMG_RUN_WHILE_DURATION) return;
 		gMotorDrive.drive(0);
 		nextState();
 		break;
@@ -311,6 +332,31 @@ void SeparatingState::nextState()
 void SeparatingState::SetMissionFlag(bool flag)
 {
 	mMissionFlag = flag;
+}
+
+void SeparatingState::init(const struct timespec& time)
+{
+	//initialize
+	gServo.free();
+
+	gServo.wrap(1.0);
+	gServo.turn(-1.0);
+	gLED.setColor(0, 255, 255);
+	gLora.enableGPSsend(true);
+
+	mLastUpdateTime = time;
+	mCurServoState = false;
+	mServoCount = 0;
+    mServoOpenCount = 0;
+    mServoFightForFreeCount = 0;
+    mServoGetDistanceCount = 0;
+	mCheckCount = 0;
+	mCurStep = STEP_STABI_OPEN;
+	//mCurStep = STEP_CHECK_IF_INSIDE
+	mCurMotorStep = STEP_MOTOR_MOVE;
+	move = false;
+	mReadyFlag = false;
+	mChijikiMode = false;
 }
 
 void SeparatingState::onClean()
