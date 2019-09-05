@@ -155,6 +155,8 @@ void SeparatingState::onUpdate(const struct timespec& time)
         Debug::print(LOG_SUMMARY, "[Separating State] Fighting Free Count (%d/%d)\r\n", mServoFightForFreeCount, SEPARATING_FIGHT_FOR_FREE_COUNT);
         if(mServoFightForFreeCount >= SEPARATING_FIGHT_FOR_FREE_COUNT)
         {
+			gServo.wrap(0.0);
+			gServo.turn(0);
             mCurStep = STEP_CHECK_IF_INSIDE;
             mCurServoState = true;
             mLastUpdateTime = time;
@@ -206,7 +208,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		//TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
 
 		gServo.turn(0.0);
-		if(turn_side_state != Right && turn_side_state == Left){
+		if(turn_side_state != Right && turn_side_state != Left){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
 		 	gMotorDrive.drive(0);
 			gServo.turn(0.0);

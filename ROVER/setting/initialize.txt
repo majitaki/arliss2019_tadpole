@@ -5,6 +5,7 @@ cdetecting setmode ON
 //true goal
 //navigating 35.6402596 139.5442230
 navigating 35.640222 139.544221
+navigating 40.77854 -119.25974
 
 motor r 100 100 100
 
