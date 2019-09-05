@@ -13,17 +13,22 @@ private:
 	struct timespec mCheckTime;
 	double turn_value;
 	double turn_value2;
+	double turn_value3;
+	double mInitialYaw;
 	int mCheckCount;
 	int mSuccessCount;
+	int mInfinityCount;
+	int count;
 	enum SubState
 	{
-		Initial, Roll, NearGoalNavi, CheckGoal, RunWhile, NearGoal, Fail
+		Initial, Infinity, Roll, NearGoalNavi, CheckGoal, RunWhile, NearGoal, Fail
 	};
 	enum SubState mSubState;
 	bool isGoalLeft;
 	bool isGyroOperation;
+	bool isInfinityOperation;
 	bool mTurnValueChangeFlag;
-
+	bool updateFlag;
 	void navigationNearMode();
 protected:
 	virtual bool onInit(const struct timespec& time);

@@ -41,9 +41,14 @@ bool NearNavigating::onInit(const timespec & time)
 	isGoalLeft = (gNavigatingState.getDeltaAngle() > 0) ? true : false;
 	mCheckCount = 0;
 	mTurnValueChangeFlag = true;
-
+	isInfinityOperation = false;
 	isGyroOperation = false;
+	updateFlag = true;
 	turn_value2 = 0.9;
+	turn_value3 = 0.2;
+	mInitialYaw = 0;
+	mInfinityCount = 0;
+	
 	gMotorDrive.drive(100);
 	gServo.wrap(-1);
 	return true;
@@ -69,18 +74,78 @@ void NearNavigating::onUpdate(const timespec & time)
 		{
 			mCheckTime = time;
 			if (isGyroOperation) mSubState = Roll;
+			else if (isInfinityOperation){
+				mSubState = Infinity;
+				mInitialYaw = gNineAxisSensor.getYaw();
+			}
 			else mSubState = NearGoalNavi;
+			break;
+		}
+		case Infinity:
+		{
+			double dt = Time::dt(time, mCheckTime);
+			if( dt > 1){
+				mSubState = CheckGoal;
+				mCheckTime = time;
+			}
+			gMotorDrive.drive(100);
+			if(mInitialYaw >= 0){
+				if(gNineAxisSensor.getYaw() < (mInitialYaw-180)+2 && gNineAxisSensor.getYaw() > (mInitialYaw-180)-2 && updateFlag)
+				{
+					updateFlag = false;
+					turn_value3 *= -1;
+				}
+					
+				else if(gNineAxisSensor.getYaw() < mInitialYaw+2 && gNineAxisSensor.getYaw() > mInitialYaw -2 && !updateFlag)
+				{
+					updateFlag = true;
+					mInfinityCount++;
+					if(mInfinityCount > 3) nextState();
+				}
+			}
+			else {
+				if(gNineAxisSensor.getYaw() < (mInitialYaw+180)+2 && gNineAxisSensor.getYaw() > (mInitialYaw+180)-2 && updateFlag)
+				{
+					updateFlag = false;
+					turn_value3 *= -1;
+				}
+				else if(gNineAxisSensor.getYaw() < mInitialYaw+2 && gNineAxisSensor.getYaw() > mInitialYaw-2 && !updateFlag){
+					updateFlag = true;
+					mInfinityCount++;
+					if(mInfinityCount > 3) nextState();
+				}
+			}
+			//if(abs(gNineAxisSensor.getYaw()) > mInitialYaw && updateFlag)
+			//{
+			//	updateFlag = false;
+			//	turn_value3 *= -1;
+			//}
+			//else if(abs(gNineAxisSensor.getYaw()) < mInitialYaw+2 && abs(gNineAxisSensor.getYaw()) > mInitial -2 && !updateFlag)
+			//{
+			//	updateFlag = true;
+			//
+			//}
+			gServo.turn(turn_value3);
 			break;
 		}
 		case Roll:
 		{
 			double dt = Time::dt(time, mCheckTime);
 			if (abs(gNineAxisSensor.getYaw()) < 5) {
-				gServo.turn(turn_value2);
-				if(turn_value  > 0) turn_value2-= 0.1;
-				else nextState();
+				if(updateFlag){
+					updateFlag = false;
+					gServo.turn(turn_value2);
+					if(turn_value  > 0) turn_value2 -= 0.1;
+					else nextState();
+				}
 			}
+
+			else if(abs(gNineAxisSensor.getYaw()) > 170){
+				updateFlag = true;	
+			}
+
 			if (dt > NEAR_NAVIGATING_ROLL_DURATION) {
+				gMotorDrive.drive(0);
 				mCheckTime = time;
 				mSubState = CheckGoal;
 			}
@@ -127,6 +192,7 @@ void NearNavigating::onUpdate(const timespec & time)
 				break;
 			}else{
 				if(isGyroOperation) mSubState = Roll;
+				else if(isInfinityOperation) mSubState = Infinity;
 				else mSubState = NearGoalNavi;
 				mCheckTime = time;
 				break;
@@ -181,21 +247,23 @@ void NearNavigating::nextState()
 
 void NearNavigating::navigationNearMode()
 {
+	Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f ;  -%f \r\n", turn_value, std::log(turn_value/1000+1));
 	gMotorDrive.drive(100);
 	gServo.wrap(0.0);
 
 	if(mTurnValueChangeFlag){
-		turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
-		mTurnValueChangeFlag = false;
+		// turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
+		turn_value -= std::log(turn_value/1000+1);
+		// mTurnValueChangeFlag = false;
 	}
 
-	gServo.wrap(0.0);
-	if(isGoalLeft) {
-		gServo.turn(turn_value * -1);
-	}else{
-		gServo.turn(turn_value);
-	}
-	Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f / %f (%s)\r\n", turn_value, NEAR_NAVIGATING_SERVO_TURN, isGoalLeft ? "Left" : "Right");
+	// if(isGoalLeft) {
+	// 	gServo.turn(turn_value * -1);
+	// }else{
+	// 	gServo.turn(turn_value);
+	// }
+
+	
 }
 
 NearNavigating::NearNavigating(): isGoalLeft(false)
