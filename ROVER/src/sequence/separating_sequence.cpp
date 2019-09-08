@@ -67,6 +67,7 @@ bool SeparatingState::onInit(const struct timespec& time)
 }
 void SeparatingState::onUpdate(const struct timespec& time)
 {
+	gLora.setSeqName(getName());
 	TurnSideDirection turn_side_state;
 	switch (mCurStep)
 	{

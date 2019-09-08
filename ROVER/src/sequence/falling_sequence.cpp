@@ -84,6 +84,7 @@ void FallingState::onUpdate(const struct timespec& time)
 
 	if (Time::dt(time, mLastUpdateTime) < FALLING_STATE_UPDATE_INTERVAL_TIME) return;
 	mLastUpdateTime = time;
+	gLora.setSeqName(getName());
 
 	CheckGyroCount(time);
 	CheckPressureCount(time);

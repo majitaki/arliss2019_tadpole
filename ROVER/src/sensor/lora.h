@@ -8,6 +8,7 @@ private:
 	int fd;
 	struct timespec mLastUpdateTime;
 	bool enableGPSsendFlag;
+	std::string mSequenceName;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
@@ -17,6 +18,7 @@ public:
 	void send(const std::string & str);
 	void sleep(bool enableSleepMode);
 	void enableGPSsend(bool flag);
+	void setSeqName(std::string str_seq);
 	Lora();
 	~Lora();
 };

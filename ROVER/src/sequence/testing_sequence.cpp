@@ -72,6 +72,7 @@ bool TestingState::onCommand(const std::vector<std::string>& args)
 {
 	if (args[0].compare(getName()) != 0) return true;
 	//if (gDemo.isActive()) return true;
+	gLora.setSeqName(getName());
 
 	if (args.size() == 2)
 	{

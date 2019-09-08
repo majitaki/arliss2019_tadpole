@@ -90,6 +90,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < NAVIGATING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
+	gLora.setSeqName(getName());
 
 	//switch (mSubState)
 	//{

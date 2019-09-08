@@ -20,6 +20,8 @@ bool Lora::onInit(const struct timespec& time)
 	std::string str_rx = " gpio_rx=";
 	std::string str_rxpin = std::to_string(LORA_RX_PIN);
 	std::string str_command = str_insmod + str_tx + str_txpin  + str_rx + str_rxpin;
+	mSequenceName = "";
+
 	system(str_command.c_str());
     pinMode(LORA_SLEEP_PIN, OUTPUT);
 	delay(10);
@@ -96,10 +98,15 @@ void Lora::onUpdate(const struct timespec& time)
 	if(enableGPSsendFlag){
 		VECTOR3 currentPos;
 		gGPSSensor.get(currentPos, false);
+
 		std::string str_gps = "lati: " + std::to_string(currentPos.x) + " long: " + std::to_string(currentPos.y);
+
+		if((int)(mSequenceName.size()) > 0)
+		{
+			str_gps += " seq: " + mSequenceName;
+		}
 		send(str_gps);
 	}
-
 }
 
 void Lora::send(const std::string & str)
@@ -133,7 +140,12 @@ void Lora::enableGPSsend(bool flag){
 	}
 }
 
-Lora::Lora(): mLastUpdateTime(), enableGPSsendFlag(false)
+void Lora::setSeqName(std::string str_seq)
+{
+	mSequenceName = str_seq;
+}
+
+Lora::Lora(): mLastUpdateTime(), enableGPSsendFlag(false), mSequenceName("")
 {
 	setName("lora");
 	setPriority(TASK_PRIORITY_SENSOR, TASK_INTERVAL_SENSOR);
