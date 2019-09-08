@@ -94,7 +94,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (mCurServoState)
 		{
 			//gServo.turn(1.0); 
-			gServo.move("direct", 5200); 
+			gServo.move("direct", 4600); 
 		}
 		else
 		{
@@ -176,18 +176,35 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			   init(time);
 			   mRetryCount++;
 		   }
-		   else mCurStep = STEP_GET_DISTANCE;
+		   else {
+			   mCurStep = STEP_GET_DISTANCE;
+			   mCurMotorStep = STEP_MOTOR_MOVE;
+		   }
 		   mLastUpdateTime = time;
 
 	   }
-		// Check 
-	   if(gDistanceSensor.getDistance() > 100)
-	   {
-		   mCheckCount++;
-	   }
-	   else
-	   {
-		   mCheckCount = 0;
+	   switch(mCurMotorStep) {
+		case STEP_MOTOR_MOVE:
+			gMotorDrive.drive(-10);
+			mCurMotorStep = STEP_MOTOR_STOP;
+			mLastMotorMoveTime = time;
+			break;
+		case STEP_MOTOR_STOP:
+			gMotorDrive.drive(0);
+			Debug::print(LOG_SUMMARY, "[Separating State] Check Count %d : %d\r\n", gDistanceSensor.getDistance(), 100);
+			// Check 
+			if (gDistanceSensor.getDistance() > 100)
+			{
+				mCheckCount++;
+			}
+			else
+			{
+				mCheckCount = 0;
+			}
+			if (Time::dt(time, mLastMotorMoveTime) >= 5) {
+				mCurMotorStep = STEP_MOTOR_MOVE;
+			}
+			break;
 	   }
 
 	   Debug::print(LOG_SUMMARY, "[Separating State] Check Count %d/%d\r\n",mCheckCount,SEPARATING_CHECK_MAX_COUNT);
@@ -257,30 +274,37 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		gServo.turn(0);
 		if(move){
 			gMotorDrive.drive(-10);
+			mLastMotorMoveTime = time;
+			move = !move;
 		}
 		else{
 			gMotorDrive.drive(0);
 			Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
-			if(gDistanceSensor.getDistance() > 8000){
+			if(gDistanceSensor.getDistance() > 250){
 				//whenever missing gaikokkaku
 				if (mReadyFlag) {
 					Debug::print(LOG_SUMMARY, "[Separating State] found safe way to run !\r\n");
 					mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
 					gServo.wrap(0.0);
 				}
+				mDetectedArmorCount = 0;
 			}
 			else {
-				//gaikokkaku mmituketenakattara
+				//gaikokkaku mituketenakattara
 				if (!mReadyFlag)
 				{
-					Debug::print(LOG_SUMMARY, "[Separating State] gaikokkaku detected\r\n");
-					mReadyFlag = true;
+					Debug::print(LOG_SUMMARY, "[Separating State] gaikokkaku may at infront count %d/%d\r\n",mDetectedArmorCount,3);
+					if (mDetectedArmorCount > 3) {
+						Debug::print(LOG_SUMMARY, "[Separating State] gaikokkaku detected\r\n");
+						mReadyFlag = true;
+					}
+					else mDetectedArmorCount++;
 				}
 			}
+			if (Time::dt(time, mLastMotorMoveTime) >= 5) {
+				move = !move;
+			}
 		}
-		move = !move;
-		break;
-	case STEP_MOVE_BY_CHIJIKI:
 		break;
 	case STEP_STABLE_AWAKE_FROM_SIDE:
 		Debug::print(LOG_SUMMARY, "[Separating State] STEP_STABLE_AWAKE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_AWAKE_ABORT_TIME);
@@ -353,8 +377,9 @@ void SeparatingState::init(const struct timespec& time)
     mServoFightForFreeCount = 0;
     mServoGetDistanceCount = 0;
 	mCheckCount = 0;
+	mDetectedArmorCount = 0;
 	mCurStep = STEP_STABI_OPEN;
-	//mCurStep = STEP_CHECK_IF_INSIDE
+	//mCurStep = STEP_FIGHT_FOR_FREE;
 	mCurMotorStep = STEP_MOTOR_MOVE;
 	move = false;
 	mReadyFlag = false;
