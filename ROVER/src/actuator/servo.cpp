@@ -1,4 +1,9 @@
-﻿#include <time.h>
+﻿#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <picojson.h>
+
+#include <time.h>
 #include <string.h>
 #include <fstream>
 #include <sstream>
@@ -49,8 +54,40 @@ bool Servo::onInit(const struct timespec& time)
 	setPID(1000, -1000, 0.5, 0.01, 0.0);
 	enablePID = false;
 	Debug::print(LOG_SUMMARY, "Servo is Ready!\r\n");
+
+	mSettingDirectCenter = DIRECT_CENTER;
+	if(!readJSON()){
+		mSettingDirectCenter = DIRECT_CENTER;
+	}
+
 	return true;
 }
+
+
+bool Servo::readJSON()
+{
+	// JSONデータの読み込み。
+    std::ifstream ifs("../setting/servo.json", std::ios::in);
+    if (ifs.fail()) {
+		Debug::print(LOG_SUMMARY, "Failed to read Servo JSON\r\n");
+        return false;
+    }
+    const std::string json((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    ifs.close();
+
+    // JSONデータを解析する。
+    picojson::value v;
+    const std::string err = picojson::parse(v, json);
+    if (err.empty() == false) {
+        std::cerr << err << std::endl;
+        return false;
+    }
+
+	picojson::object& obj = v.get<picojson::object>();
+	mSettingDirectCenter  = (int)obj["direct_center"].get<double>();
+	return true;
+}
+
 void Servo::onClean()
 {
 	free();
@@ -238,11 +275,11 @@ void Servo::turn(double range){
 	}
 
 	if(range <= 0){
-		move(DIRECT_ID, translateToRawValue(range, DIRECT_LEFT, DIRECT_CENTER, -1));
+		move(DIRECT_ID, translateToRawValue(range, DIRECT_LEFT, mSettingDirectCenter, -1));
 	}
 
 	if(range > 0){
-		move(DIRECT_ID, translateToRawValue(range, DIRECT_RIGHT, DIRECT_CENTER, 1));
+		move(DIRECT_ID, translateToRawValue(range, DIRECT_RIGHT, mSettingDirectCenter, 1));
 	}
 }
 
@@ -395,7 +432,7 @@ int Servo::getServoCenterValue(std::string name){
 	if(name == NECK_NAME){
 		return NECK_CENTER;
 	}else if(name == DIRECT_NAME){
-		return DIRECT_CENTER;
+		return mSettingDirectCenter;
 	}else if(name == WAIST_NAME){
 		return WAIST_CENTER;
 	}else if(name == STABI_NAME){
@@ -418,10 +455,10 @@ std::string Servo::getServoName(int id){
 }
 
 void Servo::showValueData(){
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", NECK_NAME.c_str(), mCurServoRawData.neck, NECK_OUTER, NECK_INNER);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", DIRECT_NAME.c_str(), mCurServoRawData.direct, DIRECT_LEFT, DIRECT_RIGHT);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", WAIST_NAME.c_str(), mCurServoRawData.waist, WAIST_OUTER, WAIST_INNER);
-	Debug::print(LOG_PRINT, "%s value = %d [%d, %d]\r\n", STABI_NAME.c_str(), mCurServoRawData.stabi, STABI_OUTER, STABI_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d, %d]\r\n", NECK_NAME.c_str(), mCurServoRawData.neck, NECK_OUTER, NECK_CENTER, NECK_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d, %d]\r\n", DIRECT_NAME.c_str(), mCurServoRawData.direct, DIRECT_LEFT, mSettingDirectCenter, DIRECT_RIGHT);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d, %d]\r\n", WAIST_NAME.c_str(), mCurServoRawData.waist, WAIST_OUTER, WAIST_CENTER, WAIST_INNER);
+	Debug::print(LOG_PRINT, "%s value = %d [%d, %d, %d]\r\n", STABI_NAME.c_str(), mCurServoRawData.stabi, STABI_OUTER, STABI_CENTER, STABI_INNER);
 }
 
 void Servo::setPID(int max, int min, double k, double p, double i){
