@@ -28,6 +28,8 @@ private:
 	void registValueData(int id, int raw_value);
 	bool enablePID;
 	bool enableGyroPID;
+	bool readJSON();
+	int mSettingDirectCenter;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onClean();
