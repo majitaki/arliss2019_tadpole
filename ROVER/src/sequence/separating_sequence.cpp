@@ -16,6 +16,7 @@
 #include "testing_sequence.h"
 #include "navigating_sequence.h"
 #include "../sub_sequence/waking_turnback.h"
+#include "../sub_sequence/waking_turnside.h"
 
 #include "../sensor/gps.h"
 #include "../sensor/light.h"
@@ -67,6 +68,8 @@ bool SeparatingState::onInit(const struct timespec& time)
 }
 void SeparatingState::onUpdate(const struct timespec& time)
 {
+	if (gWakingFromTurnSide.isActive())return;
+
 	TurnSideDirection turn_side_state;
 	switch (mCurStep)
 	{
@@ -165,7 +168,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
         }
         break;
    case STEP_CHECK_IF_INSIDE:
-	   if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL)return;
+	   if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL) return;
 	   mLastUpdateTime = time;
 
 	   Debug::print(LOG_SUMMARY, "[Separating State] CheckIfInside Abort time: %1.1f/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_CHECK_INSIDE_ABORT_TIME);
@@ -262,9 +265,14 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		}
 		break;
 	case STEP_DECIDE_DIRECTION:
-		if (Time::dt(time, mStartStepTime) > SEPARATING_DECIDE_DIRECTION_ABORT_TIME) mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
-		if (Time::dt(time, mLastUpdateTime) < 0.5) return;
-        mLastUpdateTime = time;
+		if(Time::dt(time, mLastUpdateTime) < 0.5) return;
+		mLastUpdateTime = time;
+		if (Time::dt(time, mStartStepTime) > SEPARATING_DECIDE_DIRECTION_ABORT_TIME) {
+			mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
+			mStartStepTime = time;
+			gServo.wrap(0.0);
+		}
+		Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION abort time %d/%d\r\n",mStartStepTime,SEPARATING_DECIDE_DIRECTION_ABORT_TIME);
 		
 		if(!gNineAxisSensor.isTurnSide()){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION Finished\r\n");
@@ -273,18 +281,19 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		gServo.wrap(1);
 		gServo.turn(0);
 		if(move){
-			gMotorDrive.drive(-10);
+			gMotorDrive.drive(-100);
 			mLastMotorMoveTime = time;
 			move = !move;
 		}
 		else{
 			gMotorDrive.drive(0);
-			Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
-			if(gDistanceSensor.getDistance() > 250){
+			//Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
+			if(gDistanceSensor.getDistance() > 150){
 				//whenever missing gaikokkaku
 				if (mReadyFlag) {
 					Debug::print(LOG_SUMMARY, "[Separating State] found safe way to run !\r\n");
 					mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
+					mStartStepTime = time;
 					gServo.wrap(0.0);
 				}
 				mDetectedArmorCount = 0;
@@ -306,6 +315,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			}
 		}
 		break;
+
 	case STEP_STABLE_AWAKE_FROM_SIDE:
 		Debug::print(LOG_SUMMARY, "[Separating State] STEP_STABLE_AWAKE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_AWAKE_ABORT_TIME);
 		if (Time::dt(time, mStartStepTime) > SEPARATING_AWAKE_ABORT_TIME) nextState();
@@ -321,6 +331,12 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			gServo.turn(-1);
 		}
 		gMotorDrive.drive(-100);
+		/*if (gNineAxisSensor.isTurnSide()) {
+			gWakingFromTurnSide.setRunMode(true);
+		}
+		else {
+			nextState();
+		}*/
 		break;
 
 	case STEP_RUN_WHILE:
@@ -364,7 +380,7 @@ void SeparatingState::init(const struct timespec& time)
 {
 	//initialize
 	gServo.free();
-
+	gMotorDrive.drive(0);
 	gServo.wrap(1.0);
 	gServo.turn(-1.0);
 	gLED.setColor(0, 255, 255);
