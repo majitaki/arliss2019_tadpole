@@ -93,6 +93,11 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
 	}
 
+	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
+		mMidDistanceToGoal = onEstMidDistance();
+		Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
+	}
+
 	//switch (mSubState)
 	//{
 	// case InitialRunWhile:
