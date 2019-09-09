@@ -76,13 +76,9 @@ bool NavigatingState::onInit(const struct timespec& time)
 	FreezeFlag = false;
 	mInitialRunWhileFlag = true;
 	gLora.enableGPSsend(true);
-    
-    mMidDistanceToGoal = onEstMidDistance(); 
-    enableMiddleMode = true;
+	mMidDistanceToGoal = 0;
+	enableMiddleMode = true;
 	enableNearNaviMode = true;
-    Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n",mMidDistanceToGoal);
-
-
 	return true;
 }
 void NavigatingState::onUpdate(const struct timespec& time)
@@ -91,6 +87,11 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	if (dt < NAVIGATING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
 	gLora.setSeqName(getName());
+
+	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
+		mMidDistanceToGoal = onEstMidDistance();
+		Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
+	}
 
 	//switch (mSubState)
 	//{
@@ -346,6 +347,7 @@ void NavigatingState::onEstDistance()
 	if (!gGPSSensor.getAvePos(current_pos))
 	{
 		mDistanceToGoal = -1;
+		Debug::print(LOG_SUMMARY, "NAVIGATING : onEstDistanc = -1\r\n");
 		return;
 	}
 
