@@ -80,6 +80,7 @@ void WaitingState::onUpdate(const struct timespec& time)
 {
 	if (Time::dt(time, mLastUpdateTime) < WAITING_STATE_UPDATE_INTERVAL_TIME) return;
 	mLastUpdateTime = time;
+	gLora.setSeqName(getName());
 
 	CheckLightCount(time);
 	CheckDistanceCount(time);

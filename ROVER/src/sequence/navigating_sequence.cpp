@@ -86,6 +86,12 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	double dt = Time::dt(time, mLastUpdateTime);
 	if (dt < NAVIGATING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
+	gLora.setSeqName(getName());
+
+	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
+		mMidDistanceToGoal = onEstMidDistance();
+		Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
+	}
 
 	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
 		mMidDistanceToGoal = onEstMidDistance();
