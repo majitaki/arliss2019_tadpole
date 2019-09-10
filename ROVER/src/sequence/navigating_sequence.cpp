@@ -76,7 +76,7 @@ bool NavigatingState::onInit(const struct timespec& time)
 	FreezeFlag = false;
 	mInitialRunWhileFlag = true;
 	gLora.enableGPSsend(true);
-	mMidDistanceToGoal = 0;
+	mMidDistanceToGoal = onEstMidDistance();
 	enableMiddleMode = true;
 	enableNearNaviMode = true;
 	return true;
@@ -87,11 +87,6 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	if (dt < NAVIGATING_UPDATE_INTERVAL_TIME)return;
 	mLastUpdateTime = time;
 	gLora.setSeqName(getName());
-
-	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
-		mMidDistanceToGoal = onEstMidDistance();
-		Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
-	}
 
 	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
 		mMidDistanceToGoal = onEstMidDistance();
@@ -196,7 +191,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		break;
     case Digging:
         enableMiddleMode = false; 
-        Debug::print(LOG_SUMMARY,"[Navi] Digging");
+        Debug::print(LOG_SUMMARY,"[Navi] Digging\r\n");
         gDigging.setRunMode(true);
 		mSubState = Initial;
 		FreezeFlag = true;
@@ -233,6 +228,10 @@ void NavigatingState::onUpdate(const struct timespec& time)
 			}
 			else
 			{
+				Debug::print(LOG_SUMMARY, "[Navi] Far Mode Goal\r\n");
+				Debug::print(LOG_SUMMARY, "[Navi] Navigating Finish Point:(%f %f)\r\n", gGPSSensor.getPosx(), gGPSSensor.getPosy());
+				Debug::print(LOG_SUMMARY, "[Navi] But I will try more accuracy...\r\n");
+		
 				mSubState = NearGoalNavi;
 			}
 		}
@@ -245,7 +244,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		gMotorDrive.drive(100);
 		gServo.wrap(0.0);
 
-		Debug::print(LOG_SUMMARY, "[Navi] FarGoalNavi\r\n");
+		Debug::print(LOG_SUMMARY, "[Navi] [FarGoalNavi]\r\n");
 		navigationFarMode();
 		mSubState = CheckGoal;
 		break;

@@ -135,7 +135,8 @@ void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableComp
         double ay = gNineAxisSensor.getAccel().y();
         double az = gNineAxisSensor.getAccel().z();
         double l2_accel = std::sqrt(pow(ax, 2) + std::pow(ay, 2) + std::pow(az, 2));
-		Debug::print(LOG_PRINT, "l2_accel: %f\r\n", l2_accel);
+		double l2_accel2 = std::sqrt(ax + ay + az);
+		Debug::print(LOG_PRINT, "l2_accel: %lf\r\n", l2_accel2);
 	}
 	if(mIMUData.fusionPoseValid && enableFusionPoss){
 		Debug::print(LOG_PRINT, "%s\r\n", RTMath::displayDegrees("fusion_poss", mIMUData.fusionPose));
