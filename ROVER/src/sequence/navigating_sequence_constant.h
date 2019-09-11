@@ -1,7 +1,10 @@
 #pragma once
 
 const static double NAVIGATING_UPDATE_INTERVAL_TIME = 0.1; //second
+const static double NAVIGATING_ABORT_UPDATE_INTERVAL_TIME = 3; //second
 const static double NAVIGATING_INITIAL_RUN_WHILE_TIME = 10; //second
+const static unsigned int NAVIGATING_ABORT_TIME = 3600 * 3;
+const static unsigned int NAVIGATING_NEAR_ABORT_TIME = 600;
 const static double NAVIGATING_GOAL_FAR_DISTANCE_THRESHOLD = 3;//meter
 const static double NAVIGATING_MIDDLE_DISTANCE_RATE = 2.0 / 4.0; // (from goal to middle point) / (from goal to start)
 const static int NAVIGATING_STUCK_COUNT = 3;

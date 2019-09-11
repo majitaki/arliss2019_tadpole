@@ -12,8 +12,8 @@ const static unsigned int FALLING_ABORT_TIME = 1200;
 const static int GYRO_COUNT_TIME = 10; //�W���C���J�E���g�̌p������(�b)
 const static float GYRO_THRESHOLD = 1;
 //pressure
-const static int PRESSURE_COUNT_TIME = 10; //��C���J�E���g�̌p������(�b)
-const static double PRESSURE_THRESHOLD = 1.0;
+const static int PRESSURE_COUNT_TIME = 5; //��C���J�E���g�̌p������(�b)
+const static double PRESSURE_THRESHOLD = 0.4;
 
 class FallingState : public TaskBase
 {

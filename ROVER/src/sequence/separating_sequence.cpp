@@ -75,6 +75,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 	switch (mCurStep)
 	{
 	case STEP_STABI_OPEN:
+		gMotorDrive.drive(0);
 		gServo.wrap(1.0);
 		gServo.turn(0.0); 
 
@@ -85,12 +86,14 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (Time::dt(time, mLastUpdateTime) > 0.5)
 		{
 			mLastUpdateTime = time;
+			gMotorDrive.drive(0);
 			mCurStep = STEP_SEPARATE;
 		}
 		break;
 	case STEP_SEPARATE:
 		if (Time::dt(time, mLastUpdateTime) < SEPARATING_SERVO_INTERVAL)return;
 		mLastUpdateTime = time;
+		gMotorDrive.drive(0);
 
 		mCurServoState = !mCurServoState;
 
@@ -185,7 +188,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			   mCurMotorStep = STEP_MOTOR_MOVE;
 		   }
 		   mLastUpdateTime = time;
-
+		   break;
 	   }
 	   switch(mCurMotorStep) {
 		case STEP_MOTOR_MOVE:
@@ -205,7 +208,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			{
 				mCheckCount = 0;
 			}
-			if (Time::dt(time, mLastMotorMoveTime) >= 5) {
+			if (Time::dt(time, mLastMotorMoveTime) > 5) {
 				mCurMotorStep = STEP_MOTOR_MOVE;
 			}
 			break;
@@ -216,6 +219,8 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		   Debug::print(LOG_SUMMARY, "[Separating State] outside of gaikokkaku :)\r\n");
 		   mCurStep = STEP_GET_DISTANCE;
 		   mLastUpdateTime = time;
+		   turn_side_state = gNineAxisSensor.getTurnSideDirection();
+		   //TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
 	   }
 
 	   break;
@@ -224,10 +229,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		// if rover is still inside gaikokkaku
 
         mLastUpdateTime = time;
-
-		turn_side_state = gNineAxisSensor.getTurnSideDirection();
-		//TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
-
+		
 		gServo.turn(0.0);
 		if(turn_side_state != Right && turn_side_state != Left){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
@@ -235,6 +237,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			gServo.turn(0.0);
 		 	gServo.wrap(0.0);
 			mCurStep = STEP_RUN_WHILE;
+			mStartStepTime = time;
 			break;
 		}
 
@@ -266,14 +269,14 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		}
 		break;
 	case STEP_DECIDE_DIRECTION:
-		if(Time::dt(time, mLastUpdateTime) < 0.5) return;
+		if(Time::dt(time, mLastUpdateTime) < 0.2) return;
 		mLastUpdateTime = time;
 		if (Time::dt(time, mStartStepTime) > SEPARATING_DECIDE_DIRECTION_ABORT_TIME) {
 			mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
 			mStartStepTime = time;
 			gServo.wrap(0.0);
 		}
-		Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION abort time %d/%d\r\n",mStartStepTime,SEPARATING_DECIDE_DIRECTION_ABORT_TIME);
+		Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION abort time %lf/%d\r\n",mStartStepTime,SEPARATING_DECIDE_DIRECTION_ABORT_TIME);
 		
 		if(!gNineAxisSensor.isTurnSide()){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION Finished\r\n");
@@ -322,6 +325,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		if (Time::dt(time, mStartStepTime) > SEPARATING_AWAKE_ABORT_TIME) nextState();
 		if(!gNineAxisSensor.isTurnSide()){
 			mLastUpdateTime = time;
+			mStartStepTime = time;
 			mCurStep = STEP_RUN_WHILE;
 		}
 		turn_side_state = gNineAxisSensor.getTurnSideDirection();
@@ -331,6 +335,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		else if (turn_side_state == Left){
 			gServo.turn(-1);
 		}
+		gServo.wrap(0.0);
 		gMotorDrive.drive(-100);
 		/*if (gNineAxisSensor.isTurnSide()) {
 			gWakingFromTurnSide.setRunMode(true);
@@ -341,13 +346,16 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		break;
 
 	case STEP_RUN_WHILE:
+		if (Time::dt(time, mLastUpdateTime) < 1) return;
+		mLastUpdateTime = time;
 		gServo.wrap(0.0);
 		if (gNineAxisSensor.isTurnBack()) gMotorDrive.drive(-100);
 		else gMotorDrive.drive(100);
 		Debug::print(LOG_SUMMARY, "[Separating State] STEP_RUN_WHILE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATIMG_RUN_WHILE_DURATION);
-		if (Time::dt(time, mLastUpdateTime) < SEPARATIMG_RUN_WHILE_DURATION) return;
-		gMotorDrive.drive(0);
-		nextState();
+		if (Time::dt(time, mStartStepTime) > SEPARATIMG_RUN_WHILE_DURATION) {
+			gMotorDrive.drive(0);
+			nextState();
+		}
 		break;
 
 	};
@@ -396,7 +404,7 @@ void SeparatingState::init(const struct timespec& time)
 	mCheckCount = 0;
 	mDetectedArmorCount = 0;
 	mCurStep = STEP_STABI_OPEN;
-	//mCurStep = STEP_FIGHT_FOR_FREE;
+	//mCurStep = STEP_STABLE_AWAKE_FROM_SIDE;
 	mCurMotorStep = STEP_MOTOR_MOVE;
 	move = false;
 	mReadyFlag = false;

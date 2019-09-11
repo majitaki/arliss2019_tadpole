@@ -135,7 +135,8 @@ void NineAxisSensor::showData(bool enableAccel, bool enableGyro, bool enableComp
         double ay = gNineAxisSensor.getAccel().y();
         double az = gNineAxisSensor.getAccel().z();
         double l2_accel = std::sqrt(pow(ax, 2) + std::pow(ay, 2) + std::pow(az, 2));
-		Debug::print(LOG_PRINT, "l2_accel: %f\r\n", l2_accel);
+		double l2_accel2 = std::sqrt(ax + ay + az);
+		Debug::print(LOG_PRINT, "l2_accel: %lf\r\n", l2_accel2);
 	}
 	if(mIMUData.fusionPoseValid && enableFusionPoss){
 		Debug::print(LOG_PRINT, "%s\r\n", RTMath::displayDegrees("fusion_poss", mIMUData.fusionPose));
@@ -158,41 +159,31 @@ RTVector3 NineAxisSensor::getFusionPose() {
 double NineAxisSensor::getYaw(){
 	return mIMUData.fusionPose.z() * RTMATH_RAD_TO_DEGREE;
 }
-bool NineAxisSensor::isTurnSide() const{
-	if(abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE) > TURNSIDE_DEGREE_THRESHOLD)
-		return true;
-	return false;
+bool NineAxisSensor::isTurnSide() const {
+	float pitch = abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE);
+	return (pitch > 90 - TURNSIDE_DEGREE_THRESHOLD && pitch < 90 + TURNSIDE_DEGREE_THRESHOLD);
 }
 
 //int NineAxisSensor::whichSide() const{
 TurnSideDirection NineAxisSensor::getTurnSideDirection() const{
-	if(abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE) > TURNSIDE_DEGREE_THRESHOLD){
-		if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
-			// left
-			//return -1;
+	if (isTurnSide()) {
+		if (mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
 			return Left;
 		else
-			//right
 			return Right;
-			//return 1;
-	}else{
-		return Center;
+		
 	}
-
-    // if(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
-    //     // left
-    //     //return -1;
-    //     return TurnSideDirection.Left;
-    // else
-    //     //right
-    //     return TurnSideDirection.Right;
-    //     //return 1;
+	return Center;
 }
 
-bool NineAxisSensor::isTurnBack() const{
-	if(abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE) > TURNBACK_DEGREE_THRESHOLD ||mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < -1 * TURNSIDE_DEGREE_THRESHOLD)
-		return true;
-	return false;
+bool NineAxisSensor::isTurnBack() const {
+	float roll = abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE);
+	if (!isTurnSide())
+		return ((roll > 180 - TURNBACK_DEGREE_THRESHOLD && roll < 180 + TURNBACK_DEGREE_THRESHOLD) 
+			|| (mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE > -90 - TURNBACK_DEGREE_THRESHOLD 
+				&& mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < -90 + TURNBACK_DEGREE_THRESHOLD));
+	else
+		return false;
 }
 double NineAxisSensor::normalizeAngle(double pos)
 {

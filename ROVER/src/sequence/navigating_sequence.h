@@ -13,10 +13,12 @@ private:
 	enum SubState mSubState;
 
 	struct timespec mLastUpdateTime;
+	struct timespec mLastAbortUpdateTime;
 	struct timespec mInitialRunWhileTime;
 	struct timespec mStuckTime;
 	struct timespec mWakeTime;
 	struct timespec mFreezeTime;
+	struct timespec mNaviStartTime;
 
 	PID mFarModePID;
 	bool FreezeFlag;
@@ -29,6 +31,8 @@ private:
 	double mPrevPIDValue;
 	int mCheckStuckCount;
 	int mNearNaviCount;
+	unsigned int mNaviAbortTime;
+	bool isNearNaviFinished;
 	double mDeltaAngle;
     bool enableMiddleMode;
 	bool enableNearNaviMode;
