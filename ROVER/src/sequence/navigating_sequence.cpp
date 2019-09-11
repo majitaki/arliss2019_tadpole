@@ -95,6 +95,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		//Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
 	}
 
+<<<<<<< HEAD
 
 	if (enableNearNaviMode && isNearNaviFinished){
 		mNaviStartTime = time;
@@ -116,6 +117,8 @@ void NavigatingState::onUpdate(const struct timespec& time)
 		mLastAbortUpdateTime = time;
 	}
 
+=======
+>>>>>>> 0949995c9205616afd8ad18b6a17bc12488ae98e
 	//switch (mSubState)
 	//{
 	// case InitialRunWhile:
@@ -251,8 +254,11 @@ void NavigatingState::onUpdate(const struct timespec& time)
 			}
 			else
 			{
+<<<<<<< HEAD
 				isNearNaviFinished = true;
 				Debug::print(LOG_SUMMARY, "[Navi] Near Navi Count Max\r\n");
+=======
+>>>>>>> 0949995c9205616afd8ad18b6a17bc12488ae98e
 				Debug::print(LOG_SUMMARY, "[Navi] Far Mode Goal\r\n");
 				Debug::print(LOG_SUMMARY, "[Navi] Navigating Finish Point:(%f %f)\r\n", gGPSSensor.getPosx(), gGPSSensor.getPosy());
 				Debug::print(LOG_SUMMARY, "[Navi] But I will try more accuracy...\r\n");
