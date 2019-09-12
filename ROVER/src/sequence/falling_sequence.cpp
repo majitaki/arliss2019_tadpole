@@ -182,7 +182,7 @@ void FallingState::CheckPressureCount(const timespec & time)
 		float diff_pressure = abs(new_pressure - mLastPressure);
 		mLastPressure = new_pressure;
 
-		if (diff_pressure < PRESSURE_THRESHOLD && gPressureSensor.isActive())
+		if (diff_pressure < PRESSURE_THRESHOLD && gPressureSensor.isActive() && diff_pressure != 0)
 		{
 			int diff_time = Time::dt(time, mStartPressureCheckTime);
 

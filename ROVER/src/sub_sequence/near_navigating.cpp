@@ -178,7 +178,7 @@ void NearNavigating::onUpdate(const timespec & time)
 			double dt = Time::dt(time, mCheckTime);
 			if (dt < NEAR_NAVIGATING_RUNNING_INTERVAL_TIME){
 				double dt = Time::dt(time, mLastNearNaviTime);
-				Debug::print(LOG_SUMMARY, "[Near] Abort Time: %f / %d \r\n",dt , NEAR_NAVIGATING_TIMEOUT);
+				Debug::print(LOG_SUMMARY, "[Near] Abort Time: %1.1f / %d \r\n", dt , NEAR_NAVIGATING_TIMEOUT);
 				navigationNearMode();
 				/*if(turn_value < 0.3){
 					mSubState = Fail;
