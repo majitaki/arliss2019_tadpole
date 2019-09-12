@@ -19,6 +19,7 @@ private:
 	int mSuccessCount;
 	int mInfinityCount;
 	int count;
+	int mTurnSideBackCount;
 	enum SubState
 	{
 		Initial, Infinity, Roll, NearGoalNavi, CheckGoal, RunWhile, NearGoal, Fail

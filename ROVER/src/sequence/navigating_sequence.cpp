@@ -60,18 +60,17 @@ bool NavigatingState::onInit(const struct timespec& time)
 	gLED.setRunMode(true);
 	gBuzzer.setRunMode(true);
 
-
 	//initialize
 	gLED.setColor(100, 100, 100);
 	gServo.wrap(0.0);
 	//gGPSSensor.clearSample();
 	mSubState = InitialRunWhile;
 	mDistanceToGoal = 999999;
-	mLastUpdateTime = mNaviStartTime = mLastUpdateTime = time;
+	mLastUpdateTime = mNaviStartTime = mNaviSequenceStartTime = mLastUpdateTime = time;
 	//mFarModePID = PID(NAVIGATING_UPDATE_INTERVAL_TIME, NAVIGATING_MAX_DELTA_ANGLE, -NAVIGATING_MAX_DELTA_ANGLE, 3, 0.2, 0.0);
 	mCheckStuckCount = 0;
 	mNearNaviCount = 0;
-	isNearNaviFinished = false;
+	isNearNaviStart = false;
 	mNaviAbortTime = NAVIGATING_ABORT_TIME;
 	mStuckTime = time;
 	mFreezeTime = time;
@@ -81,6 +80,9 @@ bool NavigatingState::onInit(const struct timespec& time)
 	mMidDistanceToGoal = onEstMidDistance();
 	enableMiddleMode = true;
 	enableNearNaviMode = true;
+	mIsStartPos = false;
+	setStart();
+	mTurnValue = 0.0;
 	return true;
 }
 void NavigatingState::onUpdate(const struct timespec& time)
@@ -90,15 +92,33 @@ void NavigatingState::onUpdate(const struct timespec& time)
 	mLastUpdateTime = time;
 	gLora.setSeqName(getName());
 
+	if(!mIsStartPos){
+		setStart();
+	}else{
+		double start_dt = Time::dt(time, mNaviSequenceStartTime);
+		if (start_dt > NAVIGATING_START_ABORT_TIME)
+		{
+			if(getStartDistance() < NAVIGATING_START_ABORT_DISTANCE)
+			{
+				gMotorDrive.drive(0);
+				gServo.free();
+				Debug::print(LOG_SUMMARY, "[Navi] Start Abort. Reboot Now\r\n");
+				system("sudo reboot now");
+				return;
+			}
+		}
+	}
+
+
 	if (mMidDistanceToGoal < 0 && enableMiddleMode) {
 		mMidDistanceToGoal = onEstMidDistance();
 		//Debug::print(LOG_SUMMARY, "[Navi] mMidDistance = %lf\r\n", mMidDistanceToGoal);
 	}
 
 
-	if (enableNearNaviMode && isNearNaviFinished){
+	if (enableNearNaviMode && isNearNaviStart){
 		mNaviStartTime = time;
-		isNearNaviFinished = false; 
+		isNearNaviStart = false;
 		mNaviAbortTime = NAVIGATING_NEAR_ABORT_TIME;
 	}
 
@@ -251,7 +271,7 @@ void NavigatingState::onUpdate(const struct timespec& time)
 			}
 			else
 			{
-				isNearNaviFinished = true;
+				isNearNaviStart = true;
 				Debug::print(LOG_SUMMARY, "[Navi] Near Navi Count Max\r\n");
 				Debug::print(LOG_SUMMARY, "[Navi] Far Mode Goal\r\n");
 				Debug::print(LOG_SUMMARY, "[Navi] Navigating Finish Point:(%f %f)\r\n", gGPSSensor.getPosx(), gGPSSensor.getPosy());
@@ -388,6 +408,16 @@ double NavigatingState::onEstMidDistance()
     return mDistanceToGoal * NAVIGATING_MIDDLE_DISTANCE_RATE;
 }
 
+double NavigatingState::getStartDistance()
+{
+	VECTOR3 current_pos;
+	if (!gGPSSensor.getAvePos(current_pos))
+	{
+		return -1;
+	}
+	return VECTOR3::calcDistanceXY(current_pos, mStartPos);
+}
+
 void NavigatingState::navigationFarMode()
 {
 	double roverAngle;
@@ -415,6 +445,7 @@ void NavigatingState::navigationFarMode()
 	double under = -1 * max_angle - max_angle;
 	//double inc = mFarModePID.calculate(0, deltaAngle) * (upper / under);
 	double inc = -1 * mDeltaAngle * (upper / under);
+	mTurnValue = inc;
 	gServo.turnp(inc);
 	gServo.turn(0);
 	Debug::print(LOG_SUMMARY, "[Navi] current: %1.2f target: %1.2f inc: %1.2f\r\n", mDeltaAngle, 0.0, inc);
@@ -445,6 +476,20 @@ void NavigatingState::setGoal(const VECTOR3& pos)
 	mGoalPos = pos;
 	Debug::print(LOG_SUMMARY, "Set Goal ( %f %f )\r\n", mGoalPos.x, mGoalPos.y);
 }
+
+void NavigatingState::setStart()
+{
+	VECTOR3 current_pos;
+	if (gGPSSensor.get(current_pos))
+	{
+		mStartPos = current_pos; 
+		mIsStartPos = true;
+		return;
+	}
+	mIsStartPos = false;
+	return;
+}
+
 bool NavigatingState::getGoal(VECTOR3 & pos)
 {
 	if (!mIsGoalPos)return false;
@@ -455,6 +500,11 @@ bool NavigatingState::getGoal(VECTOR3 & pos)
 double NavigatingState::getDeltaAngle()
 {
 	return mDeltaAngle;
+}
+
+double NavigatingState::getTurnValue()
+{
+	return mTurnValue;
 }
 
 void NavigatingState::SetMissionFlag(bool flag)

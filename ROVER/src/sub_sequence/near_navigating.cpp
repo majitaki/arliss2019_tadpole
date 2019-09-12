@@ -17,6 +17,7 @@
 #include "../actuator/servo.h"
 #include "../noisy/buzzer.h"
 #include "../noisy/led.h"
+#include "waking_turnside_constant.h"
 
 NearNavigating gNearNavigating;
 
@@ -48,6 +49,7 @@ bool NearNavigating::onInit(const timespec & time)
 	turn_value3 = 0.2;
 	mInitialYaw = 0;
 	mInfinityCount = 0;
+	mTurnSideBackCount = 0;
 	
 	gMotorDrive.drive(100);
 	gServo.wrap(-1);
@@ -65,8 +67,27 @@ void NearNavigating::onUpdate(const timespec & time)
 		mSubState = Fail;
 	}
 
-	if (gNineAxisSensor.isTurnSide()) { mSubState = Fail;}
-	if (gNineAxisSensor.isTurnBack()) { mSubState = Fail;}
+	//if (gNineAxisSensor.isTurnSide()) { mSubState = Fail;}
+	//if (gNineAxisSensor.isTurnBack()) { mSubState = Fail;}
+
+	if (gNineAxisSensor.isTurnBack() || gNineAxisSensor.isTurnSide()) 
+	{ 
+		mTurnSideBackCount++;
+		gServo.turn(0);
+		gServo.wrap(0);
+		gMotorDrive.drive(100);
+		Debug::print(LOG_SUMMARY, "[Near] Turn Side Back Count %d / %d\r\n", mTurnSideBackCount, NEAR_NAVIGATING_TURN_SIDEBACK_CHECK_COUNT);
+		if(mTurnSideBackCount > NEAR_NAVIGATING_TURN_SIDEBACK_CHECK_COUNT)
+		{
+			mSubState = NearGoal;
+		}else{
+			return;
+		}
+	}
+	else{
+		mTurnSideBackCount = 0;
+	}
+
 
 	switch (mSubState)
 	{
@@ -156,13 +177,15 @@ void NearNavigating::onUpdate(const timespec & time)
 		{
 			double dt = Time::dt(time, mCheckTime);
 			if (dt < NEAR_NAVIGATING_RUNNING_INTERVAL_TIME){
+				double dt = Time::dt(time, mLastNearNaviTime);
+				Debug::print(LOG_SUMMARY, "[Near] Abort Time: %f / %d \r\n",dt , NEAR_NAVIGATING_TIMEOUT);
 				navigationNearMode();
-				if(turn_value < 0.3){
+				/*if(turn_value < 0.3){
 					mSubState = Fail;
-				}
+				}*/
 				break;
 			} 
-			mTurnValueChangeFlag = true;
+			//mTurnValueChangeFlag = true;
 			mCheckTime = time;
 			mSubState = CheckGoal;
 			break;
@@ -247,23 +270,19 @@ void NearNavigating::nextState()
 
 void NearNavigating::navigationNearMode()
 {
-	Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f ;  -%f \r\n", turn_value, std::log(turn_value/1000+1));
+	// Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f ;  -%f \r\n", turn_value, std::log(turn_value/1000+1));
 	gMotorDrive.drive(100);
-	gServo.wrap(0.0);
-
-	if(mTurnValueChangeFlag){
+	gServo.wrap(-1);
+	double turn_value = gNavigatingState.getTurnValue();
+	//if(mTurnValueChangeFlag){
 		// turn_value -= NEAR_NAVIGATING_SERVO_EACH_TURN;
-		turn_value -= std::log(turn_value/1000+1);
+		//turn_value -= std::log(turn_value/1000+1);
 		// mTurnValueChangeFlag = false;
-	}
+	//}
+	if(turn_value < 0.1) turn_value = 0.2;
+	if(turn_value > 0.3) turn_value = 0.3;
 
-	// if(isGoalLeft) {
-	// 	gServo.turn(turn_value * -1);
-	// }else{
-	// 	gServo.turn(turn_value);
-	// }
-
-	
+	gServo.turn(turn_value);
 }
 
 NearNavigating::NearNavigating(): isGoalLeft(false)

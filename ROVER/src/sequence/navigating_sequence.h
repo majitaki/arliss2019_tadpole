@@ -19,12 +19,15 @@ private:
 	struct timespec mWakeTime;
 	struct timespec mFreezeTime;
 	struct timespec mNaviStartTime;
+	struct timespec mNaviSequenceStartTime;
 
 	PID mFarModePID;
 	bool FreezeFlag;
 
 	VECTOR3 mGoalPos;
+	VECTOR3 mStartPos;
 	bool mIsGoalPos;
+	bool mIsStartPos;
 	double mDistanceToGoal;
     double mMidDistanceToGoal;
 	int mSamples;
@@ -32,16 +35,19 @@ private:
 	int mCheckStuckCount;
 	int mNearNaviCount;
 	unsigned int mNaviAbortTime;
-	bool isNearNaviFinished;
+	bool isNearNaviStart;
 	double mDeltaAngle;
     bool enableMiddleMode;
 	bool enableNearNaviMode;
 	bool mMissionFlag; //mean mission flag
 	bool mInitialRunWhileFlag;
+	double mTurnValue;
 	void onCheckGoalInfo();
 	void onEstDistance();
     double onEstMidDistance();
+	double getStartDistance();
 	void navigationFarMode();
+	void setStart();
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
@@ -53,6 +59,7 @@ public:
 	bool getGoal(VECTOR3& pos);
 	void SetMissionFlag(bool flag);
 	double getDeltaAngle();
+	double getTurnValue();
 
 	NavigatingState();
 	~NavigatingState();

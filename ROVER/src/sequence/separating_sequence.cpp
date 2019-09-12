@@ -71,7 +71,6 @@ void SeparatingState::onUpdate(const struct timespec& time)
 	if (gWakingFromTurnSide.isActive())return;
 	gLora.setSeqName(getName());
 
-	TurnSideDirection turn_side_state;
 	switch (mCurStep)
 	{
 	case STEP_STABI_OPEN:
@@ -219,7 +218,6 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		   Debug::print(LOG_SUMMARY, "[Separating State] outside of gaikokkaku :)\r\n");
 		   mCurStep = STEP_GET_DISTANCE;
 		   mLastUpdateTime = time;
-		   turn_side_state = gNineAxisSensor.getTurnSideDirection();
 		   //TurnBackDirection turn_back_state gNineAxisSensor.getTurnBackDirection();
 	   }
 
@@ -231,6 +229,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
         mLastUpdateTime = time;
 		
 		gServo.turn(0.0);
+		turn_side_state = gNineAxisSensor.getTurnSideDirection();
 		if(turn_side_state != Right && turn_side_state != Left){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
 		 	gMotorDrive.drive(0);
@@ -269,6 +268,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		}
 		break;
 	case STEP_DECIDE_DIRECTION:
+	{
 		if(Time::dt(time, mLastUpdateTime) < 0.2) return;
 		mLastUpdateTime = time;
 		if (Time::dt(time, mStartStepTime) > SEPARATING_DECIDE_DIRECTION_ABORT_TIME) {
@@ -319,8 +319,9 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			}
 		}
 		break;
-
+	}
 	case STEP_STABLE_AWAKE_FROM_SIDE:
+	{
 		Debug::print(LOG_SUMMARY, "[Separating State] STEP_STABLE_AWAKE %lf/%d\r\n",Time::dt(time, mStartStepTime),SEPARATING_AWAKE_ABORT_TIME);
 		if (Time::dt(time, mStartStepTime) > SEPARATING_AWAKE_ABORT_TIME) nextState();
 		if(!gNineAxisSensor.isTurnSide()){
@@ -344,7 +345,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			nextState();
 		}*/
 		break;
-
+	}
 	case STEP_RUN_WHILE:
 		if (Time::dt(time, mLastUpdateTime) < 1) return;
 		mLastUpdateTime = time;

@@ -3,6 +3,7 @@
 #include <list>
 #include "../rover_util/task.h"
 #include "../rover_util/utils.h"
+#include "../sub_sequence/waking_turnside.h"
 
 class SeparatingState : public TaskBase
 {
@@ -26,6 +27,7 @@ private:
 	bool move;
 	bool mReadyFlag;
 	bool mChijikiMode;
+	TurnSideDirection turn_side_state;
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
