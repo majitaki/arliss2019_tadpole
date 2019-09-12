@@ -437,7 +437,7 @@ void NavigatingState::navigationFarMode()
 
 	double currentSpeed = gGPSSensor.getSpeed();
 	Debug::print(LOG_SUMMARY, "[Navi] Speed: %1.1f \r\n", currentSpeed);
-	Debug::print(LOG_SUMMARY, "[Navi] Distance: %1.1f Middle: %1.1f \r\n", mDistanceToGoal, mMidDistanceToGoal);
+	Debug::print(LOG_SUMMARY, "[Navi] Distance: %1.1f Middle: %1.1f Start: %1.1f\r\n", mDistanceToGoal, mMidDistanceToGoal, getStartDistance());
 	Debug::print(LOG_SUMMARY, "[Navi] Goal Angle: %1.1f Rover Angle: %1.1f Delta Angle: %1.1f(%s)\r\n", goalAngle, roverAngle, mDeltaAngle, mDeltaAngle > 0 ? "Left" : "Right");
 
 	double turn_slope = NAVIGATING_TURN_SLOPE;

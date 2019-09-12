@@ -224,20 +224,25 @@ void SeparatingState::onUpdate(const struct timespec& time)
 	   break;
 	case STEP_GET_DISTANCE:
 		if (Time::dt(time, mLastUpdateTime) < SEPARATING_MOTOR_INTERVAL)return;
-		// if rover is still inside gaikokkaku
-
         mLastUpdateTime = time;
-		
 		gServo.turn(0.0);
-		turn_side_state = gNineAxisSensor.getTurnSideDirection();
-		if(turn_side_state != Right && turn_side_state != Left){
-			Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
-		 	gMotorDrive.drive(0);
-			gServo.turn(0.0);
-		 	gServo.wrap(0.0);
-			mCurStep = STEP_RUN_WHILE;
-			mStartStepTime = time;
+		++mServoGetDistanceCount;
+		if (mServoGetDistanceCount < 10) {
+
+			if (gNineAxisSensor.isTurnSide()){
+				isSideCount++;
+				Debug::print(LOG_SUMMARY, "[Separating State] SideCount: %d\r\n", isSideCount);
+			}
 			break;
+		}
+		if (isSideCount < 3) {
+				Debug::print(LOG_SUMMARY, "[Separating State] STEP_GET_DISTANCE rover is standing\r\n");
+				gMotorDrive.drive(0);
+				gServo.turn(0.0);
+				gServo.wrap(0.0);
+				mCurStep = STEP_RUN_WHILE;
+				mStartStepTime = time;
+				break;
 		}
 
 		switch(mCurMotorStep){
@@ -254,8 +259,6 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			mCurMotorStep = STEP_MOTOR_MOVE;
 			break;
 		}
-
-        ++mServoGetDistanceCount;
         Debug::print(LOG_SUMMARY, "[Separating State] Getting Distance Count (%d/%d)\r\n", mServoGetDistanceCount, SEPARATING_GET_DISTANCE_COUNT);
  
 		if(mServoGetDistanceCount >= SEPARATING_GET_DISTANCE_COUNT)
@@ -276,7 +279,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 			mStartStepTime = time;
 			gServo.wrap(0.0);
 		}
-		Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION abort time %lf/%d\r\n",mStartStepTime,SEPARATING_DECIDE_DIRECTION_ABORT_TIME);
+		//Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION abort time %lf/%d\r\n",mStartStepTime,SEPARATING_DECIDE_DIRECTION_ABORT_TIME);
 		
 		if(!gNineAxisSensor.isTurnSide()){
 			Debug::print(LOG_SUMMARY, "[Separating State] STEP_DECIDE_DIRECTION Finished\r\n");
@@ -292,6 +295,7 @@ void SeparatingState::onUpdate(const struct timespec& time)
 		else{
 			gMotorDrive.drive(0);
 			//Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
+			Debug::print(LOG_SUMMARY, "[Separating State] Check_Gaikokkaku Distance:%d \r\n",gDistanceSensor.getDistance());
 			if(gDistanceSensor.getDistance() > 150){
 				//whenever missing gaikokkaku
 				if (mReadyFlag) {
@@ -410,6 +414,8 @@ void SeparatingState::init(const struct timespec& time)
 	move = false;
 	mReadyFlag = false;
 	mChijikiMode = false;
+	isSideCount = 0;
+	mServoGetDistanceCount = 0;
 }
 
 void SeparatingState::onClean()

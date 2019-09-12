@@ -19,6 +19,7 @@ private:
 	unsigned int mRetryCount;
 	unsigned int mCheckCount;
 	unsigned int mDetectedArmorCount;
+	unsigned int isSideCount;
 	enum STEP { STEP_STABI_OPEN = 0, STEP_WAIT_STABI_OPEN, STEP_SEPARATE, CHECK_STAND,STEP_CHECK_IF_INSIDE, FAIL_STAND, STEP_PRE_PARA_JUDGE, STEP_PARA_JUDGE, STEP_PARA_DODGE, STEP_GO_FORWARD,STEP_SEPARATE_OPEN, STEP_FIGHT_FOR_FREE, STEP_GET_DISTANCE,STEP_MOVE_BY_CHIJIKI, STEP_DECIDE_DIRECTION, STEP_STABLE_AWAKE_FROM_SIDE,STEP_RUN_WHILE};
 	enum STEP mCurStep;
 	enum MOTOR_STEP{STEP_MOTOR_MOVE, STEP_MOTOR_STOP};
@@ -27,6 +28,7 @@ private:
 	bool move;
 	bool mReadyFlag;
 	bool mChijikiMode;
+	bool isSide;
 	TurnSideDirection turn_side_state;
 protected:
 	virtual bool onInit(const struct timespec& time);

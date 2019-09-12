@@ -160,30 +160,45 @@ double NineAxisSensor::getYaw(){
 	return mIMUData.fusionPose.z() * RTMATH_RAD_TO_DEGREE;
 }
 bool NineAxisSensor::isTurnSide() const {
-	float pitch = abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE);
-	return (pitch > 90 - TURNSIDE_DEGREE_THRESHOLD && pitch < 90 + TURNSIDE_DEGREE_THRESHOLD);
+	//float pitch = abs(mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE);
+	//return (pitch > 90 - TURNSIDE_DEGREE_THRESHOLD && pitch < 90 + TURNSIDE_DEGREE_THRESHOLD);
+
+	return (gNineAxisSensor.getAccel().x() < -0.7 || gNineAxisSensor.getAccel().x() > 0.7); 
 }
 
 //int NineAxisSensor::whichSide() const{
 TurnSideDirection NineAxisSensor::getTurnSideDirection() const{
 	if (isTurnSide()) {
-		if (mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
-			return Left;
-		else
+		if(gNineAxisSensor.getAccel().x() < -0.7){
 			return Right;
+		}else if (gNineAxisSensor.getAccel().x() > 0.7){
+			return Left;
+		}
+
+		//if (mIMUData.fusionPose.y()*RTMATH_RAD_TO_DEGREE < 0)
+		//	return Left;
+		//else
+		//	return Right;
 		
 	}
 	return Center;
 }
 
 bool NineAxisSensor::isTurnBack() const {
-	float roll = abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE);
-	if (!isTurnSide())
-		return ((roll > 180 - TURNBACK_DEGREE_THRESHOLD && roll < 180 + TURNBACK_DEGREE_THRESHOLD) 
-			|| (mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE > -90 - TURNBACK_DEGREE_THRESHOLD 
-				&& mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < -90 + TURNBACK_DEGREE_THRESHOLD));
-	else
-		return false;
+	if(!isTurnSide()){
+		if(gNineAxisSensor.getAccel().z() < -0.7){
+			return true;
+		}
+	}
+	return false;
+
+	//float roll = abs(mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE);
+	//if (!isTurnSide())
+	//	return ((roll > 180 - TURNBACK_DEGREE_THRESHOLD && roll < 180 + TURNBACK_DEGREE_THRESHOLD) 
+	//		|| (mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE > -90 - TURNBACK_DEGREE_THRESHOLD 
+	//			&& mIMUData.fusionPose.x()*RTMATH_RAD_TO_DEGREE < -90 + TURNBACK_DEGREE_THRESHOLD));
+	//else
+	//	return false;
 }
 double NineAxisSensor::normalizeAngle(double pos)
 {

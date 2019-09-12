@@ -45,6 +45,7 @@ bool NearNavigating::onInit(const timespec & time)
 	isInfinityOperation = false;
 	isGyroOperation = false;
 	updateFlag = true;
+	updateChangeFlag = false;
 	turn_value2 = 0.9;
 	turn_value3 = 0.2;
 	mInitialYaw = 0;
@@ -179,7 +180,7 @@ void NearNavigating::onUpdate(const timespec & time)
 			if (dt < NEAR_NAVIGATING_RUNNING_INTERVAL_TIME){
 				double dt = Time::dt(time, mLastNearNaviTime);
 				Debug::print(LOG_SUMMARY, "[Near] Abort Time: %1.1f / %d \r\n", dt , NEAR_NAVIGATING_TIMEOUT);
-				navigationNearMode();
+				navigationNearMode(time);
 				/*if(turn_value < 0.3){
 					mSubState = Fail;
 				}*/
@@ -268,7 +269,7 @@ void NearNavigating::nextState()
 	gTestingState.setRunMode(true);
 }
 
-void NearNavigating::navigationNearMode()
+void NearNavigating::navigationNearMode(const struct timespec& time)
 {
 	// Debug::print(LOG_SUMMARY, "[Near] Servo Turn: %f ;  -%f \r\n", turn_value, std::log(turn_value/1000+1));
 	gMotorDrive.drive(100);
@@ -281,6 +282,14 @@ void NearNavigating::navigationNearMode()
 	//}
 	if(turn_value < 0.1) turn_value = 0.2;
 	if(turn_value > 0.3) turn_value = 0.3;
+
+
+	double dt_near_navi = Time::dt(time, mLastNearNaviTime);
+	if (dt_near_navi > NEAR_NAVIGATING_TIMEOUT / 2 && !updateChangeFlag){
+		turn_value -= 0.1;
+		updateChangeFlag = true;
+	}
+
 
 	gServo.turn(turn_value);
 }

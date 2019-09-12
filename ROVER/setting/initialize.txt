@@ -6,8 +6,8 @@ cdetecting setmode ON
 //navigating 35.6402596 139.5442230
 //navigating 35.640222 139.544221
 //navigating 40.88430 -119.11161
-//navigating 40.88430 -119.11160
-navigating 40.86996 -119.10558
+navigating 40.88430 -119.11160
+//navigating 40.86996 -119.10558
 motor r 100 100 100
 
 //morot

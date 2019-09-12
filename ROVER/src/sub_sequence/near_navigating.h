@@ -30,7 +30,8 @@ private:
 	bool isInfinityOperation;
 	bool mTurnValueChangeFlag;
 	bool updateFlag;
-	void navigationNearMode();
+	bool updateChangeFlag;
+	void navigationNearMode(const struct timespec& time);
 protected:
 	virtual bool onInit(const struct timespec& time);
 	virtual void onUpdate(const struct timespec& time);
